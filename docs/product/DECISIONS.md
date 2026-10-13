@@ -25,6 +25,7 @@ Recorded 2026-10-13. **Accepted** means explicitly selected by project owner in 
 | P-019 | Accepted | DataOps | Smart C: review queue, run history, quality/cost monitoring; stage advanced functionality, avoid excessive infra. |
 | P-020 | Accepted | AI-first development | Agent/Codex implements code; owner learns business logic, architecture, retrieval, agent/context engineering and evals. Good AGENTS.md, scoped roles and reusable skills when useful. |
 | P-021 | Accepted | Source reuse | padel.how owner responded positively to portal data use; written correspondence must be retained and precise permitted scope tracked. |
+| P-022 | Accepted | Design skills workflow | Use UI UX Pro Max for design and implementation; later use Impeccable as an independent review/polish pass. Install locally per project; avoid overlapping always-on design guidance. |
 | T-001 | Accepted | Agent framework | Defer LangGraph/LangChain and orchestration frameworks until measured need; see ADR-001. |
 | D-001 | Proposed | Schema | Separate canonical rackets, source records, specs/ratings/evidence and source permissions. |
 | D-002 | Proposed | Git layout | `apps/web`, `apps/worker`, `packages/domain`, `packages/ai`, `evals`, `supabase`. |

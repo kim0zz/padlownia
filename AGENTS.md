@@ -42,6 +42,12 @@ Keep a single repo and modular boundaries; avoid premature distributed infrastru
 5. For architecture changes propose an ADR; don't silently override approved choices.
 6. Delegate bounded roles when useful; don't create a swarm of agents merely for appearance.
 
+## Product design workflow
+- **UI/UX Pro Max** is the active project-level design intelligence skill: `.agents/skills/ui-ux-pro-max/SKILL.md` (upstream: nextlevelbuilder). Read and apply it for UI/UX planning and implementation; generate a consistent design system for the catalogue, profile, comparison, chat and admin screens.
+- **Impeccable** is a **planned independent reviewer**, not installed yet. Invoke only after implementing a visible screen to audit accessibility, interactions, hierarchy, responsive layouts and polish; report issues before implementing changes. See `docs/ai/DESIGN_WORKFLOW.md`.
+- Do not allow design skill suggestions to override product requirements: classic search and AI are separate entry points, citations must be visible, comparisons remain readable on desktop and mobile. No extra paid service or access to credentials.
+- Design changes need tangible before/after review and tests for keyboard, contrast, responsiveness and UI state.
+
 ## Roles and reusable skills
 Defined at `docs/ai/ROLES.md`. Initial opt-in skills:
 - `.agents/skills/source-profiling/SKILL.md`

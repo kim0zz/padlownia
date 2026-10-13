@@ -36,3 +36,8 @@ A **skill** is a repeatable workflow with explicit inputs and expected outputs, 
 - `rag-evaluation` — evaluate grounding/citation quality and per-model costs.
 
 Skills belong at `.agents/skills/<name>/SKILL.md`. These are instructions, not executable functionality. Do not create redundant skills without repeated need.
+
+## UI design and independent review
+- **Design implementer**: use project-local `ui-ux-pro-max` to propose tokens, typography, information architecture and UI components; build against agreed product flows, not arbitrary landing-page templates.
+- **Independent UX auditor**: later use Impeccable on actual working screens; distinguish defects, actionable fixes and optional aesthetic preferences. This is a separate review pass, not a second always-on design instruction source.
+- Workflow and install notes: `docs/ai/DESIGN_WORKFLOW.md`.
