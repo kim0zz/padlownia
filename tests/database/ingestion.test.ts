@@ -81,6 +81,70 @@ describe("PostgreSQL ingestion, permissions and publication (PGlite, isolated sy
     expect((await readPublishedCatalogue(db))[0]!.releaseId).toBe(prior.releaseId);
   });
 
+  it("batched evidence preserves all typed fields, JSON nulls, ordinals and source context", async () => {
+    const detailed = record(0,{
+      observations: [...record().observations,
+        { key: "balance",rawValue: 26.25,rawSourcePath: "/rackets/0/balance/value",kind: "measured_specimen",context: { unit: "cm",referencePoint: "butt",setup: { grip: false,weights: [1,2] } },attribution: { name: "Test reviewer",url: "https://example.test/review",verified: false } },
+        { key: "missing",rawValue: null,rawSourcePath: "/rackets/0/missing",kind: "unknown",context: {},attribution: null },
+        { key: "extra'); select 1; --",rawValue: { labels: ["quote\"",false,null],count: 0 },rawSourcePath: "/rackets/0/extra",kind: "retailer_claim",context: { detail: "Unicode: łza" },attribution: null },
+      ],
+      ratings: [...record().ratings,
+        { key: "comfort",rawValue: 7.25,rawSourcePath: "/rackets/0/comfort",numericScore: 7.25,scaleMin: 0,scaleMax: 10,methodology: "synthetic:editorial:v2",kind: "editorial",status: "valid",issues: [] },
+        { key: "unknown",rawValue: null,rawSourcePath: "/rackets/0/unknown",numericScore: null,scaleMin: null,scaleMax: null,methodology: "synthetic:unknown",kind: "unknown",status: "unknown",issues: [{ code: "missing_rating",path: "/rackets/0/unknown",severity: "warning" }] },
+      ],
+    });
+    const evidenceStatements: string[] = [];
+    const countingDb: SqlExecutor = {
+      query: db.query,
+      transaction: (work) => db.transaction((tx) => work({ ...tx,query: async <T>(sql: string,params: unknown[] = []) => {
+        if (/insert into padlownia\.(spec_observations|source_ratings)/.test(sql)) evidenceStatements.push(sql);
+        return tx.query<T>(sql,params);
+      } })),
+    };
+    await stageImport(countingDb,input([detailed]));
+    expect(evidenceStatements).toHaveLength(2);
+    const observations = (await db.query(`select ordinal,attribute_key,raw_value,normalized_text,numeric_value::float8 numeric_value,
+      value_min::float8 value_min,value_max::float8 value_max,unit,measurement_context,claim_type,validation_status,attribution,evidence_path,issues
+      from padlownia.spec_observations order by ordinal`)).rows;
+    expect(observations).toHaveLength(5);
+    expect(observations[0]).toEqual({ ordinal: 0,attribute_key: "weight",raw_value: "365 ± 5 g",normalized_text: null,numeric_value: null,value_min: 360,value_max: 370,unit: "g",measurement_context: { tolerance: 5 },claim_type: "manufacturer_declared",validation_status: "valid",attribution: { name: "Synthetic manufacturer",url: "https://example.test/manufacturer",verified: true },evidence_path: "/rackets/0/weight",issues: [] });
+    expect(observations[1]).toMatchObject({ ordinal: 1,attribute_key: "shape",raw_value: "round",normalized_text: "round",attribution: null });
+    expect(observations[2]).toEqual({ ordinal: 2,attribute_key: "balance",raw_value: 26.25,normalized_text: null,numeric_value: 26.25,value_min: 26.25,value_max: 26.25,unit: "cm",measurement_context: { unit: "cm",referencePoint: "butt",setup: { grip: false,weights: [1,2] } },claim_type: "measured_specimen",validation_status: "valid",attribution: { name: "Test reviewer",url: "https://example.test/review",verified: false },evidence_path: "/rackets/0/balance/value",issues: [] });
+    expect(observations[3]).toMatchObject({ ordinal: 3,raw_value: null,numeric_value: null,validation_status: "unknown",issues: [{ code: "missing_value",path: "/rackets/0/missing",severity: "warning" }] });
+    expect(observations[4]).toMatchObject({ ordinal: 4,attribute_key: "extra'); select 1; --",raw_value: { labels: ["quote\"",false,null],count: 0 },measurement_context: { detail: "Unicode: łza" },validation_status: "invalid" });
+    const ratings = (await db.query(`select ordinal,dimension_key,raw_value,numeric_score::float8 numeric_score,scale_min::float8 scale_min,scale_max::float8 scale_max,
+      methodology,rating_kind,validation_status,evidence_path,issues from padlownia.source_ratings order by ordinal`)).rows;
+    expect(ratings).toEqual([
+      { ordinal: 0,dimension_key: "power",raw_value: 82,numeric_score: 82,scale_min: 0,scale_max: 100,methodology: "synthetic:derived:v1",rating_kind: "rule_derived",validation_status: "valid",evidence_path: "/rackets/0/power",issues: [] },
+      { ordinal: 1,dimension_key: "comfort",raw_value: 7.25,numeric_score: 7.25,scale_min: 0,scale_max: 10,methodology: "synthetic:editorial:v2",rating_kind: "editorial",validation_status: "valid",evidence_path: "/rackets/0/comfort",issues: [] },
+      { ordinal: 2,dimension_key: "unknown",raw_value: null,numeric_score: null,scale_min: null,scale_max: null,methodology: "synthetic:unknown",rating_kind: "unknown",validation_status: "unknown",evidence_path: "/rackets/0/unknown",issues: [{ code: "missing_rating",path: "/rackets/0/unknown",severity: "warning" }] },
+    ]);
+    expect((await db.query("select raw_value is null sql_null,raw_value='null'::jsonb json_null,attribution is null attribution_sql_null from padlownia.spec_observations where ordinal=3")).rows).toEqual([{ sql_null: false,json_null: true,attribution_sql_null: false }]);
+    expect((await db.query("select raw_value is null sql_null,raw_value='null'::jsonb json_null from padlownia.source_ratings where ordinal=2")).rows).toEqual([{ sql_null: false,json_null: true }]);
+  });
+
+  it("a failing rating inside a batch rolls back the whole record and resumes without duplicate evidence", async () => {
+    const second = record(1);
+    second.ratings.push({ ...second.ratings[0]!,key: "reject",rawSourcePath: "/rackets/1/reject" });
+    const data = input([record(),second]);
+    await db.query(`create function padlownia.test_fail_rating_batch() returns trigger language plpgsql as $$
+      begin if new.dimension_key='reject' then raise exception 'SIMULATED_BATCH_FAILURE'; end if; return new; end $$`);
+    await db.query("create trigger test_fail_rating_batch before insert on padlownia.source_ratings for each row execute function padlownia.test_fail_rating_batch()");
+    await expect(stageImport(db,data)).rejects.toThrow(/^DATABASE_STAGE_FAILED$/);
+    const counts = async () => (await db.query(`select
+      (select count(*)::int from padlownia.source_records) records,
+      (select count(*)::int from padlownia.record_results) results,
+      (select count(*)::int from padlownia.spec_observations) observations,
+      (select count(*)::int from padlownia.source_ratings) ratings,
+      (select count(*)::int from padlownia.rackets) rackets`)).rows[0];
+    expect(await counts()).toEqual({ records: 1,results: 1,observations: 2,ratings: 1,rackets: 1 });
+    await db.query("drop trigger test_fail_rating_batch on padlownia.source_ratings");
+    const resumed = await stageImport(db,data);
+    expect(resumed.replayed).toBe(true);
+    expect(resumed.metrics.total).toBe(2);
+    expect(await counts()).toEqual({ records: 2,results: 2,observations: 4,ratings: 3,rackets: 2 });
+  });
+
   it("ING-021/009: unknown year stays in review and never merges into a known-year product", async () => {
     await publish();
     const staged = await stageImport(db,input([record(1,{ identity: { brand: "Testlab",name: "Synthetic 0 Pro",year: null } })]));

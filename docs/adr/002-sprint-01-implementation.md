@@ -7,6 +7,8 @@
 
 ## Context
 
+The real-source follow-up is recorded in [ADR-003](003-private-source-knowledge-staging.md). It supersedes the initial synthetic-only compatibility boundary below and adds private evidence manifests; the original baseline is retained here as implementation history.
+
 The repository began with product decisions and proposed architecture documents. Sprint 01 needs executable boundaries, deterministic ingestion and a reviewable catalogue without paid services or runtime AI calls. The proposed table names and TypeScript sketches were not immutable product requirements.
 
 This ADR records the resulting technical choices. It does not promote proposed/open items in the decision register to Accepted, authorize production operations, settle source reuse permissions or certify an actual source import. Deployment state, commands actually executed and cloud evidence belong in the sprint handoff report.

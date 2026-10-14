@@ -86,15 +86,22 @@ async function persistRecord(db: SqlExecutor, runId: string, snapshotId: string,
     if (normalized.status !== "valid" || decision.decision === "needs_review") {
       await tx.query("insert into padlownia.review_queue(run_id,result_id,reason_code) values($1,$2,$3)", [runId,result.id,normalized.status === "invalid" ? "INVALID_RECORD" : decision.decision === "needs_review" ? "IDENTITY_REVIEW" : "NORMALIZATION_REVIEW"]);
     }
-    for (const [ordinal,o] of normalized.observations.entries()) {
+    // Batch evidence within the same record transaction: two round trips regardless
+    // of its field count. JSON null must stay JSON null rather than SQL NULL.
+    if (normalized.observations.length) {
       await tx.query(`insert into padlownia.spec_observations(result_id,ordinal,attribute_key,raw_value,normalized_text,numeric_value,value_min,value_max,unit,measurement_context,claim_type,validation_status,attribution,evidence_path,issues)
-        values($1,$2,$3,$4::jsonb,$5,$6,$7,$8,$9,$10::jsonb,$11,$12,$13::jsonb,$14,$15::jsonb)`,
-      [result.id,ordinal,o.key,json(o.rawValue),o.normalizedText,o.numericValue,o.valueMin,o.valueMax,o.unit,json(o.context),o.kind,o.status,json(o.attribution),o.rawSourcePath,json(o.issues)]);
+        select $1,o.ordinal,o.attribute_key,coalesce(o.raw_value,'null'::jsonb),o.normalized_text,o.numeric_value,o.value_min,o.value_max,o.unit,o.measurement_context,o.claim_type,o.validation_status,coalesce(o.attribution,'null'::jsonb),o.evidence_path,o.issues
+        from jsonb_to_recordset($2::jsonb) as o(ordinal integer,attribute_key text,raw_value jsonb,normalized_text text,numeric_value numeric,value_min numeric,value_max numeric,unit text,measurement_context jsonb,claim_type text,validation_status text,attribution jsonb,evidence_path text,issues jsonb)`,
+      [result.id,json(normalized.observations.map((o,ordinal) => ({ ordinal,attribute_key: o.key,raw_value: o.rawValue,normalized_text: o.normalizedText,
+        numeric_value: o.numericValue,value_min: o.valueMin,value_max: o.valueMax,unit: o.unit,measurement_context: o.context,
+        claim_type: o.kind,validation_status: o.status,attribution: o.attribution,evidence_path: o.rawSourcePath,issues: o.issues }))) ]);
     }
-    for (const [ordinal,r] of normalized.ratings.entries()) {
+    if (normalized.ratings.length) {
       await tx.query(`insert into padlownia.source_ratings(result_id,ordinal,dimension_key,raw_value,numeric_score,scale_min,scale_max,methodology,rating_kind,validation_status,evidence_path,issues)
-        values($1,$2,$3,$4::jsonb,$5,$6,$7,$8,$9,$10,$11,$12::jsonb)`,
-      [result.id,ordinal,r.key,json(r.rawValue),r.numericScore,r.scaleMin,r.scaleMax,r.methodology,r.kind,r.status,r.rawSourcePath,json(r.issues)]);
+        select $1,r.ordinal,r.dimension_key,coalesce(r.raw_value,'null'::jsonb),r.numeric_score,r.scale_min,r.scale_max,r.methodology,r.rating_kind,r.validation_status,r.evidence_path,r.issues
+        from jsonb_to_recordset($2::jsonb) as r(ordinal integer,dimension_key text,raw_value jsonb,numeric_score numeric,scale_min numeric,scale_max numeric,methodology text,rating_kind text,validation_status text,evidence_path text,issues jsonb)`,
+      [result.id,json(normalized.ratings.map((r,ordinal) => ({ ordinal,dimension_key: r.key,raw_value: r.rawValue,numeric_score: r.numericScore,
+        scale_min: r.scaleMin,scale_max: r.scaleMax,methodology: r.methodology,rating_kind: r.kind,validation_status: r.status,evidence_path: r.rawSourcePath,issues: r.issues }))) ]);
     }
   });
 }

@@ -39,4 +39,19 @@ describe("deterministic normalization", () => {
     expect(normalizeObservation(observation("weight", "0,365 kg"))).toMatchObject({ numericValue: 365, unit: "g", status: "valid" });
     expect(normalizeObservation(observation("thickness", "3.8 cm"))).toMatchObject({ numericValue: 38, unit: "mm", status: "valid" });
   });
+  it("supports explicit unit-before-tolerance notation and rejects mixed units", () => {
+    expect(normalizeObservation(observation("weight", "350 g +/- 10 g"))).toMatchObject({ valueMin: 340, valueMax: 360, unit: "g", context: { tolerance: 10 }, status: "valid" });
+    expect(normalizeObservation(observation("weight", "350 g +/- 10 kg"))).toMatchObject({ numericValue: null, status: "invalid" });
+  });
+  it("does not collapse intermediate or ambiguous balance categories into high/low", () => {
+    expect(normalizeObservation(observation("balance", "Medium-high"))).toMatchObject({ normalizedText: "medium_high", status: "valid" });
+    expect(normalizeObservation(observation("balance", "Mid-low"))).toMatchObject({ normalizedText: "medium_low", status: "valid" });
+    expect(normalizeObservation(observation("balance", "Low to medium, slightly head-light"))).toMatchObject({ normalizedText: null, status: "unknown" });
+    expect(normalizeObservation(observation("balance", "Adjustable, head-heavy biased"))).toMatchObject({ normalizedText: null, status: "unknown" });
+  });
+  it("retains unsupported source prose and missing material markers for review", () => {
+    expect(normalizeObservation(observation("weight", "Men 350-370 g; Women 330-350"))).toMatchObject({ numericValue: null, status: "invalid" });
+    expect(normalizeObservation(observation("core", "Not specified"))).toMatchObject({ normalizedText: null, status: "unknown" });
+    expect(normalizeObservation(observation("player_level", "junior"))).toMatchObject({ normalizedText: null, status: "invalid" });
+  });
 });

@@ -1,5 +1,9 @@
 # Sprint 01 — raport wykonania
 
+> Raport historyczny pierwszego przekazania. Po dostarczeniu źródeł i klucza
+> Storage aktualny stan opisuje [raport importu rzeczywistych źródeł](SOURCE_IMPORT_RESULTS_2026_10_14.md).
+> Poniższe blokady dostępu i liczby opisują stan przed tym uzupełnieniem.
+
 Stan: 2026-10-14. Gałąź `feat/sprint-01-foundation-catalogue`. Kod przygotowany do przeglądu; **Sprint nie jest w pełni zamknięty**, ponieważ rzeczywisty import źródeł i publikacja katalogu Dev pozostają zablokowane. Issue #1 pozostaje otwarte. Bez automatycznego merge'a.
 
 ## Dostarczony zakres

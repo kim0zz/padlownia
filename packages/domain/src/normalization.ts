@@ -1,8 +1,8 @@
 import { NORMALIZER_VERSION, type Issue, type NormalizedObservation, type NormalizedRecord, type ObservationInput, type SourceRecord } from "./types.js";
 import { normalizeIdentity } from "./resolution.js";
 
-const emptyValues = new Set(["", "unknown", "n/a", "na", "-", "?", "not available", "brak"]);
-const normalizedString = (value: string) => value.trim().toLowerCase().replaceAll(",", ".");
+const emptyValues = new Set(["", "unknown", "n/a", "na", "-", "?", "not available", "not specified", "unspecified", "brak"]);
+const normalizedString = (value: string) => value.trim().toLowerCase().replace(/(\d),(\d)/g, "$1.$2");
 const shapes: Record<string, string> = { round: "round", "okrągła": "round", diamond: "diamond", "diament": "diamond", teardrop: "teardrop", "tear drop": "teardrop", "łza": "teardrop", hybrid: "hybrid" };
 const levels = new Set(["beginner", "intermediate", "advanced", "professional", "all levels"]);
 
@@ -18,14 +18,25 @@ function problem(result: NormalizedObservation, code: string, invalid = false): 
 /** No numeric coercion from field suffixes. Units and balance reference must be explicit. */
 export function normalizeObservation(input: ObservationInput): NormalizedObservation {
   const result = blank(input);
-  const raw = input.rawValue;
+  // The PadelTrue adapter retains exact verbatim text, and separately points to the
+  // source's structured interpretation. It is still an unverified supplier claim.
+  const raw = input.context.sourceFormat === "padeltrue:model-1.0" && Object.hasOwn(input.context, "normalizationCandidate")
+    ? input.context.normalizationCandidate! : input.rawValue;
   if (raw === null || (typeof raw === "string" && emptyValues.has(normalizedString(raw)))) return problem(result, "missing_value");
   if (typeof raw !== "string" && typeof raw !== "number") return problem(result, "unsupported_value_type", true);
   const value = normalizedString(String(raw));
   if (input.key === "weight" || input.key === "balance" || input.key === "thickness") {
-    if (input.key === "balance" && /\b(head[- ]heavy|high)\b/.test(value) && !/\d/.test(value)) { result.normalizedText = "head_heavy"; result.status = "valid"; return result; }
-    if (input.key === "balance" && /\b(head[- ]light|low)\b/.test(value) && !/\d/.test(value)) { result.normalizedText = "head_light"; result.status = "valid"; return result; }
-    if (input.key === "balance" && /^(medium|even|balanced)$/.test(value)) { result.normalizedText = "even"; result.status = "valid"; return result; }
+    if (input.key === "balance" && !/\d/.test(value)) {
+      const labels: Record<string, string> = {
+        "high": "head_heavy", "head-heavy": "head_heavy", "head heavy": "head_heavy", "high, head-heavy": "head_heavy", "high (head-heavy)": "head_heavy",
+        "low": "head_light", "head-light": "head_light", "head light": "head_light", "low, head-light": "head_light",
+        "medium": "even", "mid": "even", "even": "even", "balanced": "even", "neutral": "even",
+        "medium-high": "medium_high", "mid-high": "medium_high", "mid/high": "medium_high", "medium/high": "medium_high",
+        "medium-low": "medium_low", "mid-low": "medium_low", "low/mid": "medium_low",
+      };
+      if (!Object.hasOwn(labels, value)) return problem(result, "ambiguous_qualitative_balance");
+      result.normalizedText = labels[value]!; result.status = "valid"; return result;
+    }
     const unitMatch = value.match(/\b(kg|g|mm|cm)\b/);
     const unit = unitMatch?.[1] ?? (typeof input.context.unit === "string" ? input.context.unit.toLowerCase() : null);
     if (!unit) return problem(result, "unknown_unit");
@@ -36,15 +47,16 @@ export function normalizeObservation(input: ObservationInput): NormalizedObserva
     else if (/with (?:one|1|an?) overgrip/.test(value)) result.context.grips = "one_overgrip";
     else if (/overgrip|adjustable|custom weight/.test(value)) result.context.configuration = "nonstandard_unspecified";
     if (/^\s*[~≈]|approximately|approx\./.test(value)) result.context.approximate = true;
-    const match = value.match(/^\s*[~≈]?\s*(\d+(?:\.\d+)?)\s*(?:(±|\+\/-|[–—-])\s*(\d+(?:\.\d+)?))?\s*(?:kg|g|mm|cm)?(?=\s|$|\()/);
+    const match = value.match(/^\s*[~≈]?\s*(\d+(?:\.\d+)?)\s*(kg|g|mm|cm)?\s*(?:(±|\+\/-|[–—-])\s*(\d+(?:\.\d+)?)\s*(kg|g|mm|cm)?)?(?=\s|$|\()/);
     if (!match) return problem(result, "unparsed_numeric_value", true);
     // Reject unexplained suffixes: converting a number out of arbitrary prose is unsafe.
     const suffix = value.slice(match[0].length).trim();
     const allowedSuffix = /^(?:\(?\s*(?:(?:with (?:one|1|an?) overgrip)|(?:without (?:an? )?overgrip)|(?:no overgrip)|(?:from (?:the )?(?:butt|handle base|base of (?:the )?handle)))\s*\)?|)$/;
     if (!allowedSuffix.test(suffix)) return problem(result, "unknown_measurement_configuration");
     const first = Number(match[1]);
-    const second = match[3] === undefined ? null : Number(match[3]);
-    const tolerance = match[2] === "±" || match[2] === "+/-";
+    if (match[2] && match[5] && match[2] !== match[5]) return problem(result, "mixed_measurement_units", true);
+    const second = match[4] === undefined ? null : Number(match[4]);
+    const tolerance = match[3] === "±" || match[3] === "+/-";
     let min = tolerance && second !== null ? first - second : first;
     let max = second === null ? first : tolerance ? first + second : second;
     if (min <= 0 || max < min || !Number.isFinite(min) || !Number.isFinite(max)) return problem(result, "invalid_numeric_range", true);

@@ -40,6 +40,9 @@ test('desktop and mobile screenshots, no horizontal overflow, WCAG AA automated 
   await page.setViewportSize({ width: 1440, height: 1080 });
   await page.goto('/');
   await expect(page.locator('.racket-card')).toHaveCount(6);
+  // Streamed Next.js content can exist in a hidden boundary before it is shown.
+  await expect(page.locator('.racket-card').first()).toBeVisible();
+  await expect(page.getByText('Dane demonstracyjne.', { exact: true })).toBeVisible();
   await page.screenshot({ path: 'docs/design/screenshots/catalogue-desktop.png', fullPage: true, caret: 'initial' });
   expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()).violations).toEqual([]);
   await page.goto('/rakiety/fixture-orbit-control-2026');

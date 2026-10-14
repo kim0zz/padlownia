@@ -6,6 +6,7 @@ import { openLocalDatabase, createPgExecutor, stageImport, createRelease, evalua
 import { devConfig, WorkerError, safeError } from './config.js';
 import { LocalSnapshotStore, SupabaseSnapshotStore, type SnapshotStore } from './storage.js';
 import { profileSnapshot } from './profile.js';
+import { checkDevelopmentStorage } from './storage-check.js';
 
 const help = `Padłownia worker — no LLM and no remote source fetching
   profile --source padeltrue|padelhow --file <path>
@@ -17,6 +18,7 @@ const help = `Padłownia worker — no LLM and no remote source fetching
   catalogue [--target local|dev]
   demo (local synthetic complete flow; never writes to cloud)
   check-dev (read-only connectivity and restricted-role check)
+  check-storage (Dev-only synthetic upload/replay/denial check; cleans up own object)
 Local state: .local/worker (one worker at a time). Errors never print credentials or raw inputs.`;
 const report = (value: unknown) => process.stdout.write(`${JSON.stringify(value, null, 2)}\n`);
 
@@ -31,7 +33,7 @@ async function main(): Promise<void> {
   const command = positionals[0];
   if (values.help || !command) { process.stdout.write(`${help}\n`); return; }
   if (positionals.length !== 1) throw new WorkerError('INVALID_ARGUMENTS');
-  if (!['profile','import','release','gate','approve','publish','rollback','catalogue','demo','check-dev'].includes(command)) throw new WorkerError('UNKNOWN_COMMAND');
+  if (!['profile','import','release','gate','approve','publish','rollback','catalogue','demo','check-dev','check-storage'].includes(command)) throw new WorkerError('UNKNOWN_COMMAND');
   const required = (value: string | undefined, name: string): string => { if (!value?.trim()) throw new WorkerError(`${name}_REQUIRED`); return value; };
   const target = values.target;
   if (!['local','dev'].includes(target)) throw new WorkerError('INVALID_TARGET');
@@ -47,7 +49,7 @@ async function main(): Promise<void> {
   }
   if (command === 'demo' && target !== 'local') throw new WorkerError('DEMO_IS_LOCAL_ONLY');
   if (['approve','publish','rollback'].includes(command) && !values['explicit-yes']) throw new WorkerError('EXPLICIT_REVIEW_REQUIRED');
-  const cloud = target === 'dev' || command === 'check-dev';
+  const cloud = target === 'dev' || command === 'check-dev' || command === 'check-storage';
   const config = cloud ? devConfig(process.env) : null;
   // Fail before opening a remote DB if Storage cannot preserve the input snapshot.
   const store: SnapshotStore = cloud && command === 'import' ? new SupabaseSnapshotStore(config!) : new LocalSnapshotStore(resolve('.local/worker/storage'));
@@ -86,6 +88,11 @@ async function main(): Promise<void> {
       report({ status: command === 'publish' ? 'published' : 'rolled-back', releaseId: values.release });
     } else if (command === 'catalogue') {
       report({ target, entries: await readPublishedCatalogue(db) });
+    } else if (command === 'check-storage') {
+      report({
+        snapshots: await checkDevelopmentStorage(config!,db,process.env.SUPABASE_PUBLISHABLE_KEY),
+        reviewOriginals: await checkDevelopmentStorage(config!,db,process.env.SUPABASE_PUBLISHABLE_KEY,undefined,'text'),
+      });
     } else if (command === 'check-dev') {
       const check = (await db.query<{ role: string; can_bypass_rls: boolean }>('select current_user as role,rolbypassrls as can_bypass_rls from pg_roles where rolname=current_user')).rows[0];
       if (check?.can_bypass_rls) throw new WorkerError('PRIVILEGED_ROLE_REJECTED');

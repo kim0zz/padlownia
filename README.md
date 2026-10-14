@@ -37,11 +37,13 @@ npm run worker -- catalogue
 
 ## Supabase Dev i źródła
 
-Właściciel potwierdził projekt **padlownia**, ref `kfdegaowpanatofnqvpy`, jako wyłącznie developerski. Zastosowano wersjonowany schemat, prywatne buckety `source-snapshots` i `review-originals` oraz dedykowane loginy aplikacji/workera. Rzeczywisty `worker check-dev` potwierdził połączenie przez ograniczoną rolę i zweryfikowany TLS. Instrukcje połączenia, importu, release gate, backupu i resetu: [SETUP](docs/development/SETUP.md). Dostęp do DB nie daje sam w sobie credentialu do Storage; jego brak nadal blokuje pełny cloud import.
+Właściciel potwierdził projekt **padlownia**, ref `kfdegaowpanatofnqvpy`, jako wyłącznie developerski. Zastosowano wersjonowany schemat, prywatne buckety `source-snapshots` i `review-originals` oraz dedykowane loginy aplikacji/workera. Zweryfikowano połączenie DB przez ograniczone role i TLS oraz rzeczywisty zapis, odczyt z kontrolą SHA-256, replay i odmowę publicznego dostępu do obu bucketów. Instrukcje połączenia, importu, release gate, backupu i resetu: [SETUP](docs/development/SETUP.md).
 
-Next.js przez dedykowany reader zwrócił HTTP 200 i rzeczywiście pusty katalog Dev, bez podstawiania fixture. Nie ma jeszcze opublikowanego rzeczywistego datasetu ani wykonanego testu HTTP Storage. Dokładne wyniki i pozostałe blokady: [raport Sprintu 01](docs/development/SPRINT_01_RESULTS.md).
+Next.js korzysta z dedykowanego readera. Dopóki release nie przejdzie przeglądu i weryfikacji zakresu praw źródeł, katalog Dev pozostaje pusty, bez podstawiania fixture. Aktualne wykonania i ograniczenia: [raport importu źródeł z 14 października](docs/development/SOURCE_IMPORT_RESULTS_2026_10_14.md). [Raport Sprintu 01](docs/development/SPRINT_01_RESULTS.md) zachowuje historyczny wynik pierwszego etapu.
 
-**Pełne pliki PadelTrue i szczegółowy `rackets.json` padel.how nie były dostępne przy implementacji.** Connectory są sprawdzone na autorskich syntetycznych kontraktach; zgodność z rzeczywistymi feedami oraz import pełnych katalogów wymagają weryfikacji na autoryzowanych plikach. Historyczne liczby 268/217 nie są osiągniętymi wynikami importu.
+Właściciel dostarczył rzeczywiste snapshoty do ignorowanego `sources/`: **281 rekordów PadelTrue i 217 padel.how**. Adaptery `1.1.0` uwzględniają ich rzeczywiste struktury, jawne definicje jednostek oraz oryginalne wartości i kontekst pomiaru. To liczby rekordów wejściowych, nie potwierdzonych unikalnych lub opublikowanych produktów. Szczegółowy eksport padel.how jest wybranym wejściem; jego kopii i lżejszego eksportu nie importujemy jako dodatkowych rakiet. Pliki źródłowe są tylko do odczytu i nie trafiają do publicznego repozytorium.
+
+Dwa pliki „LLM” zawierają indeks źródła i **588 dokumentów**, w tym wszystkie 217 recenzji. Przeprowadzono [audyt treści, powiązań i ograniczeń](docs/development/KNOWLEDGE_SOURCE_AUDIT.md), pobrano 29 wskazanych szczegółowych JSON-ów i zapisano prywatnie oryginały oraz manifesty 31 zasobów / 618 dokumentów. Worker `npm run knowledge -- --help` udostępnia profilowanie, lokalne wyszukiwanie z cytowaniami, kontrolowane pobieranie i staging. Jest to materiał do przeglądu; nie jest jeszcze bazą opublikowanego chatu ani embeddingów.
 
 ## Sprawdzenie zmian
 

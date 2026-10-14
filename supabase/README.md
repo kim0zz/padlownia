@@ -24,12 +24,12 @@ Every application table has RLS enabled. Anonymous/authenticated clients receive
 
 ## Migration history and runtime provisioning
 
-The six schema migration filenames use the exact versions/names returned by the
+The seven schema migration filenames use the exact versions/names returned by the
 confirmed Dev management API. Two additional **history-only marker migrations**
 (`20261014052903` and `20261014053339`) represent environment-specific encrypted
 runtime credential provisioning and removal of its temporary handoff table.
 Their original SQL is intentionally not replayed or committed. Thus the version
-list matches Dev; SQL-content parity is claimed only for the six schema migrations,
+list matches Dev; SQL-content parity is claimed only for the seven schema migrations,
 not the two explicitly labelled operational markers. Replaying this repository
 creates the schema and NOLOGIN runtime roles, never copies Dev passwords or its
 project identity marker into another database.
@@ -55,6 +55,14 @@ For a development backup, export the application schema/data with a trusted Post
 
 ## Current boundaries
 
-Long-form review/chunk/embedding tables, source deletion orchestration and object garbage collection are deferred. No vector extension is required before vector retrieval exists. Human exception adjudication currently uses audited database records; an admin review UI is outside Sprint 01. A pending or invalid record cannot be bypassed just by approving a release.
+The source follow-up adds private knowledge assets/documents: immutable metadata
+manifests for the archived LLM corpus and directly linked review JSON. Full text
+stays in private Storage. The worker can SELECT/INSERT these manifests; browser
+roles and the catalogue reader cannot read them. Deferred completeness constraints
+and manifest hashes reject partial writes and changed same-version replays.
+Their only rights state is private staging/unreviewed; no public text retrieval,
+embeddings or claim extraction is enabled by this schema.
 
-The development Supabase security advisor reported no security findings after the first three migrations. Supporting foreign-key indexes address the non-singleton join paths identified by the performance advisor. The active-release foreign-key index advisory is intentionally left for the one-row `catalog_state` table. Unused-index notices on a newly empty database do not establish that an ingestion/evidence index should be removed; recheck after representative imports.
+Reviewed claim/chunk/embedding tables, source deletion orchestration and object garbage collection are deferred. No vector extension is required before vector retrieval exists. Human exception adjudication currently uses audited database records; an admin review UI is outside Sprint 01. A pending or invalid record cannot be bypassed just by approving a release.
+
+The development Supabase security advisor reported no security findings after all seven schema migrations, including private knowledge staging. All 21 application tables have RLS enabled. Supporting foreign-key indexes address the non-singleton join paths identified by the earlier performance advisor. The active-release foreign-key index advisory is intentionally left for the one-row `catalog_state` table. Unused-index notices on a newly empty database do not establish that an ingestion/evidence index should be removed; recheck after representative imports.
