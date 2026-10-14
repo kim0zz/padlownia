@@ -83,6 +83,15 @@ export function safeSourceUrl(raw: string | null | undefined): string | null {
   } catch { return null; }
 }
 
+export function methodologyCitation(raw: string): { url: string | null; note: string } {
+  const value = raw.trim();
+  const parts = /^(\S+)(?:\s+([\s\S]*))?$/.exec(value);
+  const url = safeSourceUrl(parts?.[1]);
+  // The source may append a record-specific caveat after its methodology URL.
+  // Link only the first token and keep every remaining word visible.
+  return url ? { url, note: parts?.[2]?.trim() ?? '' } : { url: null, note: value };
+}
+
 export function formatDate(raw: string) {
   const date = new Date(raw);
   return Number.isNaN(date.getTime()) ? 'Data nieznana' : date.toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Warsaw' });

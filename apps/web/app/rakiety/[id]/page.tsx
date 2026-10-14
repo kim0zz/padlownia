@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Arrow, ModeNotice, SourceCitation, SpecSummary, Unavailable } from '../../../components/catalogue';
+import { Arrow, ModeNotice, RatingCitation, SourceCitation, SourceLicenceNotice, SpecSummary, Unavailable } from '../../../components/catalogue';
 import { claimLabel, formatDate, ratingLabels, rawText, specLabels } from '../../../lib/catalogue';
 import { getCatalogue } from '../../../lib/catalogue-server';
 
@@ -40,7 +40,14 @@ export default async function RacketPage({ params }: { params: Promise<{ id: str
         return <div key={field.key}><dt>{field.label}</dt><dd>{field.value ?? 'Brak potwierdzonych danych'}{field.value && observation && <><br /><SourceCitation evidence={observation.evidence} /></>}</dd></div>;
       })}</dl><p>Nie dopowiadamy brakujących jednostek ani parametrów.</p></section>
     </aside></div>
-    <section className="ratings-section" aria-labelledby="ratings-title"><p className="section-kicker">PERSPEKTYWA ŹRÓDŁA</p><h2 id="ratings-title">Oceny i metodologia</h2>{entry.ratings.length ? <div className="rating-grid">{entry.ratings.map((rating, index) => <article className="rating-card" key={`${rating.evidence.observationId}-${index}`}><span className="rating-kind">{ratingLabels[rating.kind] ?? 'Ocena źródła'}</span><h3>{rating.dimension === 'control' ? 'Kontrola' : rating.dimension}</h3><p className="rating-value">{rating.validationStatus === 'valid' && rating.value !== null ? <>{rating.value}<span> / {rating.scaleMax ?? '?'}</span></> : 'Nieustalona'}</p><p>Skala źródła: {rating.scaleMin ?? '?'}–{rating.scaleMax ?? '?'}. Oryginał: {rawText(rating.rawValue)}.</p>{rating.validationStatus !== 'valid' && <p>Interpretacja oceny niepotwierdzona.</p>}<p>{rating.methodology || 'Metodologia nie została podana.'}</p><SourceCitation evidence={rating.evidence} /></article>)}</div> : <p className="no-ratings">Brak opublikowanych ocen dla tego wariantu. Nie wyliczamy własnej oceny liczbowej.</p>}</section>
+    <section className="ratings-section" aria-labelledby="ratings-title"><p className="section-kicker">PERSPEKTYWA ŹRÓDŁA</p><h2 id="ratings-title">Oceny i metodologia</h2>{entry.ratings.length ? <div className="rating-grid">{entry.ratings.map((rating, index) => <article className="rating-card" key={`${rating.evidence.observationId}-${index}`}>
+      <span className="rating-kind">{ratingLabels[rating.kind] ?? 'Ocena źródła'}</span><h3>{rating.dimension === 'control' ? 'Kontrola' : rating.dimension}</h3>
+      <p className="rating-value">{rating.validationStatus === 'valid' && rating.value !== null ? <>{rating.value}<span> / {rating.scaleMax ?? '?'}</span></> : 'Nieustalona'}</p>
+      <p>Skala źródła: {rating.scaleMin ?? '?'}–{rating.scaleMax ?? '?'}. Oryginał: {rawText(rating.rawValue)}.</p>
+      {rating.validationStatus !== 'valid' && <p>Interpretacja oceny niepotwierdzona.</p>}
+      <RatingCitation rating={rating} />
+    </article>)}</div> : <p className="no-ratings">Brak opublikowanych ocen dla tego wariantu. Nie wyliczamy własnej oceny liczbowej.</p>}</section>
+    <SourceLicenceNotice entries={[entry]} />
     {related.length > 0 && <section className="related-section"><h2>Inne warianty i roczniki tej nazwy</h2><p>Każdy z nich ma oddzielny profil i własne źródła.</p><div className="related-links">{related.map((racket) => <Link className="button button-secondary" key={racket.id} href={`/rakiety/${encodeURIComponent(racket.id)}`}>{racket.model} · {racket.variant} · {racket.modelYear ?? 'rok nieznany'} <Arrow /></Link>)}</div></section>}
   </main>;
 }

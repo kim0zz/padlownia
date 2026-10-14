@@ -142,6 +142,15 @@ function parseRecord(raw: Json, inputIndex: number, source: SourceCode, rootPath
   const observations = flatPadelHow ? Object.entries(flatSpecKeys).filter(([key]) => Object.hasOwn(row, key)).map(([key]) => flatObservation(key, row[key]!, `${path}/${key}`, metadata))
     : publishedPadelTrue && specs ? Object.entries(specs).filter(([key]) => key !== "price").flatMap(([key, value]) => trueObservations(key, value, `${path}/${specField}/${pointer(key)}`))
     : specs ? Object.entries(specs).map(([key, value]) => observation(key, value, `${path}/${specField}/${pointer(key)}`)) : [];
+  if (publishedPadelTrue) for (const [sourceKey, rawConflict] of Object.entries(object(row.inputConflicts) ?? {})) {
+    const conflict = object(rawConflict);
+    if (!conflict) continue;
+    // PadelTrue's model input named `core` is firmness, separate from foam material.
+    const key = sourceKey === "core" ? "firmness" : sourceKey;
+    for (const existing of observations.filter(value => value.key === key)) existing.context.sourceConflict = rawConflict;
+    observations.push({ key,rawValue: conflict.verbatim ?? rawConflict,rawSourcePath: `${path}/inputConflicts/${pointer(sourceKey)}${conflict.verbatim !== undefined ? "/verbatim" : ""}`,
+      kind: "unknown",context: { sourceConflict: rawConflict,sourceConflictField: sourceKey },attribution: { name: null,url: safeSourceUrl(conflict.source),verified: false } });
+  }
   const scoreField = publishedPadelTrue ? "ratings" : source === "padeltrue" || flatPadelHow ? "scores" : "ratings";
   const scores = object(row[scoreField]);
   const ratings = scores ? Object.entries(scores).map(([key, value]) => rating(key, value, `${path}/${scoreField}/${pointer(key)}`, source, key === "overall", metadata)) : [];
@@ -166,7 +175,16 @@ function parseRecord(raw: Json, inputIndex: number, source: SourceCode, rootPath
     if (specs?.price !== undefined) preservedMetadata.price = specs.price;
     if (!sourceUrl || new URL(sourceUrl).origin !== "https://padeltrue.com" || new URL(sourceUrl).pathname !== `/rackets/${text(row.slug)}`) issues.push(issue("invalid_padeltrue_evidence_url", `${path}/url`));
     if (!scores || Object.keys(scores).length !== padelTrueCategories.length || padelTrueCategories.some((key) => !Object.hasOwn(scores, key))) issues.push(issue("rating_category_set_mismatch", `${path}/ratings`));
-    if (Array.isArray(row.inputsMissing) && row.inputsMissing.length) issues.push(issue("source_rating_missing_inputs", `${path}/inputsMissing`, "warning"));
+    if (Array.isArray(row.inputsMissing) && row.inputsMissing.length) {
+      issues.push(issue("source_rating_missing_inputs", `${path}/inputsMissing`, "warning"));
+      const labels: Record<string, string> = { balance: "balans", core: "twardość rdzenia", face: "materiał powierzchni", shape: "kształt", weight: "masa" };
+      const missing = row.inputsMissing.map(value => typeof value === "string" && Object.hasOwn(labels, value) ? labels[value] : "nieopisany parametr").join(", ");
+      for (const sourceRating of ratings) sourceRating.methodology += `\nModel PadelTrue 1.0. Brakujące dane wejściowe: ${missing}. Model źródła zastępuje brakujące parametry neutralną wartością 0,5; ocena ma niepełne dane i nie jest wynikiem testu gry.`;
+    }
+    const currency = text(object(specs?.price)?.currency);
+    if (currency && currency !== "EUR") for (const sourceRating of ratings.filter(value => value.key === "value" && value.rawValue === null)) {
+      sourceRating.methodology += `\nOcena opłacalności nie została podana dla ceny w ${currency}; nie przeliczamy walut ani nie zastępujemy braku zerem.`;
+    }
     if (object(row.inputConflicts) && Object.keys(object(row.inputConflicts)!).length) issues.push(issue("source_input_conflict", `${path}/inputConflicts`, "warning"));
     for (const [key, value] of Object.entries(specs ?? {})) {
       const spec = object(value);

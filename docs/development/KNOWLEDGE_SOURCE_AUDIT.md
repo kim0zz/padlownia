@@ -85,7 +85,7 @@ Later the same day, the production knowledge worker completed the explicit **29-
 
 The supplied [copyright page](https://padel.how/copyright/) and JSON license permit attributed short quotations and individual scores/specifications, and require written permission for full-review republication, catalogue mirroring or dataset redistribution. Manufacturer images/specifications retain their separate rights. The availability of `llms-full.txt`, static JSON or public MCP does not itself expand those rights.
 
-P-021 records the owner's positive source correspondence; O-002 still asks for its exact scope. Preserve that correspondence and record separate decisions for private storage, text indexing/embeddings, excerpts, full-text redistribution and any public demo. This audit supports the owner's requested private development analysis; it does not promote a permissions proposal to Accepted, publish the corpus, or authorize public full-text display. Source deletion must later cascade to excerpts, indexes, embeddings and derived caches.
+P-021 records the owner's positive source correspondence. The subsequent [permission review](SOURCE_PERMISSION_REVIEW.md) directly located and retained the written reply: it supports the described Polish comparison catalogue with attribution. That catalogue permission no longer lacks evidence. O-002 remains relevant only to broader uses not addressed in the correspondence, including full-text republication, standalone dataset redistribution and later embeddings/model processing. This private corpus audit does not itself authorize public full-text display. Source deletion must later cascade to excerpts, indexes, embeddings and derived caches.
 
 ## Reproduction and private outputs
 

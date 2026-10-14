@@ -99,6 +99,8 @@ svg { flex-shrink: 0; }
 .source-link, .source-label { font-size: 12px; font-weight: 600; }
 .source-link:hover { color: #3c6517; }
 .source-citation { display: inline-flex; flex-wrap: wrap; gap: 4px 10px; }
+.source-licence { color: var(--muted); font-size: 13px; margin: 24px 0; max-width: 78ch; overflow-wrap: anywhere; }
+.source-licence p { margin-bottom: 0; }
 .attribution-link { display: block; }
 .card-bottom { padding-top: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px; }
 .muted { color: var(--muted); }

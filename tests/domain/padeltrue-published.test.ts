@@ -53,6 +53,13 @@ describe("profiled PadelTrue model 1.0 — synthetic contract examples", () => {
     expect(result.status).toBe("needs_review");
     expect(result.metadata.inputConflicts).toEqual(conflict);
     expect(result.issues.map((x) => x.code)).toEqual(expect.arrayContaining(["source_rating_missing_inputs", "source_input_conflict"]));
+    expect(result.ratings.every(value => value.methodology.includes("Brakujące dane wejściowe: balans") && value.methodology.includes("0,5") && value.methodology.includes(envelope.methodology))).toBe(true);
+    expect(result.ratings.find(value => value.key === "control")).toMatchObject({ rawValue: 70,numericScore: 70,status: "valid",kind: "rule_derived" });
+  });
+  it("explains an absent non-EUR value rating without fabricating a currency conversion", () => {
+    const result = normalizeRecord(parse({ ...row,ratings: { ...row.ratings,value: null } }).records[0]!);
+    expect(result.ratings.find(value => value.key === "value")).toMatchObject({ rawValue: null,numericScore: null,status: "unknown",methodology: expect.stringContaining("ceny w GBP") });
+    expect(result.ratings.find(value => value.key === "power")!.methodology).toBe(envelope.methodology);
   });
   it("keeps numeric balance unknown without a measurement reference even with millimetres", () => {
     const result = normalizeRecord(parse({ ...row, specs: { ...row.specs, balance: { ...row.specs.balance, value: null, mm: 260, display: "260 mm", verbatim: "260 mm" } } }).records[0]!);
@@ -72,5 +79,20 @@ describe("profiled PadelTrue model 1.0 — synthetic contract examples", () => {
     const record = parse({ ...row, url: "https://padeltrue.com/rackets/example-other" }).records[0]!;
     expect(record.issues).toContainEqual({ code: "invalid_padeltrue_evidence_url", path: "/rackets/0/url", severity: "error" });
     expect(normalizeRecord(record).status).toBe("invalid");
+  });
+  it("retains conflicting source evidence and excludes an unverified retailer alternative from main specs", () => {
+    const conflict = { text: "Manufacturer lists two different face materials",verbatim: "Face: Carbon / Fiberglass",source: evidence.source };
+    const normalized = normalizeRecord(parse({ ...row,inputConflicts: { surface: conflict },specs: { ...row.specs,surface: { ...row.specs.surface,sourceType: "retailer" } } }).records[0]!);
+    const surfaces = normalized.observations.filter(value => value.key === "surface");
+    expect(surfaces).toHaveLength(2);
+    expect(surfaces.every(value => value.status === "unknown" && value.normalizedText === null)).toBe(true);
+    expect(surfaces[0]).toMatchObject({ rawValue: row.specs.surface.verbatim,context: { sourceConflict: conflict } });
+    expect(surfaces[1]).toMatchObject({ rawValue: conflict.verbatim,rawSourcePath: "/rackets/0/inputConflicts/surface/verbatim",context: { sourceConflict: conflict },issues: [{ code: "unresolved_source_conflict",path: "/rackets/0/inputConflicts/surface/verbatim",severity: "warning" }] });
+  });
+  it("does not confuse the source model's conflicting core firmness with known foam material", () => {
+    const conflict = { text: "Firmness differs in table and prose",verbatim: "Medium / Hard",source: evidence.source };
+    const normalized = normalizeRecord(parse({ ...row,inputConflicts: { core: conflict },specs: { ...row.specs,core: { ...row.specs.core,value: null } } }).records[0]!);
+    expect(normalized.observations.find(value => value.key === "core")).toMatchObject({ normalizedText: "example foam",status: "valid" });
+    expect(normalized.observations.find(value => value.key === "firmness")).toMatchObject({ normalizedText: null,status: "unknown",rawSourcePath: "/rackets/0/inputConflicts/core/verbatim" });
   });
 });

@@ -43,20 +43,20 @@ npm run worker -- catalogue
 
 Fixture'y `padeltrue.synthetic.json` i `padelhow.synthetic.json` zawierają celowe przypadki wymagające review; nie każdy przykład ma przejść gate. Czysta demonstracja używa `demo-clean.synthetic.json`. Fixture UI jest osobny od bazy workera, a UI nie ma trybu odczytu tej lokalnej bazy.
 
-Właściciel dostarczył rzeczywiste pliki do `sources/`. PadelTrue ma 281 rekordów, a szczegółowy padel.how 217; adaptery `1.1.0` zostały dopasowane do tych wersji. Są to liczebności wejścia, nie opublikowanego katalogu. `rackets.json` i `padel how base.txt` są identycznymi kopiami, a `data rackets.json` reprezentuje te same 217 modeli w lżejszym formacie. Wybierz szczegółowy `rackets.json` jako jedno wejście padel.how. Nie edytuj oryginałów ani nie dodawaj `sources/` do Git.
+Właściciel dostarczył rzeczywiste pliki do `sources/`. PadelTrue ma 281 rekordów, a szczegółowy padel.how 217; adaptery `1.2.0` obejmują korekty wynikające z przeglądu tych plików. Są to liczebności wejścia, nie opublikowanego katalogu. `rackets.json` i `padel how base.txt` są identycznymi kopiami, a `data rackets.json` reprezentuje te same 217 modeli w lżejszym formacie. Wybierz szczegółowy `rackets.json` jako jedno wejście padel.how. Nie edytuj oryginałów ani nie dodawaj `sources/` do Git.
 
 ```sh
 npm run worker -- profile --source padeltrue --file "sources/rackets padel true.txt"
 npm run worker -- profile --source padelhow --file sources/rackets.json
 ```
 
-Dla kolejnego snapshotu ponownie sprawdź [obsługiwany kontrakt](../../packages/domain/README.md), profil i hash; zmiana struktury wymaga jawnej wersji parsera. Wyniki rzeczywistych wykonań i wyjątki są w [raporcie importu](SOURCE_IMPORT_RESULTS_2026_10_14.md), a syntetyczne regresje pozostają niezależną, bezpieczną podstawą CI.
+Dla kolejnego snapshotu ponownie sprawdź [obsługiwany kontrakt](../../packages/domain/README.md), profil i hash; zmiana struktury wymaga jawnej wersji parsera. Aktualny wynik wykonania opisuje [raport przeglądu źródeł](SOURCE_REVIEW_RESULTS_2026_10_14.md), a [raport importu](SOURCE_IMPORT_RESULTS_2026_10_14.md) zachowuje wcześniejszy stan. Syntetyczne regresje pozostają niezależną, bezpieczną podstawą CI.
 
 ## Połączenie z potwierdzonym Supabase Dev
 
-Właściciel potwierdził **padlownia**, ref **`kfdegaowpanatofnqvpy`**, jako środowisko developerskie. Nie przenoś tej autoryzacji na inny projekt. Schemat i dwa prywatne buckety zostały zastosowane w tym Dev. Dedykowane loginy zostały bezpiecznie skonfigurowane, a `worker check-dev` potwierdził rzeczywiste połączenie z ograniczoną rolą i weryfikacją TLS. Credentials są w ignorowanych lokalnych plikach, nie w Git. Dostęp administracyjny, odczyt DB, zapis Storage oraz publikacja danych są osobnymi krokami weryfikacji. Klucz Storage i rzeczywiste snapshoty są już dostępne; gate nadal wymaga weryfikacji praw źródeł i wyjątków danych przed publikacją.
+Właściciel potwierdził **padlownia**, ref **`kfdegaowpanatofnqvpy`**, jako środowisko developerskie. Nie przenoś tej autoryzacji na inny projekt. Schemat i dwa prywatne buckety zostały zastosowane w tym Dev. Dedykowane loginy zostały bezpiecznie skonfigurowane, a `worker check-dev` potwierdził rzeczywiste połączenie z ograniczoną rolą i weryfikacją TLS. Credentials są w ignorowanych lokalnych plikach, nie w Git. Dostęp administracyjny, odczyt DB, zapis Storage oraz publikacja danych są osobnymi krokami weryfikacji. Klucz Storage i rzeczywiste snapshoty są dostępne; [dowody praw katalogowych](SOURCE_PERMISSION_REVIEW.md) obu źródeł zostały sprawdzone. Gate wymaga ich zapisu oraz rozstrzygnięcia danych dla konkretnego release; sam import nie przyznaje praw.
 
-Next.js z loginem readera zwrócił HTTP 200 i pusty katalog Dev bez fallbacku do fixture. Ten wynik potwierdza odczyt aplikacyjny; nie oznacza publikacji rakiet. Testy HTTP obu prywatnych bucketów potwierdziły zapis/odczyt z SHA-256, idempotentny replay, odmowę dostępu bez klucza i dla anonimowego klienta oraz usunięcie własnego obiektu testowego. Bieżący stan: [raport importu](SOURCE_IMPORT_RESULTS_2026_10_14.md); wynik początkowego etapu pozostaje w [SPRINT_01_RESULTS](SPRINT_01_RESULTS.md).
+Pierwsza próba Next.js z loginem readera zwróciła HTTP 200 i pusty katalog Dev bez fallbacku do fixture. Potwierdziła odczyt aplikacyjny, nie publikację rakiet. Web zawsze czyta wyłącznie aktywny release; bieżący stan publikacji i jego sprawdzenia opisuje [raport przeglądu](SOURCE_REVIEW_RESULTS_2026_10_14.md). Testy HTTP obu prywatnych bucketów potwierdziły zapis/odczyt z SHA-256, idempotentny replay, odmowę dostępu bez klucza i dla anonimowego klienta oraz usunięcie własnego obiektu testowego. Wyniki wcześniejszych etapów pozostają w [raporcie importu](SOURCE_IMPORT_RESULTS_2026_10_14.md) i [SPRINT_01_RESULTS](SPRINT_01_RESULTS.md).
 
 ### Role i credentials
 
@@ -128,7 +128,17 @@ npm run worker -- release --runs RUN_ID_PADELTRUE,RUN_ID_PADELHOW --target dev
 npm run worker -- gate --release RELEASE_ID --target dev
 ```
 
-Zgodę źródła i jej rzeczywisty zakres należy wcześniej udokumentować kontrolowaną operacją DB; CLI nie ma polecenia nadawania zgody. Syntetyczna zgoda z lokalnego `demo` nie uprawnia do importowania prawdziwych katalogów. Niekompletne snapshoty, błędy, niepewne dopasowania i niezaakceptowane review blokują release. Review to obecnie audytowana operacja DB, bez panelu admina; nie zmieniaj historycznych rekordów, aby ominąć gate.
+Zgodę źródła i jej rzeczywisty zakres zapisuje kontrolowana funkcja DB `setSourcePermission`; CLI nie ma polecenia nadawania zgody. Dla obecnego katalogu istnieje pisemna zgoda padel.how oraz potwierdzona licencja PadelTrue — nie wymagają ponownego pytania właściciela. Prywatny manifest `.local/adjudication/source-permissions.json` zawiera `decisions[].permission` z referencją i zakresem; nie jest częścią świeżego klonu. Korespondencja pozostaje prywatna. Syntetyczna zgoda z lokalnego `demo` nie uprawnia do używania prawdziwych katalogów. Niekompletne snapshoty, błędy, niepewne dopasowania i niezaakceptowane review nadal blokują release.
+
+### Przegląd pojedynczych rekordów i ponowne przetwarzanie
+
+Pierwotne 320 pozycji kolejki przejrzano na podstawie źródeł: 48 zakwalifikowano do korekt normalizacji, a 272 do zachowania z opisanym ograniczeniem. Nie oznacza to 320 nowych produktów ani niezależnej weryfikacji każdego twierdzenia źródłowego. Nieznanego roku lub konfiguracji nie uzupełnia się domysłem; jawna akceptacja ograniczenia może zachować `null` i odrębną tożsamość.
+
+Review pozostaje kontrolowaną operacją DB bez panelu admina i bez osobnego polecenia CLI. [`applySourceReview`](../../packages/database/src/review.ts) przyjmuje konkretny run/result, external ID, oczekiwany stan dopasowania, SHA-256 snapshotu, osobę przeglądającą, uzasadnienie i dowody `{sourceUrl, snapshotSha256, path, finding}`; zmiana tożsamości wymaga jawnego `identity`. Funkcja w transakcji sprawdza zgodność celu i głównego dowodu, odrzuca nieaktualny zapis oraz run przypięty do zatwierdzonego release. Zachowuje surowe i znormalizowane obserwacje, zapisując rozstrzygnięcie w kolejce i zdarzenie audytu. Dokładne powtórzenie tej samej decyzji jest idempotentne.
+
+Korekta parsera/normalizatora wymaga nowej wersji i ponownego `import --stage` tych samych, niezmienionych bajtów. Wersja `1.2.0` tworzy własne wyniki; historia `1.1.0` pozostaje. Po pełnym przetworzeniu tego samego snapshotu `supersedeReviewedRun` może wycofać wyłącznie wcześniejszy niezatwierdzony run, wskazując jego następcę. Migracja chroni stan `superseded`: stary run nie może wrócić do przetwarzania ani przejść publikacji, a jego zamknięte pozycje mają dyspozycję `superseded_interpretation`. Nie jest to akceptacja wszystkich wyników następcy. Każdy jego wyjątek nadal wymaga własnego rozstrzygnięcia, a nowy draft pełnej oceny gate.
+
+Prywatne plany i dowody przeglądu są w `.local/adjudication/`; nie publikuj ich wraz ze źródłami. Wynik zastosowania decyzji, ponownego przetwarzania Dev i ewentualnej aktywacji znajduje się w [bieżącym raporcie](SOURCE_REVIEW_RESULTS_2026_10_14.md). Nie zamieniaj tych kroków na masowe ustawienie statusów kolejki.
 
 Po rzeczywistym przeglądzie liczebności, wyjątków, tożsamości modeli, pochodzenia i diffu:
 
@@ -190,7 +200,7 @@ npm run knowledge -- stage-reviews --catalogue sources/rackets.json --target dev
 
 `stage-reviews` obejmuje wszystkie wcześniej pobrane pliki recenzji w prywatnym cache, maksymalnie 30. Staging zapisuje oryginały w `review-originals`, a w `knowledge_assets` / `knowledge_documents` wyłącznie niezmienne manifesty: lokalizacje, granice dokumentów, hashe i powiązania. Nie zapisuje pełnych artykułów w tabelach ani nie udostępnia manifestów readerowi weba. Replay jest idempotentny; zmieniona interpretacja wymaga nowej wersji parsera. Stan pozostaje `private_staging_unreviewed` i nie nadaje praw źródłu ani nie aktywuje katalogu.
 
-Wykonany staging wiedzy obejmuje 31 zasobów / 618 dokumentów: dwa pliki LLM oraz 29 szczegółowych JSON-ów. Szczegóły dostarczyły 29 werdyktów, 137 odpowiedzi FAQ i 93 odnośniki porównań. Są to wyniki przetworzenia źródła, nie dowód poprawności wszystkich twierdzeń. [Bieżący raport](SOURCE_IMPORT_RESULTS_2026_10_14.md) oddziela tę część od importu katalogów i decyzji release.
+Wykonany staging wiedzy obejmuje 31 zasobów / 618 dokumentów: dwa pliki LLM oraz 29 szczegółowych JSON-ów. Szczegóły dostarczyły 29 werdyktów, 137 odpowiedzi FAQ i 93 odnośniki porównań. Są to wyniki przetworzenia źródła, nie dowód poprawności wszystkich twierdzeń. [Raport tego importu](SOURCE_IMPORT_RESULTS_2026_10_14.md) oddziela tę część od katalogu; aktualny wynik przeglądu i release wskazuje [nowszy raport](SOURCE_REVIEW_RESULTS_2026_10_14.md).
 
 Lokalna baza, lock i Storage wiedzy znajdują się w `.local/knowledge`, oddzielnie od `.local/worker`. Nie używaj jednego katalogu PGlite w równoległych procesach. Przy backupie zachowaj bazę, cache, metadane i oryginały. Nie publikuj tych plików w Git, logach ani artefaktach CI.
 
@@ -203,7 +213,7 @@ npm test
 npm run build
 ```
 
-Łączny skrót to `npm run check`. Vitest obejmuje domenę, konfigurację/workera, profilowane formaty źródeł na wymyślonych rekordach, prywatne manifesty wiedzy i rzeczywiste SQL w izolowanym PGlite. Sam zestaw lokalny nie potwierdza sieciowego połączenia z Supabase ani aktualnego stanu HTTP Storage. Wykonane kontrole chmury i pełnych prywatnych plików mają osobne wyniki w [raporcie importu](SOURCE_IMPORT_RESULTS_2026_10_14.md). Mapa ING-001–ING-032: [TEST_COVERAGE](TEST_COVERAGE.md).
+Łączny skrót to `npm run check`. Vitest obejmuje domenę, konfigurację/workera, profilowane formaty źródeł na wymyślonych rekordach, prywatne manifesty wiedzy, rozstrzyganie rekordów i ochronę zastąpionych runów w rzeczywistym SQL izolowanego PGlite. Sam zestaw lokalny nie potwierdza sieciowego połączenia z Supabase ani aktualnego stanu HTTP Storage. Wykonane kontrole chmury i pełnych prywatnych plików mają osobne wyniki w [bieżącym raporcie przeglądu](SOURCE_REVIEW_RESULTS_2026_10_14.md). Mapa ING-001–ING-032: [TEST_COVERAGE](TEST_COVERAGE.md).
 
 Testy przeglądarki uruchamiają własny serwer fixture na porcie 3100; port musi być wolny. Domyślnie wymagają zainstalowanego Microsoft Edge:
 

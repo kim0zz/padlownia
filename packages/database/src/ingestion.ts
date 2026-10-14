@@ -120,6 +120,7 @@ export async function stageImport(db: SqlExecutor, input: StageImportInput): Pro
     const created = await tx.query<{ id: string }>(`insert into padlownia.ingestion_runs(source_id,snapshot_id,parser_version,normalizer_version,matching_version,idempotency_key,declared_count,actual_count)
       values($1,$2,$3,$4,$5,$6,$7,$8) on conflict(idempotency_key) do nothing returning id`, [source,snapshotId,input.parserVersion,input.normalizerVersion,MATCH_RULE_VERSION,key,input.declaredCount,input.actualCount]);
     const run = (await tx.query<{ id: string; status: string }>("select id,status from padlownia.ingestion_runs where idempotency_key=$1", [key])).rows[0]!;
+    if (run.status === "superseded") throw new Error("SUPERSEDED_RUN_REPROCESS_FORBIDDEN");
     if (created.rows.length) {
       await tx.query("insert into padlownia.run_events(run_id,stage,code) values($1,'staging','IMPORT_STARTED')", [run.id]);
       for (const issue of input.issues ?? []) {

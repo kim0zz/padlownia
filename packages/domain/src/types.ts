@@ -1,6 +1,6 @@
 export const CONTRACT_VERSION = "1.0.0";
-export const PARSER_VERSION = "1.1.0";
-export const NORMALIZER_VERSION = "1.1.0";
+export const PARSER_VERSION = "1.2.0";
+export const NORMALIZER_VERSION = "1.2.0";
 export const MATCH_RULE_VERSION = "exact-identity-v1";
 
 export type SourceCode = "padeltrue" | "padelhow";

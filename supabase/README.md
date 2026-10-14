@@ -18,18 +18,19 @@ Every application table has RLS enabled. Anonymous/authenticated clients receive
 - Raw rows are keyed by snapshot and input index, preserving duplicate upstream IDs as evidence. Duplicate IDs block a complete release. A record-processing result is scoped to an ingestion run, so a parser version change preserves prior outputs while reusing the same snapshot/raw rows.
 - A run idempotency key includes source, snapshot SHA-256, parser, normalizer and matching rule versions. Each row is committed independently. A failed SQL transaction leaves earlier rows available, marks the run retryable, and replay resumes without duplicate observations.
 - Drafts can be rebuilt after an explicit review. Approval pins the exact run set; inserts into pinned results/evidence/matches and edits to published projections are blocked. Source data and observations are append-only.
+- Evidence review requires an exact snapshot/result target, source pointers, reviewer and rationale. Missing facts remain unknown. Unpublished interpretations can be retired in favor of a complete versioned successor of the same snapshot; their audit outputs remain, and their runs cannot publish or replay. Approval, activation and retirement use compatible run locks. Retirement alone does not approve the successor.
 - The gate rejects incomplete counts, duplicate IDs, invalid/unreviewed records, unaccepted identities, missing rights, unverified storage, omitted active sources, unbacked values and ineligible specimen/opinion values. Initial policy is conservative blocking, not an invented statistical accuracy threshold.
 - The diff includes selected physical fields, all source observations, ratings and attribution, ignoring generated IDs and retrieval timestamps. Ratings stay in their source-specific scales and methodologies.
 - Rollback requires a previously published release, expected-current-pointer check and current rights/evidence validity. It may return to an earlier catalogue predating an added source. Permission withdrawal makes the reader fail closed for the affected active release, pending an explicitly reviewed compliant successor.
 
 ## Migration history and runtime provisioning
 
-The seven schema migration filenames use the exact versions/names returned by the
+The nine schema migration filenames use the exact versions/names returned by the
 confirmed Dev management API. Two additional **history-only marker migrations**
 (`20261014052903` and `20261014053339`) represent environment-specific encrypted
 runtime credential provisioning and removal of its temporary handoff table.
 Their original SQL is intentionally not replayed or committed. Thus the version
-list matches Dev; SQL-content parity is claimed only for the seven schema migrations,
+list matches Dev; SQL-content parity is claimed only for the nine schema migrations,
 not the two explicitly labelled operational markers. Replaying this repository
 creates the schema and NOLOGIN runtime roles, never copies Dev passwords or its
 project identity marker into another database.
@@ -65,4 +66,4 @@ embeddings or claim extraction is enabled by this schema.
 
 Reviewed claim/chunk/embedding tables, source deletion orchestration and object garbage collection are deferred. No vector extension is required before vector retrieval exists. Human exception adjudication currently uses audited database records; an admin review UI is outside Sprint 01. A pending or invalid record cannot be bypassed just by approving a release.
 
-The development Supabase security advisor reported no security findings after all seven schema migrations, including private knowledge staging. All 21 application tables have RLS enabled. Supporting foreign-key indexes address the non-singleton join paths identified by the earlier performance advisor. The active-release foreign-key index advisory is intentionally left for the one-row `catalog_state` table. Unused-index notices on a newly empty database do not establish that an ingestion/evidence index should be removed; recheck after representative imports.
+The development Supabase security advisor reported no security findings after all nine schema migrations, including private knowledge staging and serialized import supersession. All 21 application tables have RLS enabled. Supporting foreign-key indexes address the non-singleton join paths identified by the earlier performance advisor. The active-release foreign-key index advisory is intentionally left for the one-row `catalog_state` table. Unused-index notices alone do not establish that an ingestion/evidence index should be removed; recheck after representative usage.

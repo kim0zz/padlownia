@@ -1,5 +1,7 @@
 # Rzeczywiste źródła — raport wykonania 2026-10-14
 
+> Raport historyczny pierwszego importu. Późniejszy audyt 320 wyjątków, potwierdzone prawa i aktualny stan wydania opisuje [raport rozstrzygnięć](SOURCE_REVIEW_RESULTS_2026_10_14.md). Poniższe blokady dotyczą stanu sprzed tego audytu.
+
 Kontynuacja Sprintu 01 po dostarczeniu plików przez właściciela. Ten raport zastępuje wcześniejsze blokady braku plików i dostępu do Storage z [pierwszego raportu](SPRINT_01_RESULTS.md), zachowując go jako historię. Nie oznacza ukończenia publikacji katalogu.
 
 **Wynik:** oba pełne katalogi są w prywatnym stagingu potwierdzonego Supabase Dev. Przeanalizowano oba pliki LLM, zachowano oryginały i uzupełniono 29 recenzji przez bezpośrednie JSON-y. Aplikacja łączy się z Dev; opublikowany katalog pozostaje pusty, ponieważ zgody źródłowe i wyjątki danych nie zostały zatwierdzone. Gate nie został ominięty.

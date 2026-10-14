@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeObservation, type ObservationInput } from "../../packages/domain/src/index.js";
+import { normalizeObservation, selectProjection, type ObservationInput } from "../../packages/domain/src/index.js";
 
 const observation = (key: string, rawValue: string | number | null, context: ObservationInput["context"] = {}): ObservationInput => ({ key, rawValue, rawSourcePath: `/specs/${key}`, kind: "unknown", context, attribution: null });
 
@@ -53,5 +53,43 @@ describe("deterministic normalization", () => {
     expect(normalizeObservation(observation("weight", "Men 350-370 g; Women 330-350"))).toMatchObject({ numericValue: null, status: "invalid" });
     expect(normalizeObservation(observation("core", "Not specified"))).toMatchObject({ normalizedText: null, status: "unknown" });
     expect(normalizeObservation(observation("player_level", "junior"))).toMatchObject({ normalizedText: null, status: "invalid" });
+  });
+  it.each([
+    ["Head-heavy; ≈27.0 cm", 27, 27, "head-heavy"],
+    ["Medium-low (~25.8-26.1 cm from handle end)", 25.8, 26.1, "medium-low"],
+    ["Medium-high (~265–270 mm, head-oriented mass distribution)", 26.5, 27, "medium-high"],
+    ["Medium, approximately 25.7–26.0 cm from handle base", 25.7, 26, "medium"],
+    ["High (≈ 27.0–27.2 cm)", 27, 27.2, "high"],
+    ["Medium / 260 mm", 26, 26, "medium"],
+    ["Medium to medium-high (~25.8–26.1 cm)", 25.8, 26.1, "medium to medium-high"],
+  ])("preserves qualitative context while parsing one explicitly referenced balance: %s", (raw,min,max,qualitative) => {
+    const result = normalizeObservation(observation("balance",raw,{ unit: "cm",referencePoint: "butt" }));
+    expect(result).toMatchObject({ rawValue: raw,valueMin: min,valueMax: max,unit: "cm",status: "valid",context: { qualitativeBalance: qualitative } });
+  });
+  it("validates equivalent units instead of silently choosing one", () => {
+    expect(normalizeObservation(observation("balance","250 mm / 25.0 cm (low to medium, head-light)",{ referencePoint: "butt" })))
+      .toMatchObject({ numericValue: 25,unit: "cm",status: "valid",context: { alternativeUnitRepresentation: "25.0 cm" } });
+    expect(normalizeObservation(observation("balance","250 mm / 27.0 cm",{ referencePoint: "butt" })))
+      .toMatchObject({ numericValue: null,status: "unknown",issues: [{ code: "inconsistent_unit_representations",path: "/specs/balance",severity: "warning" }] });
+  });
+  it("parses harmless standard-profile and approximate notation without dropping original text", () => {
+    expect(normalizeObservation(observation("thickness","38 mm (standard profile)")))
+      .toMatchObject({ rawValue: "38 mm (standard profile)",numericValue: 38,unit: "mm",status: "valid",context: { sourceQualifier: "standard profile" } });
+    expect(normalizeObservation(observation("balance","approximately ~25.4–25.8",{ unit: "cm",referencePoint: "butt" })))
+      .toMatchObject({ valueMin: 25.4,valueMax: 25.8,status: "valid",context: { approximate: true } });
+  });
+  it("retains setup-specific numbers as secondary evidence, excluded from canonical selection", () => {
+    for (const [key,raw] of [["weight","~350–360 g with single overgrip application"],["weight","312 g without grip/runner"],["balance","~26.0–26.7 cm depending on overgrips and weights"]]) {
+      const normalized = normalizeObservation(observation(key!,raw!,{ referencePoint: "butt" }));
+      expect(normalized.status).toBe("valid");
+      expect(selectProjection([{ ...normalized,id: "synthetic-observation",source: "padelhow",sourceUrl: "https://example.com/review",externalId: "synthetic" }]).selected).toEqual({});
+    }
+  });
+  it("still refuses multiple or contradictory numeric claims and unexplained prose", () => {
+    for (const raw of ["355 g +/- 10 g EN; 360 g +/-10 g localized pages","Men 355-375 g; Women 345-355","Field testing indicates 360 g without overgrip, 365–370 g playing weight","±360","370 g secret instructions"]) {
+      const normalized = normalizeObservation(observation("weight",raw,{ unit: "g" }));
+      expect(normalized.status).not.toBe("valid"); expect(normalized.numericValue).toBeNull(); expect(normalized.valueMin).toBeNull();
+    }
+    expect(normalizeObservation(observation("balance","High (27 cm)"))).toMatchObject({ status: "unknown",numericValue: null });
   });
 });

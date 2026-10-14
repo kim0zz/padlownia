@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Arrow, ModeNotice, RacketCard, Unavailable } from '../components/catalogue';
+import { Arrow, ModeNotice, RacketCard, SourceLicenceNotice, Unavailable } from '../components/catalogue';
 import { catalogueUrl, filterCatalogue, PAGE_SIZE, parseFilters, shapeLabels, type SearchParams } from '../lib/catalogue';
 import { getCatalogue } from '../lib/catalogue-server';
 
@@ -40,6 +40,7 @@ export default async function CataloguePage({ searchParams }: { searchParams: Pr
           : <div className="empty-state"><h3>{entries.length ? 'Tym razem bez wyników.' : 'Pierwsza publikacja jeszcze przed nami.'}</h3><p>{entries.length ? 'Spróbuj krótszej nazwy, innego rocznika albo wyczyść filtry.' : 'Po zatwierdzeniu importu pojawią się tu rakiety z aktywnej wersji katalogu.'}</p>{active && <Link className="button button-secondary" href="/">Pokaż cały katalog <Arrow /></Link>}</div>}
         {pages > 1 && <nav className="pagination" aria-label="Strony wyników">{page > 1 && <Link className="button button-secondary" href={catalogueUrl(filters, page - 1)}><Arrow direction="left" /> Poprzednia</Link>}<span>Strona {page} z {pages}</span>{page < pages && <Link className="button button-secondary" href={catalogueUrl(filters, page + 1)}>Następna <Arrow /></Link>}</nav>}
       </section>
+      <SourceLicenceNotice entries={visible} />
       <aside className="evidence-explainer"><span className="explainer-symbol" aria-hidden="true">i</span><div><h2>Każdy parametr ma swoją historię.</h2><p>Dane producenta i pomiar konkretnego egzemplarza mogą się różnić. W profilu pokazujemy źródła, rozbieżności i brakujące informacje.</p></div><span className="explainer-tag">ŹRÓDŁA, NIE DOMYSŁY</span></aside>
     </>}
   </main>;

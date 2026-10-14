@@ -23,7 +23,7 @@ const parse = (record = row, definitions = envelope.fields) => parseSnapshot("pa
 describe("profiled padel.how flat schema — synthetic contract examples", () => {
   it("preserves source schema, dates, license and source-specific metadata without asserting rights", () => {
     const result = parse();
-    expect(result).toMatchObject({ parserVersion: "1.1.0", declaredCount: 1, actualCount: 1, recordErrors: [] });
+    expect(result).toMatchObject({ parserVersion: "1.2.0", declaredCount: 1, actualCount: 1, recordErrors: [] });
     expect(result.metadata).toMatchObject({ schema_version: "2026-08-23", generated: "2026-08-18", license: envelope.license, fields: envelope.fields });
     expect(result.records[0]!.metadata).toMatchObject({ retailers: row.retailers, feel: row.feel, play_style: ["control"], gender: "unisex", junior: false, handle_length_cm: "12" });
     expect(result.records[0]!.rawPayload).toEqual(row);
@@ -49,7 +49,7 @@ describe("profiled padel.how flat schema — synthetic contract examples", () =>
   });
   it("retains measured weights and demographic levels as separate evidence/problems", () => {
     const normalized = normalizeRecord(parse({ ...row, weight_g: "360 g (as tested, factory configuration)", player_level: "women", surface: "530 cm²" }).records[0]!);
-    expect(normalized.observations.find((x) => x.key === "weight")).toMatchObject({ kind: "measured_specimen", status: "unknown" });
+    expect(normalized.observations.find((x) => x.key === "weight")).toMatchObject({ kind: "measured_specimen", status: "valid", numericValue: 360, context: { sourceQualifier: "as tested, factory configuration" } });
     expect(normalized.observations.find((x) => x.key === "player_level")!.status).toBe("invalid");
     expect(normalized.observations.find((x) => x.key === "texture")!.issues[0]!.code).toBe("wrong_semantic_field");
     expect(normalized.status).toBe("needs_review");

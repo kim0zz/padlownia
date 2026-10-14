@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { catalogueUrl, claimLabel, filterCatalogue, formatWeight, parseFilters, rawText, safeSourceUrl } from '../../apps/web/lib/catalogue';
+import { catalogueUrl, claimLabel, filterCatalogue, formatWeight, methodologyCitation, parseFilters, rawText, safeSourceUrl } from '../../apps/web/lib/catalogue';
 import { fixtureCatalogue } from '../../apps/web/lib/fixtures';
 import { resolveCatalogueConfig } from '../../apps/web/lib/config';
 
@@ -35,6 +35,15 @@ describe('classic catalogue search and provenance presentation', () => {
   it('rejects executable source links and never links fake example domains', () => {
     for (const url of ['javascript:alert(1)', 'data:text/html,test', 'https://user:pass@example.com/x', 'https://example.invalid/x', 'not a URL']) expect(safeSourceUrl(url)).toBeNull();
     expect(safeSourceUrl('https://padel.how/rackets/test')).toBe('https://padel.how/rackets/test');
+  });
+  it('keeps methodology caveats visible without making untrusted protocols clickable', () => {
+    const note = 'Model uses a neutral default for missing balance.\nValue is unavailable in this currency.';
+    expect(methodologyCitation(`https://padeltrue.com/methodology\n${note}`)).toEqual({ url: 'https://padeltrue.com/methodology', note });
+    expect(methodologyCitation('https://padel.how/equipment/racket/methodology/')).toEqual({ url: 'https://padel.how/equipment/racket/methodology/', note: '' });
+    for (const raw of ['javascript:alert(1)', 'data:text/html,test', 'https://user:pass@example.com/methodology', 'https://example.invalid/methodology', 'Synthetic methodology']) {
+      expect(methodologyCitation(raw)).toEqual({ url: null, note: raw });
+    }
+    expect(methodologyCitation('')).toEqual({ url: null, note: '' });
   });
 });
 
