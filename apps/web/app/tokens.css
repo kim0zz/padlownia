@@ -1,0 +1,31 @@
+/* Shared foundation for catalogue, profile, comparison and structured views. */
+:root {
+  --ink: #142e32;
+  --muted: #536467;
+  --accent: #d2ef79;
+  --accent-hover: #c3e65c;
+  --paper: #f7f8f4;
+  --surface: #fff;
+  --line: #d8ded9;
+  --input-line: #83918c;
+  --soft: #edf1e9;
+  --warning: #714b18;
+  --warning-bg: #fff4de;
+  --focus: #336eaa;
+  --font-body: Arial, Helvetica, sans-serif;
+  --text-small: 0.8125rem;
+  --text-body: 1rem;
+  --text-large: 1.25rem;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --radius-small: 6px;
+  --radius: 12px;
+  --control-height: 48px;
+  --content-width: 1328px;
+  --motion-feedback: 150ms;
+}

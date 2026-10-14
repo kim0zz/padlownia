@@ -1,6 +1,11 @@
 import Link from 'next/link';
 import type { CatalogueEntry } from '@padlownia/database';
-import { claimLabel, formatDate, formatWeight, methodologyCitation, safeSourceUrl, shapeLabels } from '../lib/catalogue';
+import { claimLabel, formatWeight, shapeLabels } from '../lib/catalogue';
+import { SourceCitation } from './evidence';
+import { AddToComparison } from './comparison-selection';
+import { racketLabel } from '../lib/comparison';
+
+export { SourceCitation, RatingCitation, SourceLicenceNotice } from './evidence';
 
 export function Arrow({ direction = 'right' }: { direction?: 'left' | 'right' }) {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" className={direction === 'left' ? 'arrow-left' : ''}><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>;
@@ -22,31 +27,6 @@ export function Unavailable({ setup }: { setup: boolean }) {
   </section>;
 }
 
-export function SourceCitation({ evidence }: { evidence: CatalogueEntry['specs'][number]['evidence'] }) {
-  const href = safeSourceUrl(evidence.sourceUrl);
-  const attributionHref = safeSourceUrl(evidence.attribution?.url);
-  return <span className="source-citation">{href ? <a className="source-link" href={href} rel="noreferrer">{evidence.sourceName} <span aria-hidden="true">↗</span></a>
-    : <span className="source-label">{evidence.sourceName}</span>}
-    {attributionHref && attributionHref !== href && <a className="source-link attribution-link" href={attributionHref} rel="noreferrer">{evidence.attribution?.name ?? 'Źródło parametru'} <span aria-hidden="true">↗</span></a>}</span>;
-}
-
-export function RatingCitation({ rating }: { rating: CatalogueEntry['ratings'][number] }) {
-  const methodology = methodologyCitation(rating.methodology);
-  return <>
-    {methodology.url && <p><a className="source-link" href={methodology.url} rel="noreferrer">Metodologia ocen — {rating.evidence.sourceName}</a></p>}
-    {methodology.note ? <p>{methodology.note}</p> : !methodology.url && <p>Metodologia nie została podana.</p>}
-    <div className="observation-source"><SourceCitation evidence={rating.evidence} /><span>Pobrano {formatDate(rating.evidence.retrievedAt)}</span></div>
-  </>;
-}
-
-export function SourceLicenceNotice({ entries }: { entries: CatalogueEntry[] }) {
-  const hasPadelTrue = entries.some((entry) => [...entry.specs, ...entry.ratings].some((item) => item.evidence.sourceCode === 'padeltrue'));
-  if (!hasPadelTrue) return null;
-  return <aside className="source-licence" aria-label="Licencja danych PadelTrue">
-    <p>Dane <a href="https://padeltrue.com/" rel="noreferrer">PadelTrue</a> udostępniono na licencji <a href="https://creativecommons.org/licenses/by/4.0/" rel="noreferrer">CC BY 4.0</a>. Padłownia normalizuje nazwy, jednostki i strukturę danych; oryginalne obserwacje zachowują wskazanie źródła.</p>
-  </aside>;
-}
-
 export function SpecSummary({ entry, field }: { entry: CatalogueEntry; field: 'shape' | 'weight' }) {
   const source = entry.specs.find((spec) => spec.selected && (spec.key === field || (field === 'weight' && spec.key === 'weight_g')));
   const value = field === 'shape' ? (entry.shape ? shapeLabels[entry.shape] ?? entry.shape : 'Brak danych') : formatWeight(entry.weightMinG, entry.weightMaxG);
@@ -66,5 +46,6 @@ export function RacketCard({ entry, index }: { entry: CatalogueEntry; index: num
     <div className="card-bottom">{hasConflict ? <span className="conflict-label">Rozbieżne źródła</span> : <span className="muted">Parametry ze źródłami</span>}
       <Link className="profile-link" href={`/rakiety/${encodeURIComponent(entry.id)}`} aria-label={`Zobacz profil ${entry.brand} ${entry.model} ${entry.variant ?? ''} ${entry.modelYear ?? 'rok nieznany'}`}><Arrow /></Link>
     </div>
+    <AddToComparison id={entry.id} releaseId={entry.releaseId} label={racketLabel(entry)} />
   </article>;
 }

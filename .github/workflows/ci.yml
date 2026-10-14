@@ -1,4 +1,4 @@
-name: Sprint 01 checks
+name: Project checks
 
 on:
   push:

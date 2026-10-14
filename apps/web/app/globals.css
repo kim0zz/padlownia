@@ -1,19 +1,6 @@
 :root {
   color-scheme: light;
-  --ink: #142e32;
-  --muted: #536467;
-  --accent: #d2ef79;
-  --accent-hover: #c3e65c;
-  --paper: #f7f8f4;
-  --surface: #fff;
-  --line: #d8ded9;
-  --input-line: #83918c;
-  --soft: #edf1e9;
-  --warning: #714b18;
-  --warning-bg: #fff4de;
-  --focus: #336eaa;
-  --radius: 12px;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
   font-size: 16px;
   color: var(--ink);
   background: var(--paper);
@@ -26,7 +13,7 @@ button, a, select { touch-action: manipulation; }
 button, select, summary { cursor: pointer; }
 a { color: inherit; text-underline-offset: 4px; }
 button, a, input, select, summary { -webkit-tap-highlight-color: transparent; }
-a, button { transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease; }
+a, button { transition: color var(--motion-feedback) ease, background-color var(--motion-feedback) ease, border-color var(--motion-feedback) ease; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
 h1, h2, h3, p { margin-top: 0; }
 h1, h2, h3 { line-height: 1.12; }

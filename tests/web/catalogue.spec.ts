@@ -3,7 +3,7 @@ import AxeBuilder from '@axe-core/playwright';
 
 test('catalogue exposes fixture state, exact profiles and keyboard navigation', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText('Dane demonstracyjne.', { exact: true })).toBeVisible();
+  await expect(page.getByRole('complementary', { name: 'Pochodzenie danych' }).getByText('Dane demonstracyjne.', { exact: true })).toBeVisible();
   await expect(page.locator('.racket-card')).toHaveCount(6);
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Przejdź do treści' })).toBeFocused();
@@ -14,7 +14,7 @@ test('catalogue exposes fixture state, exact profiles and keyboard navigation', 
   await expect(page).toHaveURL(/q=orbit\+control/);
   await expect(page.locator('.racket-card')).toHaveCount(1);
   await page.getByRole('link', { name: 'Zobacz profil TESTLAB Orbit Control 2026' }).click();
-  await expect(page.getByRole('heading', { name: 'Orbit', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Orbit', exact: true, level: 1 })).toBeVisible();
   await expect(page.getByText('Pomiar egzemplarza', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('372 g with one overgrip', { exact: true })).toBeVisible();
   await expect(page.getByText('360–370 g', { exact: true })).toBeVisible();
@@ -42,7 +42,7 @@ test('desktop and mobile screenshots, no horizontal overflow, WCAG AA automated 
   await expect(page.locator('.racket-card')).toHaveCount(6);
   // Streamed Next.js content can exist in a hidden boundary before it is shown.
   await expect(page.locator('.racket-card').first()).toBeVisible();
-  await expect(page.getByText('Dane demonstracyjne.', { exact: true })).toBeVisible();
+  await expect(page.getByRole('complementary', { name: 'Pochodzenie danych' }).getByText('Dane demonstracyjne.', { exact: true })).toBeVisible();
   await page.screenshot({ path: 'docs/design/screenshots/catalogue-desktop.png', fullPage: true, caret: 'initial' });
   expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()).violations).toEqual([]);
   await page.goto('/rakiety/fixture-orbit-control-2026');

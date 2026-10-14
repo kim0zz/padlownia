@@ -1,6 +1,6 @@
 # Padłownia — katalog rakiet do padla
 
-Polski katalog z wyszukiwaniem, profilami dokładnego wariantu i rocznika oraz pochodzeniem parametrów i ocen. Sprint 01 dostarcza aplikację Next.js, osobny worker TypeScript, wspólne kontrakty danych i wersjonowany pipeline ingestion. Chat AI i porównywarka są kolejnymi etapami.
+Polski katalog z wyszukiwaniem, profilami dokładnego wariantu i rocznika oraz pochodzeniem parametrów i ocen. Sprint 01 dostarczył aplikację Next.js, osobny worker TypeScript i wersjonowany pipeline ingestion. Sprint 02 dodaje klasyczną porównywarkę dwóch rakiet, wspólne komponenty i tokeny oraz walidowany kontrakt widoku. Chat AI pozostaje kolejnym etapem; obecne funkcje nie wykonują wywołań LLM.
 
 ## Uruchomienie bez sekretów
 
@@ -35,6 +35,16 @@ npm run worker -- catalogue
 
 `demo` zapisuje syntetyczny snapshot, wykonuje staging, walidację i publikację w lokalnym PostgreSQL PGlite w `.local/worker`. Nie łączy się z chmurą. Fixture UI i lokalny dataset workera są oddzielnymi demonstracjami; serwer aplikacji czyta opublikowane dane dopiero w trybie `supabase`.
 
+## Porównywarka i wspólne UI
+
+Na karcie katalogu lub w profilu wybierz „Dodaj do porównania”. Można wybrać maksymalnie dwie różne rakiety; przed dodaniem trzeciej usuń jedną z pary. [Porównywarka](http://127.0.0.1:3000/porownaj) pozwala też wybrać oba dokładne modele, warianty i roczniki w formularzu. Zestawienie zachowuje braki, rozbieżności, obserwacje egzemplarza i odrębne skale ocen źródeł; nie wylicza zbiorczej punktacji.
+
+Odnośnik `/porownaj?left=ID&right=ID&release=RELEASE_ID` przypina parę do jednego wydania. Dane są odczytywane z aktualnie opublikowanego katalogu; starsze wydanie wymaga jawnego „Porównaj w aktualnej wersji”. Nie następuje cicha podmiana danych. Wybór przetrwa przejście przez profil, wyszukiwanie i odświeżenie w tej samej karcie dzięki `sessionStorage`, które przechowuje tylko ID, release i etykiety do wyświetlenia. Fakty i pochodzenie zawsze pochodzą z ponownie zweryfikowanego odczytu. Poprawny jawny URL kompletnej pary ma pierwszeństwo nad starszą sesją; po wyczyszczeniu koszyka otwarty widok nie dodaje sam pary ponownie.
+
+[Galeria komponentów](http://127.0.0.1:3000/komponenty) pokazuje syntetyczne parametry, pomiary, konflikty, skale ocen i stany braków/błędu. Działa na fixture także wtedy, gdy katalog czyta Supabase. Zawiera przykład `racket_specs` przez ten sam renderer, którego klasyczna porównywarka używa dla `racket_comparison`. Kontrakt v1 obsługuje również `racket_card`; przyjmuje wyłącznie referencje ID i `datasetVersion`, bez dostarczonych przez model wartości, HTML czy cytowań. Nie uruchamia to chatu, modelu ani płatnego API.
+
+Zakres i wybory techniczne: [brief Sprintu 02](docs/development/SPRINT_02_BRIEF.md), [ADR-005](docs/adr/005-comparison-and-structured-view-contract.md), [projekt wspólnego UI](docs/design/SPRINT_02_DESIGN.md). [Raport wyników Sprintu 02](docs/development/SPRINT_02_RESULTS.md) dokumentuje zaliczone 366 testów Vitest, 10 testów przeglądarkowych oraz 11 oddzielnych sprawdzeń bieżącego Supabase Dev.
+
 ## Supabase Dev i źródła
 
 Właściciel potwierdził projekt **padlownia**, ref `kfdegaowpanatofnqvpy`, jako wyłącznie developerski. Zastosowano wersjonowany schemat, prywatne buckety `source-snapshots` i `review-originals` oraz dedykowane loginy aplikacji/workera. Zweryfikowano połączenie DB przez ograniczone role i TLS oraz rzeczywisty zapis, odczyt z kontrolą SHA-256, replay i odmowę publicznego dostępu do obu bucketów. Instrukcje połączenia, importu, release gate, backupu i resetu: [SETUP](docs/development/SETUP.md).
@@ -62,7 +72,7 @@ npm run test:e2e
 
 | Katalog | Odpowiedzialność |
 |---|---|
-| `apps/web` | Next.js App Router, wyszukiwanie i profile; odczyt DB wyłącznie po stronie serwera |
+| `apps/web` | Next.js App Router, katalog, profile, porównania, galeria fixture i wspólny kontrakt widoku; odczyt DB wyłącznie po stronie serwera |
 | `apps/worker` | CLI: profilowanie plików, prywatne snapshoty, staging i jawne operacje publikacji |
 | `packages/domain` | Kontrakty, connectory, normalizacja, Entity Resolution i wybór parametrów |
 | `packages/database` | PostgreSQL, read model, release gate, lokalny PGlite |
@@ -73,6 +83,7 @@ npm run test:e2e
 
 - [Decyzje produktowe](docs/product/DECISIONS.md), [produkt](docs/product/PRODUCT.md) i [MVP](docs/product/MVP.md).
 - [Sprint 01](docs/development/SPRINT_01_BRIEF.md) i [techniczne decyzje implementacji](docs/adr/002-sprint-01-implementation.md).
+- [Sprint 02](docs/development/SPRINT_02_BRIEF.md), [kontrakt porównania](docs/adr/005-comparison-and-structured-view-contract.md) i [wspólny UI](docs/design/SPRINT_02_DESIGN.md).
 - [Proponowana architektura całości](docs/architecture/OVERVIEW.md), [model danych](docs/architecture/DATA_MODEL_V0_1.md) i [kontrakty ingestion](docs/architecture/INGESTION_DESIGN_V0_1.md).
 - [Rzeczywisty kontrakt connectorów](packages/domain/README.md), [operacje bazodanowe](supabase/README.md), [projekt UI](docs/design/SPRINT_01_DESIGN.md) i [AGENTS.md](AGENTS.md).
 
