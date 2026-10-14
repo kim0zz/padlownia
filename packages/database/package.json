@@ -1,0 +1,16 @@
+{
+  "name": "@padlownia/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./catalogue": "./src/catalogue.ts",
+    "./executor": "./src/executor.ts"
+  },
+  "dependencies": {
+    "@padlownia/domain": "*",
+    "@electric-sql/pglite": "0.5.9",
+    "pg": "^8.16.3"
+  }
+}

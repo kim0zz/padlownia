@@ -1,0 +1,33 @@
+{
+  "count": 2,
+  "metadata": {
+    "fixture_id": "padelhow-detailed-v1",
+    "fixture_license": "CC0-1.0; entirely synthetic test data, not a copied catalogue",
+    "methodology": "synthetic-editorial-v1"
+  },
+  "rackets": [
+    {
+      "slug": "synthetic-radian-control-pro-2026",
+      "brand": "Radian",
+      "name": "Control Pro",
+      "year": 2026,
+      "url": "https://example.com/padelhow/radian-control-pro-2026",
+      "markdown_url": "https://example.com/padelhow/control-pro.md",
+      "json_url": "https://example.com/padelhow/control-pro.json",
+      "image": "https://example.com/images/control-pro.jpg",
+      "characteristics": { "weight_g": "365–375 g (without overgrip)", "shape": "round", "balance_cm": "~26.5", "thickness_mm": "38 mm", "player_level": "advanced", "surface": "12K carbon" },
+      "overall_score": 85,
+      "ratings": { "power": 8, "control": 9, "maneuverability": 8, "comfort": 8, "sweet_spot": 9, "spin": 7, "defense": 9, "attack": 8, "volleys": 8, "lobs": 9 },
+      "offers": [{ "url": "https://example.com/shop/control-pro", "price": 170, "currency": "GBP", "observed_at": "2026-10-01" }]
+    },
+    {
+      "slug": "synthetic-radian-women-2026",
+      "brand": "Radian",
+      "name": "Control Women",
+      "year": 2026,
+      "url": "https://example.com/padelhow/control-women-2026",
+      "characteristics": { "weight_g": "350 g", "player_level": "women", "surface": "~530 cm²" },
+      "ratings": { "power": 7 }
+    }
+  ]
+}
