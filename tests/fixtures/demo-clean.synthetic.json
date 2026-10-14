@@ -1,0 +1,8 @@
+{
+  "count": 2,
+  "metadata": { "fixture_id": "clean-local-demo-v1", "fixture_license": "CC0-1.0; entirely synthetic, not a source catalogue", "methodology": "synthetic-technical-rules-v1", "rating_scale": { "min": 0, "max": 100 } },
+  "rackets": [
+    { "id": "synthetic-control-2026", "brand": "Radian", "name": "Control Pro", "year": 2026, "url": "https://example.com/synthetic/control-pro-2026", "specs": { "shape": "round", "weight": "360–370 g", "core": "EVA medium", "surface": "12K carbon", "balance": "265 mm from handle base" }, "scores": { "control": 80, "power": 70 } },
+    { "id": "synthetic-attack-2026", "brand": "Radian", "name": "Attack Lite", "year": 2026, "url": "https://example.com/synthetic/attack-lite-2026", "specs": { "shape": "diamond", "weight": "350–360 g", "balance": "head-heavy" }, "scores": { "control": 70, "power": 80 } }
+  ]
+}

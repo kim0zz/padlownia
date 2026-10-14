@@ -1,0 +1,8 @@
+-- HISTORY-ONLY MARKER: this version was applied to the confirmed development
+-- project during environment-specific credential provisioning on 2026-10-14.
+-- Its original SQL generated separate random runtime passwords server-side,
+-- enabled LOGIN and temporarily stored PGP-encrypted handoff envelopes.
+-- This file intentionally does NOT reproduce that operational SQL or credentials.
+-- Fresh databases retain NOLOGIN roles until separately provisioned securely.
+-- Version-list parity is intentional; SQL-content parity is not claimed for
+-- this marker. See supabase/README.md, Migration history and runtime provisioning.

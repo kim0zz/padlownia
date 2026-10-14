@@ -1,0 +1,36 @@
+{
+  "count": 2,
+  "metadata": {
+    "fixture_id": "padeltrue-structured-v1",
+    "fixture_license": "CC0-1.0; entirely synthetic test data, not a copied catalogue",
+    "methodology": "synthetic-technical-rules-v1",
+    "rating_scale": { "min": 0, "max": 100 }
+  },
+  "rackets": [
+    {
+      "id": "synthetic-radian-control-2026",
+      "brand": "Radian",
+      "name": "Control Pro",
+      "year": 2026,
+      "url": "https://example.com/padeltrue/radian-control-pro-2026",
+      "specs": {
+        "weight": { "value": "365 ± 5 g", "source": { "type": "manufacturer", "name": "Radian", "url": "https://example.com/manufacturer/control-pro-2026", "verified": true } },
+        "shape": { "value": "round", "source": { "type": "retailer", "name": "Example retailer", "url": "https://example.com/shop/control-pro" } },
+        "balance": "265 mm from handle base",
+        "core": "EVA medium",
+        "surface": "12K carbon"
+      },
+      "scores": { "power": 78, "control": 87 },
+      "price": { "amount": 199, "currency": "EUR", "observed_at": "2026-10-01" }
+    },
+    {
+      "id": "synthetic-radian-attack-2026",
+      "brand": "Radian",
+      "name": "Attack Lite",
+      "year": 2026,
+      "url": "https://example.com/padeltrue/radian-attack-lite-2026",
+      "specs": { "weight": "350–360 g", "shape": "diamond", "balance": "Head-heavy" },
+      "scores": { "power": 84, "control": 70 }
+    }
+  ]
+}

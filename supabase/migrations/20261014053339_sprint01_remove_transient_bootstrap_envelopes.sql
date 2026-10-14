@@ -1,0 +1,6 @@
+-- HISTORY-ONLY MARKER: the confirmed development project removed its temporary
+-- encrypted credential-handoff table after successful runtime connectivity.
+-- The bootstrap artifact is never created by these repository migrations, so
+-- there is nothing to remove when replaying the schema in another environment.
+-- This deliberately differs from the original environment-specific cleanup SQL.
+-- No credentials, ciphertext or temporary public key are committed here.
