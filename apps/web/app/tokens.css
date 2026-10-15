@@ -4,11 +4,15 @@
   --muted: #536467;
   --accent: #d2ef79;
   --accent-hover: #c3e65c;
-  --paper: #f7f8f4;
+  --paper: #edf4e8;
   --surface: #fff;
   --line: #d8ded9;
   --input-line: #83918c;
-  --soft: #edf1e9;
+  --soft: #dfead6;
+  --forest: #194d3b;
+  --forest-soft: #e2eed8;
+  --comparison-left: #edf2ee;
+  --comparison-right: #e6f2cf;
   --warning: #714b18;
   --warning-bg: #fff4de;
   --focus: #336eaa;

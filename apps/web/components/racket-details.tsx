@@ -50,8 +50,18 @@ export function ObservationDetails({ spec, releaseId }: { spec: CatalogueSpec; r
   </article>;
 }
 
-export function RatingCard({ rating }: { rating: CatalogueRating }) {
-  return <article className="rating-card">
+export function ratingPosition(rating: CatalogueRating) {
+  const { value, scaleMin, scaleMax } = rating;
+  if (rating.validationStatus !== 'valid' || value === null || scaleMin === null || scaleMax === null
+    || ![value, scaleMin, scaleMax].every(Number.isFinite) || scaleMax <= scaleMin || value < scaleMin || value > scaleMax) return null;
+  return (value - scaleMin) / (scaleMax - scaleMin);
+}
+
+export function RatingCard({ rating, compact = false }: { rating: CatalogueRating; compact?: boolean }) {
+  const hasPosition = ratingPosition(rating) !== null;
+  const incomplete = /brakuj|niepełne|missing|neutral/i.test(rating.methodology);
+  const citation = <RatingCitation rating={rating} />;
+  return <article className={`rating-card${compact ? ' rating-compact' : ''}`}>
     <span className="rating-kind">{ratingLabels[rating.kind] ?? 'Ocena źródła'}</span>
     <h3>{ratingDimensionLabels[rating.dimension] ?? rating.dimension}</h3>
     <p className="rating-value">
@@ -59,9 +69,11 @@ export function RatingCard({ rating }: { rating: CatalogueRating }) {
         ? <>{rating.value}<span> / {rating.scaleMax ?? '?'}</span></>
         : 'Nieustalona'}
     </p>
+    {hasPosition && <meter className="rating-meter" min={rating.scaleMin!} max={rating.scaleMax!} value={rating.value!} aria-label={`${ratingDimensionLabels[rating.dimension] ?? rating.dimension}: ${rating.value} w skali ${rating.scaleMin}–${rating.scaleMax}`} />}
     <p>Skala źródła: {rating.scaleMin ?? '?'}–{rating.scaleMax ?? '?'}. Oryginał: {rawText(rating.rawValue)}.</p>
     {rating.validationStatus !== 'valid' && <p>Interpretacja oceny niepotwierdzona.</p>}
-    <RatingCitation rating={rating} />
+    {compact ? <><div className="rating-compact-source"><SourceCitation evidence={rating.evidence} />{incomplete && <span className="conflict-label">Niepełne dane modelu</span>}</div>
+      <details className="rating-evidence"><summary>Metodologia i szczegóły</summary>{citation}</details></> : citation}
   </article>;
 }
 

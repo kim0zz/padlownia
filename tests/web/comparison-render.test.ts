@@ -149,7 +149,8 @@ describe('structured comparison renders only authoritative catalogue facts', () 
     expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
     expect(html).toContain('&lt;script&gt;hostile text&lt;/script&gt;');
     expect(html).not.toContain('<script>');
-    expect(html).not.toContain('<img');
+    expect(html).not.toMatch(/<img[^>]*onerror=/);
+    expect(html).not.toContain('<img src=x');
     expect(html).not.toContain('href="javascript:');
     expect(html).not.toContain('href="data:');
     expect(html).toContain('Przypisane producentowi — niezweryfikowane');
@@ -192,8 +193,8 @@ describe('comparison page states never silently replace a pinned publication', (
     expect(html).toContain('Supabase Dev.');
     expect(html).not.toContain('Dane demonstracyjne.');
     expect(html).toContain(`name="release" value="${release}"`);
-    expect(html).toContain(`value="${first.id}" selected=""`);
-    expect(html).toContain(`value="${second.id}" selected=""`);
+    expect(html).toContain(`name="left" value="${first.id}"`);
+    expect(html).toContain(`name="right" value="${second.id}"`);
     expect(stubs.catalogue).toHaveBeenCalledTimes(1);
   });
 
@@ -205,7 +206,7 @@ describe('comparison page states never silently replace a pinned publication', (
     expectNoComparisonFacts(empty);
     const partial = await page({ release, left: first.id });
     expect(partial).toContain('Dodaj drugą rakietę.');
-    expect(partial).toContain(`value="${first.id}" selected=""`);
+    expect(partial).toContain(`name="left" value="${first.id}"`);
     expectNoComparisonFacts(partial);
   });
 

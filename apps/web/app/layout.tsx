@@ -4,6 +4,7 @@ import { ComparisonNav, ComparisonProvider, ComparisonTray } from '../components
 import './tokens.css';
 import './globals.css';
 import './components.css';
+import './comparison-ux.css';
 
 export const metadata: Metadata = {
   title: { default: 'Padłownia — katalog rakiet z kontekstem', template: '%s · Padłownia' },

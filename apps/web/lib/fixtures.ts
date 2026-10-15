@@ -1,4 +1,5 @@
 import type { CatalogueEntry } from '@padlownia/database';
+import type { IllustratedCatalogueEntry } from './catalogue-images';
 
 // Authored synthetic examples, CC0. These are not claims about real rackets.
 const evidence = (id: string, manufacturer = true) => ({
@@ -22,7 +23,7 @@ function racket(id: string, model: string, year: number | null, variant: string,
   };
 }
 
-export const fixtureCatalogue: CatalogueEntry[] = [
+export const fixtureCatalogue: IllustratedCatalogueEntry[] = [
   racket('fixture-orbit-control-2026', 'Orbit', 2026, 'Control', 'round', 360, 370),
   racket('fixture-orbit-control-2025', 'Orbit', 2025, 'Control', 'round', 355, 365),
   racket('fixture-orbit-pro-2026', 'Orbit', 2026, 'Pro', 'teardrop', 360, 375),
@@ -30,6 +31,13 @@ export const fixtureCatalogue: CatalogueEntry[] = [
   racket('fixture-vector-lite-2026', 'Vector', 2026, 'Lite', 'teardrop', 345, 355),
   racket('fixture-arc-unknown', 'Arc', null, 'Standard', null, null, null),
 ];
+
+for (const entry of [fixtureCatalogue[0]!, fixtureCatalogue[2]!]) entry.image = {
+  racketId: entry.id, releaseId: entry.releaseId, url: '/media/rackets/fixture-orbit.svg',
+  alt: `Ilustracja syntetycznej rakiety TESTLAB ${entry.model} ${entry.variant}; nie fotografia produktu`,
+  credit: 'Ilustracja TESTLAB', sourceUrl: 'https://creativecommons.org/publicdomain/zero/1.0/',
+  rightsStatus: 'approved', licence: 'CC0', permissionReference: 'https://creativecommons.org/publicdomain/zero/1.0/',
+};
 
 fixtureCatalogue[2]!.specs[0]!.conflict = true;
 fixtureCatalogue[2]!.specs.push({

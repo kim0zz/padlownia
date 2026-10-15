@@ -80,7 +80,7 @@ describe('comparison keeps source observations and exact identities', () => {
     [{ valueMax: 370 }, 'Do 370 g'],
     [{ key: 'weight_g', valueMin: 365, valueMax: 365 }, '365 g'],
     [{ key: 'balance_cm', numericValue: 26.5, unit: 'cm' }, '26.5 cm'],
-    [{ key: 'balance', normalizedText: 'high', rawValue: 'Head heavy', unit: null }, 'high'],
+    [{ key: 'balance', normalizedText: 'high', rawValue: 'Head heavy', unit: null }, 'Wysoki'],
     [{ key: 'shape', normalizedText: 'round', unit: null }, 'Okrągła'],
     [{ key: 'shape', normalizedText: 'constructor', unit: null }, 'constructor'],
     [{ key: 'thickness', numericValue: 0, unit: 'mm' }, '0 mm'],

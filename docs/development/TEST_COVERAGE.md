@@ -102,6 +102,12 @@ The separate read-only smoke check of the production build with the Dev reader p
 
 ## Reproduction
 
+### Compact comparison UX update — 2026-10-15
+
+[UX tests](../../tests/web/comparison-ux.test.ts) add 26 cases for exact-release image approval, withheld stale/ambiguous/unapproved media, URL validation, private permission evidence exclusion, literal search and source-scale meter bounds (including unknowns and zero). The browser suite now has 12 tests: it also covers keyboard use of the separate dropdown button, typing/choosing a variant/year, clearing a stale hidden ID on edit, image load/failure, compact first-viewport geometry and the green UI contrast. The source-injection regression distinguishes approved images from an attempted injected image element.
+
+The complete check passed 392 tests in 22 files. The final web subset passed 213 tests; TypeScript, lint/build and 12 E2E passed after the final changes. A separate read-only Dev check passed 9 cases, including the actual-model 1381×857 first viewport, 12 native-scale meters, mobile axe and explicit photo absence. See [the UX receipt](../design/COMPARISON_UX_REFINEMENT.md). No real photography is licensed by these tests; [image rights](IMAGE_ASSET_POLICY.md) remain a separate publication condition.
+
 From the repository root after `npm ci`:
 
 ```text

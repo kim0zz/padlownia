@@ -61,6 +61,8 @@ Dwa pliki „LLM” zawierają indeks źródła i **588 dokumentów**, w tym wsz
 
 ## Sprawdzenie zmian
 
+Poprawka UX porównania dodaje tekstowe wyszukiwanie z podpowiedziami i zwarty ekran obu rakiet z kolorami/paskami ocen. [Opis i wyniki](docs/design/COMPARISON_UX_REFINEMENT.md). Rzeczywiste fotografie czekają na potwierdzenie praw; [dokładny brakujący zakres i gotowy tekst prośby](docs/development/IMAGE_ASSET_POLICY.md). Opcjonalny serwerowy `CATALOGUE_IMAGE_MANIFEST` pozwala dołączyć zatwierdzone zdjęcia bez zmiany układu. Fixture używa własnej ilustracji CC0, wyraźnie opisanej jako syntetyczna.
+
 ```sh
 npm run check
 npm run test:e2e

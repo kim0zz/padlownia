@@ -1,5 +1,7 @@
 # Sprint 02 — wynik wykonania
 
+**Aktualizacja UX 15.10.2026:** na zlecenie właściciela dodano wyszukiwanie z dropdownem, zwarty widok obu rakiet od razu, zielone powierzchnie i źródłowe paski ocen. Bieżąca weryfikacja: 392 testy, 12 E2E, 9 odczytowych kontroli nowego UX na Dev. [Raport poprawki UX](../design/COMPARISON_UX_REFINEMENT.md) oraz [stan zdjęć i potrzebna zgoda](IMAGE_ASSET_POLICY.md). Dalsza część zachowuje wynik bazowej implementacji Sprintu 02.
+
 **Data:** 2026-10-15, Europe/Warsaw. **Gałąź:** `feat/sprint-02-comparison-components`. Zakres: [brief](SPRINT_02_BRIEF.md), decyzje techniczne: [ADR-005](../adr/005-comparison-and-structured-view-contract.md).
 
 ## Dostarczony przepływ

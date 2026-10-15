@@ -1,5 +1,7 @@
 # Sprint 02 comparison and shared UI
 
+Update 2026-10-15: the owner-requested [compact UX refinement](COMPARISON_UX_REFINEMENT.md) replaces the large comparison hero, native selectors and spacious rows below. That document and the current screenshots describe the latest UI; this receipt retains the initial implementation and verification context.
+
 Implemented 2026-10-15 within the owner-approved [Sprint 02 scope](../development/SPRINT_02_BRIEF.md). These are reversible implementation choices under [ADR-005](../adr/005-comparison-and-structured-view-contract.md), not acceptance of unrelated product proposals.
 
 ## Design workflow and continuity

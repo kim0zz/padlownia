@@ -2,7 +2,8 @@ import type { CatalogueEntry, CatalogueSpec } from '@padlownia/database';
 import { formatWeight, rawText, shapeLabels, specLabels } from './catalogue';
 
 export function racketLabel(entry: CatalogueEntry) {
-  return `${entry.brand} ${entry.model} · ${entry.variant || 'Wariant nieustalony'} · ${entry.modelYear ?? 'Rok nieznany'}`;
+  const name = entry.model.toLocaleLowerCase('pl').startsWith(`${entry.brand.toLocaleLowerCase('pl')} `) ? entry.model : `${entry.brand} ${entry.model}`;
+  return `${name} · ${entry.variant || 'Wariant nieustalony'} · ${entry.modelYear ?? 'Rok nieznany'}`;
 }
 
 export function canonicalSpecKey(key: string) {
@@ -27,6 +28,10 @@ export function specDisplayValue(spec: CatalogueSpec) {
   if (spec.validationStatus !== 'valid') return 'Brak potwierdzonej wartości';
   const key = canonicalSpecKey(spec.key);
   if (key === 'shape' && spec.normalizedText) return shapeLabels[spec.normalizedText] ?? spec.normalizedText;
+  if (key === 'balance' && spec.normalizedText) {
+    const balanceLabels = Object.assign(Object.create(null) as Record<string, string>, { head_heavy: 'Na główkę', head_light: 'Na rączkę', even: 'Zrównoważony', medium: 'Średni', high: 'Wysoki', low: 'Niski' });
+    return balanceLabels[spec.normalizedText] ?? spec.normalizedText;
+  }
   if (key === 'weight' && spec.unit === 'g') {
     const min = spec.valueMin ?? spec.numericValue;
     const max = spec.valueMax ?? spec.numericValue;

@@ -4,6 +4,8 @@ import { claimLabel, formatWeight, shapeLabels } from '../lib/catalogue';
 import { SourceCitation } from './evidence';
 import { AddToComparison } from './comparison-selection';
 import { racketLabel } from '../lib/comparison';
+import { RacketVisual } from './racket-visual';
+import { approvedImageFor } from '../lib/catalogue-images';
 
 export { SourceCitation, RatingCitation, SourceLicenceNotice } from './evidence';
 
@@ -42,6 +44,7 @@ export function RacketCard({ entry, index }: { entry: CatalogueEntry; index: num
     <p className="racket-brand">{entry.brand}</p>
     <h3><Link href={`/rakiety/${encodeURIComponent(entry.id)}`}>{entry.model}</Link></h3>
     <p className="racket-variant">{entry.variant || 'Wariant nieustalony'}</p>
+    <RacketVisual entry={{ image: approvedImageFor(entry) }} />
     <dl className="card-specs"><SpecSummary entry={entry} field="shape" /><SpecSummary entry={entry} field="weight" /></dl>
     <div className="card-bottom">{hasConflict ? <span className="conflict-label">Rozbieżne źródła</span> : <span className="muted">Parametry ze źródłami</span>}
       <Link className="profile-link" href={`/rakiety/${encodeURIComponent(entry.id)}`} aria-label={`Zobacz profil ${entry.brand} ${entry.model} ${entry.variant ?? ''} ${entry.modelYear ?? 'rok nieznany'}`}><Arrow /></Link>

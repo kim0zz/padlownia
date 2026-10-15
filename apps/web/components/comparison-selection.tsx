@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { comparisonUrl, readSelection, toggleSelection, type ComparisonSelection, type SelectionItem } from '../lib/comparison-selection';
 
@@ -61,6 +62,18 @@ export function ComparisonNav() {
   return <Link className="nav-link" href={context?.selection ? comparisonUrl(context.selection) : '/porownaj'}>Porównaj{context?.selection ? ` (${context.selection.items.length}/2)` : ''}</Link>;
 }
 
+export function RemoveComparisonItem({ id, label }: { id: string; label: string }) {
+  const context = useContext(Context);
+  if (!context?.selection || !context.selection.items.some((item) => item.id === id)) return null;
+  const remaining = { ...context.selection, items: context.selection.items.filter((item) => item.id !== id) };
+  return <Link className="comparison-remove" href={remaining.items.length ? comparisonUrl(remaining) : '/porownaj'} aria-label={`Usuń z wyboru: ${label}`} onClick={() => context.remove(id)}><svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg></Link>;
+}
+
+export function ClearComparison() {
+  const context = useContext(Context);
+  return context?.selection ? <Link className="text-button" href="/porownaj" onClick={context.clear}>Wyczyść wybór</Link> : null;
+}
+
 export function AddToComparison({ id, releaseId, label }: SelectionItem & { releaseId: string }) {
   const context = useContext(Context);
   if (!context) return <Link className="button button-secondary comparison-add" href={comparisonUrl({ releaseId, items: [{ id, label }] })}>Wybierz do porównania</Link>;
@@ -73,7 +86,8 @@ export function AddToComparison({ id, releaseId, label }: SelectionItem & { rele
 
 export function ComparisonTray() {
   const context = useContext(Context);
-  if (!context) return null;
+  const pathname = usePathname();
+  if (!context || pathname === '/porownaj') return null;
   return <div className="selection-shell">
     <p className="selection-status" role="status" aria-live="polite">{context.message}</p>
     {context.selection && <aside className="selection-tray" aria-label="Wybrane rakiety">
