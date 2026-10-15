@@ -43,7 +43,7 @@ Recorded 2026-10-13. **Accepted** means explicitly selected by project owner in 
 | D-004 | Proposed | MVP delivery | Vertical slices from catalogue through compare, RAG, assistant and Smart DataOps; tests/logs from the outset. |
 | D-005 | Proposed | Extraction | Deterministic parsing first, LLM for hard cases with schema validation and human review exceptions. |
 | O-001 | Open | Additional review sources | Padel Magazine / Time2Padel / PadelZoom remain **candidates**; pilot extractor and assess rights/relevance. Pádel Nuestro not selected. |
-| O-002 | Open | Text rights | Verify documented scope of padel.how owner's approval, including indexing, embeddings and public-demo display; keep permission on record. |
+| O-002 | Accepted | Text rights | Owner confirmed 2026-10-15 that padel.how consent covers indexing, embeddings, model processing of review text and short attributed quotations in assistant answers. Keep the written correspondence on record (outside Git); full-text republication remains out of scope. |
 | O-003 | Open | Evaluation design | Exact gold set, pass thresholds and quality-vs-cost targets to set from baseline. |
 | O-004 | Open | Model and embeddings | Initial model, embedding model, chunking and retrieval ranking parameters subject to benchmarks. |
 | O-005 | Open | Storage/ops | Precise document storage, worker trigger and backup/retention plan; choose with real constraints. |

@@ -8,7 +8,7 @@ Stan wyjściowy: katalog, profile i porównanie działają na danych Dev (444 pr
 
 | ID | Decyzja | Blokuje | Moja rekomendacja |
 |---|---|---|---|
-| O-002 | Pisemna zgoda padel.how na: indeksowanie, embeddingi, przetwarzanie modelem, wyświetlanie krótkich cytatów w prywatnym demo | Etap 3 i 4 | Napisać do właściciela padel.how teraz — to najdłuższa ścieżka krytyczna |
+| ~~O-002~~ | Zgoda padel.how — **rozstrzygnięte 15.10.2026**: indeksowanie, embeddingi, przetwarzanie modelem i krótkie cytaty z atrybucją | — | Zachować korespondencję poza Gitem |
 | D-003 | Dostęp do demo: kod zaproszenia + limit zapytań | Etap 4 (wystawienie) | Przyjąć: jeden kod na osobę, limit dzienny, bez kont |
 | O-004 | Model czatu i embeddingów | Etap 3–4 | Embeddingi wielojęzyczne (recenzje są po angielsku, pytania po polsku); model czatu tani, wybrany benchmarkiem na zestawie ewaluacyjnym |
 | P-022 | Workflow designu (UI UX Pro Max + Impeccable) | — | Zrewidować: w praktyce skill był za każdym razem odrzucany. Zastąpić krótką listą zasad z UX v3 + przeglądem przez tech leada |
@@ -36,7 +36,7 @@ Stan wyjściowy: katalog, profile i porównanie działają na danych Dev (444 pr
 2. R6 — lokalny widok przeglądu kandydatów (dev-only, za flagą), który wywołuje istniejące `applySourceReview()`.
 3. Przegląd kandydatów, nowe wydanie. Miara sukcesu: liczba rakiet z danymi z obu źródeł (dziś ≤ 54).
 
-## Etap 3 — wiedza z recenzji (slice 3 z MVP; wymaga O-002)
+## Etap 3 — wiedza z recenzji (slice 3 z MVP; zgoda O-002 jest)
 
 1. Chunking 217 recenzji po sekcjach (werdykt, mocne/słabe strony, FAQ) z zachowaniem `knowledge_documents`, offsetów i ID rakiety.
 2. `pgvector` + kolumny FTS; embeddingi liczone przez workera wsadowo, z logiem kosztu.
