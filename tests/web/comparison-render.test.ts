@@ -5,20 +5,22 @@ import type { CatalogueEntry } from '@padlownia/database';
 
 const stubs = vi.hoisted(() => ({ catalogue: vi.fn() }));
 vi.mock('../../apps/web/lib/catalogue-server', () => ({ getCatalogue: stubs.catalogue }));
+// server-only cannot load under Vitest; the stub keeps the real env contract of lib/dev-ui.
+vi.mock('../../apps/web/lib/dev-ui', () => ({ showDevDetails: () => process.env.SHOW_DEV_DETAILS === '1' }));
 
 import ComparisonPage from '../../apps/web/app/porownaj/page';
 import { StructuredView } from '../../apps/web/components/structured-view';
 import { fixtureCatalogue } from '../../apps/web/lib/fixtures';
 import type { SearchParams } from '../../apps/web/lib/catalogue';
 
-afterEach(() => vi.resetAllMocks());
+afterEach(() => { vi.resetAllMocks(); vi.unstubAllEnvs(); });
 
 const fixtures = () => structuredClone(fixtureCatalogue);
 const first = fixtureCatalogue[0]!;
 const second = fixtureCatalogue[2]!;
 const release = first.releaseId;
 const payload = (entries = fixtureCatalogue) => ({ version: 1, datasetVersion: entries[0]!.releaseId, blocks: [{ type: 'racket_comparison', racketIds: [entries[0]!.id, entries[2]!.id] }] });
-const view = (input: unknown, entries = fixtureCatalogue) => renderToStaticMarkup(createElement(StructuredView, { input, entries }));
+const view = (input: unknown, entries = fixtureCatalogue, dev = true) => renderToStaticMarkup(createElement(StructuredView, { input, entries, dev }));
 const text = (html: string) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 const page = async (params: SearchParams = {}) => renderToStaticMarkup(await ComparisonPage({ searchParams: Promise.resolve(params) }));
 const pairParams = { release, left: first.id, right: second.id };
@@ -52,6 +54,21 @@ describe('structured comparison renders only authoritative catalogue facts', () 
     expect(html).toContain('orbit-control-measurement');
     expect(html).toContain('Pobrano 13 października 2026');
     expect(html).toContain(release);
+  });
+
+  it('hides technical provenance and the release UUID unless developer mode is on', () => {
+    const html = view(payload(), fixtureCatalogue, false);
+    expect(html).not.toContain('provenance-details');
+    expect(html).not.toContain('Ślad pochodzenia danych');
+    expect(html).not.toContain('comparison-release');
+    expect(html).not.toContain('fixture.orbit-control-measurement');
+    expect(html).not.toContain(release);
+    // Values, original observations, context and citations stay available.
+    expect(html).toContain('372 g with one overgrip');
+    expect(html).toContain('Pomiar egzemplarza');
+    expect(html).toContain('Pobrano 13 października 2026');
+    expect(html).toContain('<strong>Łezka</strong>');
+    expect(view(payload(), fixtureCatalogue, true)).toContain('class="provenance-details"');
   });
 
   it('shows selected shape and conflicting raw observation without silently substituting the conflict', () => {
@@ -186,16 +203,31 @@ describe('structured comparison renders only authoritative catalogue facts', () 
 
 describe('comparison page states never silently replace a pinned publication', () => {
   it('renders a validated pair with exact picker selections and one current release', async () => {
+    vi.stubEnv('SHOW_DEV_DETAILS', '1');
     stubs.catalogue.mockResolvedValue({ status: 'ready', mode: 'supabase', entries: fixtureCatalogue });
     const html = await page(pairParams);
     expect(html).toContain('aria-label="Zestawienie dwóch rakiet"');
     expect(html).toContain('365 ± 5 g');
     expect(html).toContain('Supabase Dev.');
+    expect(html).toContain('comparison-release');
     expect(html).not.toContain('Dane demonstracyjne.');
     expect(html).toContain(`name="release" value="${release}"`);
     expect(html).toContain(`name="left" value="${first.id}"`);
     expect(html).toContain(`name="right" value="${second.id}"`);
     expect(stubs.catalogue).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the Supabase notice, provenance and release UUID out of the user view', async () => {
+    stubs.catalogue.mockResolvedValue({ status: 'ready', mode: 'supabase', entries: fixtureCatalogue });
+    const html = await page(pairParams);
+    expect(html).toContain('aria-label="Zestawienie dwóch rakiet"');
+    expect(html).toContain('365 ± 5 g');
+    expect(html).not.toContain('Supabase Dev.');
+    expect(html).not.toContain('comparison-release');
+    expect(html).not.toContain('provenance-details');
+    expect(html).toContain(`name="release" value="${release}"`);
+    stubs.catalogue.mockResolvedValue({ status: 'ready', mode: 'fixture', entries: fixtureCatalogue });
+    expect(await page(pairParams)).toContain('Dane demonstracyjne.');
   });
 
   it('labels fixture data and provides explicit empty and one-sided selection states', async () => {

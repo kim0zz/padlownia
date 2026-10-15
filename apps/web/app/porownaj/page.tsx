@@ -6,6 +6,7 @@ import { ClearComparison, RememberComparison } from '../../components/comparison
 import { ComparisonFeedback, EmptyComparison } from '../../components/comparison-state';
 import { filterCatalogue, parseFilters, type SearchParams } from '../../lib/catalogue';
 import { getCatalogue } from '../../lib/catalogue-server';
+import { showDevDetails } from '../../lib/dev-ui';
 import { racketLabel } from '../../lib/comparison';
 import { resolveComparison } from '../../lib/comparison-request';
 import { ComparisonPicker } from '../../components/comparison-picker';
@@ -17,6 +18,7 @@ export default async function ComparisonPage({ searchParams }: { searchParams: P
   const params = await searchParams;
   const result = await getCatalogue();
   const request = resolveComparison(params, result.entries);
+  const dev = showDevDetails();
   const options = filterCatalogue(result.entries, parseFilters({}));
   return <main id="main" className="main-shell comparison-page">
     <Link href="/" className="back-link"><Arrow direction="left" />Katalog rakiet</Link>
@@ -25,10 +27,10 @@ export default async function ComparisonPage({ searchParams }: { searchParams: P
       {result.mode === 'fixture' && <ModeNotice mode={result.mode} />}
       <ComparisonFeedback status={request.status} />
       {options.length === 0 || !request.currentRelease ? <section className="empty-state"><h2>Brak danych do porównania.</h2><p>Katalog potrzebuje jednej opublikowanej wersji danych.</p></section> : <>
-        {request.status === 'ready' ? <><RememberComparison selection={{ releaseId: request.currentRelease, items: [request.left, request.right].map((id) => ({ id, label: racketLabel(result.entries.find((entry) => entry.id === id)!) })) }} /><StructuredView input={request.payload} entries={result.entries} /></>
+        {request.status === 'ready' ? <><RememberComparison selection={{ releaseId: request.currentRelease, items: [request.left, request.right].map((id) => ({ id, label: racketLabel(result.entries.find((entry) => entry.id === id)!) })) }} /><StructuredView input={request.payload} entries={result.entries} dev={dev} /></>
           : <><ComparisonPicker entries={options} request={request} />{(request.status === 'empty' || request.status === 'partial') && <EmptyComparison partial={request.status === 'partial'} />}</>}
         {request.status === 'ready' && <details className="comparison-change"><summary>Zmień porównywane rakiety</summary><ComparisonPicker entries={options} request={request} /></details>}
-        {result.mode === 'supabase' && <div className="comparison-data-note"><ModeNotice mode={result.mode} /></div>}
+        {result.mode === 'supabase' && dev && <div className="comparison-data-note"><ModeNotice mode={result.mode} dev={dev} /></div>}
       </>}
     </>}
   </main>;

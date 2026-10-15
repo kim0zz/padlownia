@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Arrow, ModeNotice, RacketCard, SourceLicenceNotice, Unavailable } from '../components/catalogue';
 import { catalogueUrl, filterCatalogue, PAGE_SIZE, parseFilters, shapeLabels, type SearchParams } from '../lib/catalogue';
 import { getCatalogue } from '../lib/catalogue-server';
+import { showDevDetails } from '../lib/dev-ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +25,7 @@ export default async function CataloguePage({ searchParams }: { searchParams: Pr
       <p className="intro-copy">Modele, roczniki i konkretne parametry. Odkrywaj rakiety do padla i sprawdzaj źródło każdego szczegółu.</p></div>
       <div className="intro-note"><span className="note-rule" /><strong>Dobre decyzje<br />zaczynają się od danych.</strong><p>Deklaracje producenta, pomiary i opinie — zawsze z kontekstem.</p></div>
     </section>
-    {result.status === 'ready' && <ModeNotice mode={result.mode} />}
+    {result.status === 'ready' && <ModeNotice mode={result.mode} dev={showDevDetails()} />}
     {result.status !== 'ready' ? <Unavailable setup={result.status === 'setup'} /> : <>
       <section className="catalogue-section" aria-labelledby="catalogue-title">
         <div className="section-heading"><div><p className="section-kicker">ODKRYWAJ ŚWIADOMIE</p><h2 id="catalogue-title">Katalog rakiet</h2></div><span className="catalogue-total">{entries.length} modeli i wariantów</span></div>

@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 const stubs = vi.hoisted(() => ({ catalogue: vi.fn() }));
 vi.mock('../../apps/web/lib/catalogue-server', () => ({ getCatalogue: stubs.catalogue }));
+vi.mock('../../apps/web/lib/dev-ui', () => ({ showDevDetails: () => process.env.SHOW_DEV_DETAILS === '1' }));
 
 import RacketPage from '../../apps/web/app/rakiety/[id]/page';
 import CataloguePage from '../../apps/web/app/page';

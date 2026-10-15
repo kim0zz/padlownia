@@ -23,7 +23,7 @@ export const ratingDimensionLabels: Readonly<Record<string, string>> = Object.fr
 }));
 
 /** Full original observation with its publication version and source trail. */
-export function ObservationDetails({ spec, releaseId }: { spec: CatalogueSpec; releaseId: string }) {
+export function ObservationDetails({ spec, releaseId, dev = false }: { spec: CatalogueSpec; releaseId: string; dev?: boolean }) {
   return <article className="observation">
     <div className="observation-title">
       <h3>{specLabels[spec.key] ?? spec.key}</h3>
@@ -39,14 +39,14 @@ export function ObservationDetails({ spec, releaseId }: { spec: CatalogueSpec; r
     </p>}
     {spec.validationStatus !== 'valid' && <p className="context-note">Interpretacja niepotwierdzona — zachowano wartość oryginalną.</p>}
     <div className="observation-source"><SourceCitation evidence={spec.evidence} /><span>Pobrano {formatDate(spec.evidence.retrievedAt)}</span></div>
-    <details>
+    {dev && <details>
       <summary>Ślad pochodzenia danych</summary>
       <dl className="provenance-details">
         <div><dt>Obserwacja</dt><dd>{spec.evidence.observationId}</dd></div>
         <div><dt>Pole źródłowe</dt><dd>{spec.evidence.path}</dd></div>
         <div><dt>Wersja danych</dt><dd>{releaseId}</dd></div>
       </dl>
-    </details>
+    </details>}
   </article>;
 }
 
@@ -86,10 +86,10 @@ export function ConflictNotice({ entry }: { entry: CatalogueEntry }) {
 }
 
 /** Presentational only: works with an already selected, released exact variant. */
-export function RacketSpecs({ entry }: { entry: CatalogueEntry }) {
+export function RacketSpecs({ entry, dev = false }: { entry: CatalogueEntry; dev?: boolean }) {
   return <div className="observation-list">
     {entry.specs.length
-      ? entry.specs.map((spec) => <ObservationDetails key={spec.evidence.observationId} spec={spec} releaseId={entry.releaseId} />)
+      ? entry.specs.map((spec) => <ObservationDetails key={spec.evidence.observationId} spec={spec} releaseId={entry.releaseId} dev={dev} />)
       : <div className="empty-state compact"><h3>Parametry jeszcze nieustalone.</h3><p>Brak zatwierdzonych obserwacji dla tego wariantu.</p></div>}
   </div>;
 }

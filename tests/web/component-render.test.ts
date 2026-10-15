@@ -7,6 +7,7 @@ import { fixtureCatalogue } from '../../apps/web/lib/fixtures';
 
 const stubs = vi.hoisted(() => ({ catalogue: vi.fn(() => { throw new Error('Gallery must never read the database'); }) }));
 vi.mock('../../apps/web/lib/catalogue-server', () => ({ getCatalogue: stubs.catalogue }));
+vi.mock('../../apps/web/lib/dev-ui', () => ({ showDevDetails: () => process.env.SHOW_DEV_DETAILS === '1' }));
 import ComponentGalleryPage from '../../apps/web/app/komponenty/page';
 
 afterEach(() => { vi.unstubAllEnvs(); vi.clearAllMocks(); });
@@ -15,7 +16,7 @@ describe('shared observations and citations', () => {
   it('preserves measured specimen context and a release-specific evidence trail', () => {
     const entry = fixtureCatalogue[0]!;
     const spec = entry.specs.find((item) => item.claimType === 'measured_specimen')!;
-    const html = renderToStaticMarkup(createElement(ObservationDetails, { spec, releaseId: entry.releaseId }));
+    const html = renderToStaticMarkup(createElement(ObservationDetails, { spec, releaseId: entry.releaseId, dev: true }));
     expect(html).toContain('372 g with one overgrip');
     expect(html).toContain('Pomiar egzemplarza');
     expect(html).toContain('Jeden overgrip; pojedynczy egzemplarz');
@@ -24,6 +25,23 @@ describe('shared observations and citations', () => {
     expect(html).toContain(spec.evidence.path);
     expect(html).toContain(entry.releaseId);
     expect(html).not.toContain('Wartość katalogowa');
+  });
+
+  it('omits the technical evidence trail from the user view and keeps the citation', () => {
+    const entry = fixtureCatalogue[0]!;
+    const spec = entry.specs.find((item) => item.claimType === 'measured_specimen')!;
+    for (const props of [{}, { dev: false }]) {
+      const html = renderToStaticMarkup(createElement(ObservationDetails, { spec, releaseId: entry.releaseId, ...props }));
+      expect(html).not.toContain('provenance-details');
+      expect(html).not.toContain('Ślad pochodzenia danych');
+      expect(html).not.toContain(spec.evidence.observationId);
+      expect(html).not.toContain(spec.evidence.path);
+      expect(html).not.toContain(entry.releaseId);
+      expect(html).toContain('372 g with one overgrip');
+      expect(html).toContain(spec.evidence.sourceName);
+      expect(html).toContain('Pobrano ');
+    }
+    expect(renderToStaticMarkup(createElement(ObservationDetails, { spec, releaseId: entry.releaseId, dev: true }))).toContain(spec.evidence.observationId);
   });
 
   it('distinguishes an unverified manufacturer claim and an unknown interpretation', () => {

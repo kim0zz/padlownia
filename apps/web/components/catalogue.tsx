@@ -13,7 +13,9 @@ export function Arrow({ direction = 'right' }: { direction?: 'left' | 'right' })
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" className={direction === 'left' ? 'arrow-left' : ''}><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 }
 
-export function ModeNotice({ mode }: { mode: 'fixture' | 'supabase' }) {
+/** The Supabase notice is technical information: shown only in developer mode. Fixture data is always labelled. */
+export function ModeNotice({ mode, dev = false }: { mode: 'fixture' | 'supabase'; dev?: boolean }) {
+  if (mode === 'supabase' && !dev) return null;
   return <aside className={`mode-notice ${mode === 'fixture' ? 'fixture-notice' : ''}`} aria-label="Pochodzenie danych">
     <span className="status-dot" aria-hidden="true" />
     {mode === 'fixture' ? <p><strong>Dane demonstracyjne.</strong> Syntetyczne rakiety i źródła do testów interfejsu. Nie opisują rzeczywistych produktów.</p>

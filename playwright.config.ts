@@ -14,6 +14,6 @@ export default defineConfig({
     url: 'http://127.0.0.1:3100',
     reuseExistingServer: false,
     timeout: 120000,
-    env: { CATALOGUE_MODE: 'fixture', APP_ENV: 'development', NEXT_TELEMETRY_DISABLED: '1' },
+    env: { CATALOGUE_MODE: 'fixture', APP_ENV: 'development', NEXT_TELEMETRY_DISABLED: '1', SHOW_DEV_DETAILS: '1' },
   },
 });

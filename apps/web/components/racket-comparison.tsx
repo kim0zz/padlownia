@@ -8,7 +8,7 @@ import { RacketVisual } from './racket-visual';
 import { RemoveComparisonItem } from './comparison-selection';
 import { approvedImageFor } from '../lib/catalogue-images';
 
-export function RacketComparison({ left, right }: { left: CatalogueEntry; right: CatalogueEntry }) {
+export function RacketComparison({ left, right, dev = false }: { left: CatalogueEntry; right: CatalogueEntry; dev?: boolean }) {
   const entries = [left, right];
   const ratingSources = comparisonRatingSources(left, right);
   return <section className="racket-comparison" aria-label="Zestawienie dwóch rakiet">
@@ -28,7 +28,7 @@ export function RacketComparison({ left, right }: { left: CatalogueEntry; right:
         </div>) : <p className="comparison-unknown">Brak danych</p>}
         {cell.observations.some((spec) => spec.conflict) && <p><span className="conflict-label">Rozbieżne źródła</span></p>}
         {cell.observations.length > 0 && <details className="comparison-observations"><summary>Obserwacje ({cell.observations.length})</summary>
-          <div className="observation-list">{cell.observations.map((spec) => <ObservationDetails key={spec.evidence.observationId} spec={spec} releaseId={left.releaseId} />)}</div>
+          <div className="observation-list">{cell.observations.map((spec) => <ObservationDetails key={spec.evidence.observationId} spec={spec} releaseId={left.releaseId} dev={dev} />)}</div>
         </details>}
       </div>)}</div>
     </section>)}
@@ -41,6 +41,6 @@ export function RacketComparison({ left, right }: { left: CatalogueEntry; right:
         {cell.ratings.length ? cell.ratings.map((rating) => <RatingCard key={rating.evidence.observationId} rating={rating} compact />) : <p className="no-ratings">Brak ocen z tego źródła dla tej kategorii.</p>}
       </div>)}</div>)}
     </section>)}
-    <details className="comparison-release"><summary>Wersja porównywanych danych</summary><p>{left.releaseId}</p><p>Obie rakiety pochodzą z jednej publikacji katalogu. Stare odnośniki wymagają świadomego odświeżenia po kolejnej publikacji.</p></details>
+    {dev && <details className="comparison-release"><summary>Wersja porównywanych danych</summary><p>{left.releaseId}</p><p>Obie rakiety pochodzą z jednej publikacji katalogu. Stare odnośniki wymagają świadomego odświeżenia po kolejnej publikacji.</p></details>}
   </section>;
 }

@@ -6,12 +6,15 @@ import { ConflictNotice, ObservationDetails, RacketSpecs, RatingCard } from '../
 import { StructuredView } from '../../components/structured-view';
 import { ComparisonFeedback, EmptyComparison } from '../../components/comparison-state';
 import { fixtureCatalogue } from '../../lib/fixtures';
+import { showDevDetails } from '../../lib/dev-ui';
 
+export const dynamic = 'force-dynamic'; // SHOW_DEV_DETAILS is read per request, not frozen at build time.
 export const metadata: Metadata = { title: 'Galeria komponentów' };
 
 // This gallery always uses authored synthetic examples, even when the catalogue
 // runs in Supabase mode. It neither reads Dev data nor changes racket selection.
 export default function ComponentGalleryPage() {
+  const dev = showDevDetails();
   const complete = fixtureCatalogue[0]!;
   const conflict = fixtureCatalogue[2]!;
   const unknown = fixtureCatalogue[5]!;
@@ -71,9 +74,9 @@ export default function ComponentGalleryPage() {
       <div className="section-heading"><div><p className="section-kicker">ORYGINAŁ, KONTEKST, POCHODZENIE</p><h2 id="gallery-observations-title">Deklaracja, pomiar i brak jednostki</h2></div></div>
       <p className="component-gallery-caption">Pomiar z overgripem dotyczy jednego egzemplarza. Nie zmienia deklarowanej masy katalogowej.</p>
       <div className="observation-list">
-        <ObservationDetails spec={complete.specs[1]!} releaseId={complete.releaseId} />
-        <ObservationDetails spec={measured} releaseId={complete.releaseId} />
-        <ObservationDetails spec={missingUnit} releaseId={complete.releaseId} />
+        <ObservationDetails spec={complete.specs[1]!} releaseId={complete.releaseId} dev={dev} />
+        <ObservationDetails spec={measured} releaseId={complete.releaseId} dev={dev} />
+        <ObservationDetails spec={missingUnit} releaseId={complete.releaseId} dev={dev} />
       </div>
     </section>
 
@@ -81,7 +84,7 @@ export default function ComponentGalleryPage() {
       <div className="section-heading"><div><p className="section-kicker">RÓŻNICE POZOSTAJĄ WIDOCZNE</p><h2 id="gallery-conflicts-title">Rozbieżne obserwacje</h2></div></div>
       <p className="component-gallery-caption">{conflict.brand} {conflict.model} · {conflict.variant} · {conflict.modelYear}. Wskazanie wartości katalogowej zachowuje pozostałe obserwacje.</p>
       <ConflictNotice entry={conflict} />
-      <RacketSpecs entry={conflict} />
+      <RacketSpecs entry={conflict} dev={dev} />
     </section>
 
     <section id="gallery-ratings" className="component-gallery-section" aria-labelledby="gallery-ratings-title">
@@ -94,13 +97,13 @@ export default function ComponentGalleryPage() {
       <div className="section-heading"><div><p className="section-kicker">TEN SAM KOMPONENT</p><h2 id="gallery-structured-title">Widok ze struktury danych</h2></div></div>
       <p className="component-gallery-caption">Sprawdzony opis wybiera komponent parametrów i dokładną rakietę z określonej wersji danych. Przykład nie wykonuje wywołania modelu.</p>
       <pre className="component-gallery-code"><code>{JSON.stringify(structuredExample, null, 2)}</code></pre>
-      <StructuredView input={structuredExample} entries={fixtureCatalogue} />
+      <StructuredView input={structuredExample} entries={fixtureCatalogue} dev={dev} />
     </section>
 
     <section id="gallery-states" className="component-gallery-section" aria-labelledby="gallery-states-title">
       <div className="section-heading"><div><p className="section-kicker">KOMUNIKATY I GRANICE DANYCH</p><h2 id="gallery-states-title">Brak danych i błąd odczytu</h2></div></div>
       <p className="component-gallery-caption">Poniżej pokazujemy przykładowe stany. Widoczny komunikat błędu nie oznacza awarii bieżącej aplikacji.</p>
-      <RacketSpecs entry={unknown} />
+      <RacketSpecs entry={unknown} dev={dev} />
       <p className="no-ratings">Brak opublikowanych ocen dla tego wariantu. Nie wyliczamy własnej oceny liczbowej.</p>
       <Unavailable setup={false} />
       <EmptyComparison />
