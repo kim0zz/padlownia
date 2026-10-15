@@ -1,5 +1,5 @@
 import { describe,expect,it } from "vitest";
-import { assertDevelopmentDatabase,postgresConnectionConfig,type SqlExecutor } from "@padlownia/database";
+import { assertDevelopmentDatabase,postgresConnectionConfig,sharedPgExecutor,type SqlExecutor } from "@padlownia/database";
 
 describe("verified database connection boundaries", () => {
   const connection = "postgresql://padlownia_web:synthetic%40password@db.abcdefghijklmnopqrst.supabase.co:5432/postgres";
@@ -26,5 +26,12 @@ describe("verified database connection boundaries", () => {
     await expect(assertDevelopmentDatabase(db([{ environment: "development",project_ref: "differentprojectrefxx" }]),"abcdefghijklmnopqrst")).rejects.toThrow("DATABASE_IDENTITY_MISMATCH");
     const unavailable = { ...db([]),query: async () => { throw new Error("postgres://user:secret@host"); } };
     await expect(assertDevelopmentDatabase(unavailable,"abcdefghijklmnopqrst")).rejects.toThrow(/^DATABASE_IDENTITY_UNAVAILABLE$/);
+  });
+  it("shares one lazily connecting pool per connection target", () => {
+    const url = `${connection}?sslmode=verify-full`;
+    const first = sharedPgExecutor(url);
+    expect(sharedPgExecutor(url)).toBe(first);
+    expect(sharedPgExecutor(url,"synthetic-ca")).not.toBe(first);
+    expect(() => sharedPgExecutor(`${connection}?sslmode=disable`)).toThrow(/^INVALID_DATABASE_CONNECTION_CONFIG$/);
   });
 });

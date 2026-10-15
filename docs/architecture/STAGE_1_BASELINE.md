@@ -15,3 +15,19 @@
 **Wniosek:** wszystkie trzy strony kosztują tyle samo, bo każda pobiera cały katalog (`published_catalogue()`, ~900 ms w bazie + 5,7 MB JSON + nowa pula `pg` i TLS). Profil jednej rakiety nie jest tańszy od listy 444 — to potwierdza R1/R2 z audytu.
 
 **Awaria podczas pomiaru:** po ~95 zapytaniach z rzędu proces `next start` zakończył się błędem natywnym Windows `0xC0000409`. Powtórka: 150 zapytań na `/`, pamięć stabilna (190→260 MB), uchwyty stałe (~310), bez awarii. Nie odtworzone — do obserwacji. Hipoteza: tworzenie i zamykanie nowej puli TLS przy każdym żądaniu; R1 (singleton puli) usuwa tę ścieżkę, więc po R1 powtórzyć test 300 zapytań.
+
+## Po R1 (15.10.2026, gałąź `perf/r1-pool-cache`)
+
+**Co zmienione:** jedna współdzielona pula `pg` na proces (`sharedPgExecutor`, bez nowego TLS na żądanie; obsługa błędów bezczynnych połączeń), sprawdzenie tożsamości bazy raz na pulę, katalog w pamięci serwera przez 60 s, potem odświeżany w tle (odwiedzający dostaje kopię z pamięci); jeden odczyt naraz zamiast równoległych; po 10 min bez udanego odświeżenia — strona czeka na świeże dane albo pokazuje „niedostępne”.
+
+| Strona | Pełny czas — mediana przed → po | p90 po | HTML |
+|---|---|---|---|
+| `/` (katalog) | 1603 ms → **16 ms** | 21 ms | 234 KB |
+| `/rakiety/[id]` (profil) | 1549 ms → **7 ms** | 9 ms | 92 KB |
+| `/porownaj` (2 rakiety) | ~1550 ms → **14 ms** | 27 ms | 255 KB |
+
+Ten sam skrypt i wydanie (`94f807c4…`, 444 rakiety, dane z Supabase Dev — sprawdzone w HTML). **Pierwsze żądanie po starcie serwera** nadal trwa ~1,56 s (pusta pamięć: nowa pula + pełny odczyt); każde kolejne ~10–25 ms. Cel < 300 ms z ciepłym cache: spełniony.
+
+**Stabilność:** 300 żądań (rotacja 3 stron) co 0,4 s przez 125 s — 0 błędów, mediana 15 ms, max 29 ms, w tym odświeżenia w tle po 60 s; potem 300 żądań bez przerw — 0 błędów, max 33 ms. Uchwyty stałe (306), pamięć 112 → 272 MB (katalog w pamięci ~ kilka MB + rozgrzany Next). Awarii `0xC0000409` nie było.
+
+**Ograniczenie i następny krok (wymaga zgody — migracja):** rola `padlownia_web` nie ma prawa czytać `catalog_state` ani `catalog_releases` (sprawdzone: `permission denied`), więc „tanie zapytanie o ID aktywnego wydania” nie jest możliwe bez migracji. Dlatego świeżość liczona jest czasem: nowe wydanie albo wycofanie źródła pojawia się na stronie najpóźniej po ~60 s (+ czas odczytu). Propozycja: addytywna funkcja `padlownia.published_release_id()` (`security definer`, ten sam warunek co CTE `active` w `published_catalogue()`, w tym prawa źródeł; `grant execute` dla `padlownia_reader`) — wtedy cache będzie kluczowany ID wydania i odświeżany natychmiast po zmianie. Można to połączyć z R2.

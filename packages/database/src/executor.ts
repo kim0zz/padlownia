@@ -35,6 +35,9 @@ export function postgresConnectionConfig(connectionString: string, trustedCaPem?
 /** Server/worker only. Never import this module from a browser component. */
 export function createPgExecutor(connectionString: string, trustedCaPem?: string): { db: SqlExecutor; close: () => Promise<void> } {
   const pool = new Pool(postgresConnectionConfig(connectionString, trustedCaPem));
+  // An idle client dropped by the server emits 'error' on the pool; unhandled, it kills the process.
+  // The pool discards that client and the next query opens a new one. Never log it: it can carry connection details.
+  pool.on("error", () => {});
   const db: SqlExecutor = {
     async query<T>(sql: string, params: unknown[] = []) {
       const result = await pool.query(sql, params);
@@ -54,6 +57,20 @@ export function createPgExecutor(connectionString: string, trustedCaPem?: string
     },
   };
   return { db, close: () => pool.end() };
+}
+
+type SharedExecutors = Map<string, { db: SqlExecutor; close: () => Promise<void> }>;
+const shared = ((globalThis as { __padlowniaPgExecutors?: SharedExecutors }).__padlowniaPgExecutors ??= new Map());
+
+/**
+ * One long-lived pool per connection target for request-serving code (web): avoids a new TLS handshake
+ * and pool per request. Kept on globalThis so dev hot reload does not leak pools. Never call close() on it.
+ */
+export function sharedPgExecutor(connectionString: string, trustedCaPem?: string): SqlExecutor {
+  const key = `${connectionString}\n${trustedCaPem ?? ""}`;
+  let executor = shared.get(key);
+  if (!executor) { executor = createPgExecutor(connectionString, trustedCaPem); shared.set(key, executor); }
+  return executor.db;
 }
 
 /** Verify a DB-owned immutable marker in addition to the caller's URL/ref checks. */
