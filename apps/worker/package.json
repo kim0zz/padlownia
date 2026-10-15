@@ -1,1 +1,1 @@
-{"name":"@padlownia/worker","version":"0.1.0","private":true,"type":"module","dependencies":{"@padlownia/domain":"*","@padlownia/database":"*"}}
+{"name":"@padlownia/worker","version":"0.1.0","private":true,"type":"module","dependencies":{"@padlownia/ai":"*","@padlownia/domain":"*","@padlownia/database":"*"}}

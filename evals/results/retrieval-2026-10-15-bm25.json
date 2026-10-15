@@ -1,0 +1,636 @@
+{
+  "date": "2026-10-15",
+  "chunkerVersion": "review-chunks-v1",
+  "retriever": "bm25-lexical-v1",
+  "limit": 5,
+  "corpus": {
+    "sha256": "4c63fd9e20badacd571617d64cf9231e90b881cee0cbcc19bf43286b342c6a45",
+    "reviewDocuments": 217,
+    "detailFiles": 29,
+    "chunks": 3053,
+    "approxTokens": 470565,
+    "kinds": {
+      "identification": 214,
+      "construction": 217,
+      "shape": 217,
+      "feel": 217,
+      "sweet_spot": 217,
+      "power": 220,
+      "net": 217,
+      "stability": 206,
+      "takeaways": 218,
+      "comparison": 478,
+      "positioning": 218,
+      "defense": 114,
+      "spin": 103,
+      "pros_cons": 10,
+      "other": 13,
+      "handling": 8,
+      "verdict": 29,
+      "faq": 137
+    }
+  },
+  "golden": {
+    "file": "evals/retrieval/golden-v0.jsonl",
+    "cases": 33
+  },
+  "results": {
+    "plain": {
+      "overall": {
+        "cases": 33,
+        "hitAt1": 0.182,
+        "hitAt3": 0.303,
+        "hitAt5": 0.455,
+        "mrr": 0.277
+      },
+      "byTag": {
+        "broad": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 1,
+          "mrr": 0.25
+        },
+        "comfort": {
+          "cases": 2,
+          "hitAt1": 0.5,
+          "hitAt3": 0.5,
+          "hitAt5": 0.5,
+          "mrr": 0.5
+        },
+        "comparison-section": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 1
+        },
+        "configuration": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 1
+        },
+        "en": {
+          "cases": 2,
+          "hitAt1": 0,
+          "hitAt3": 0.5,
+          "hitAt5": 1,
+          "mrr": 0.375
+        },
+        "family-trap": {
+          "cases": 4,
+          "hitAt1": 0,
+          "hitAt3": 0.5,
+          "hitAt5": 0.5,
+          "mrr": 0.25
+        },
+        "follow-up": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "known-conflict": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "lineup": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 1
+        },
+        "pair": {
+          "cases": 6,
+          "hitAt1": 0,
+          "hitAt3": 0.5,
+          "hitAt5": 0.5,
+          "mrr": 0.25
+        },
+        "pl": {
+          "cases": 31,
+          "hitAt1": 0.194,
+          "hitAt3": 0.29,
+          "hitAt5": 0.419,
+          "mrr": 0.271
+        },
+        "positioning": {
+          "cases": 2,
+          "hitAt1": 0.5,
+          "hitAt3": 0.5,
+          "hitAt5": 1,
+          "mrr": 0.625
+        },
+        "possibly-unanswerable": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "product-example": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "single": {
+          "cases": 27,
+          "hitAt1": 0.222,
+          "hitAt3": 0.259,
+          "hitAt5": 0.444,
+          "mrr": 0.283
+        },
+        "slang": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "variant-trap": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 0.5
+        }
+      },
+      "misses": [
+        "smash-vertex05",
+        "net-viper-26",
+        "defense-nox-ml10",
+        "materials-at10-18k",
+        "stability-wilson-blade",
+        "shape-hirostar-redstone",
+        "stiffness-starvie-triton",
+        "power-access-kuikma",
+        "vibration-siux-diablo",
+        "core-dunlop-fx-pro",
+        "takeaway-volt-900",
+        "smash-at10-attack-12k",
+        "defense-wilson-bela-pro",
+        "cmp-viper-veron",
+        "cmp-extreme-motion-viper",
+        "followup-net",
+        "slang-bandeja-viper",
+        "durability-starvie-raptor"
+      ]
+    },
+    "polishGlossary": {
+      "overall": {
+        "cases": 33,
+        "hitAt1": 0.182,
+        "hitAt3": 0.333,
+        "hitAt5": 0.515,
+        "mrr": 0.293
+      },
+      "byTag": {
+        "broad": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 1,
+          "mrr": 0.25
+        },
+        "comfort": {
+          "cases": 2,
+          "hitAt1": 0.5,
+          "hitAt3": 0.5,
+          "hitAt5": 1,
+          "mrr": 0.6
+        },
+        "comparison-section": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 1
+        },
+        "configuration": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 1
+        },
+        "en": {
+          "cases": 2,
+          "hitAt1": 0,
+          "hitAt3": 0.5,
+          "hitAt5": 1,
+          "mrr": 0.375
+        },
+        "family-trap": {
+          "cases": 4,
+          "hitAt1": 0,
+          "hitAt3": 0.5,
+          "hitAt5": 0.5,
+          "mrr": 0.208
+        },
+        "follow-up": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "known-conflict": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 1,
+          "mrr": 0.2
+        },
+        "lineup": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 1
+        },
+        "pair": {
+          "cases": 6,
+          "hitAt1": 0,
+          "hitAt3": 0.5,
+          "hitAt5": 0.5,
+          "mrr": 0.222
+        },
+        "pl": {
+          "cases": 31,
+          "hitAt1": 0.194,
+          "hitAt3": 0.323,
+          "hitAt5": 0.484,
+          "mrr": 0.288
+        },
+        "positioning": {
+          "cases": 2,
+          "hitAt1": 0.5,
+          "hitAt3": 0.5,
+          "hitAt5": 0.5,
+          "mrr": 0.5
+        },
+        "possibly-unanswerable": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "product-example": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "single": {
+          "cases": 27,
+          "hitAt1": 0.222,
+          "hitAt3": 0.296,
+          "hitAt5": 0.519,
+          "mrr": 0.309
+        },
+        "slang": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "variant-trap": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 0.5
+        }
+      },
+      "misses": [
+        "smash-vertex05",
+        "net-viper-26",
+        "defense-nox-ml10",
+        "materials-at10-18k",
+        "stability-wilson-blade",
+        "stiffness-starvie-triton",
+        "beginner-head-vibe",
+        "power-access-kuikma",
+        "core-dunlop-fx-pro",
+        "smash-at10-attack-12k",
+        "defense-wilson-bela-pro",
+        "cmp-viper-veron",
+        "cmp-extreme-motion-viper",
+        "followup-net",
+        "slang-bandeja-viper",
+        "durability-starvie-raptor"
+      ]
+    },
+    "aspectOnly": {
+      "overall": {
+        "cases": 33,
+        "hitAt1": 0.182,
+        "hitAt3": 0.212,
+        "hitAt5": 0.212,
+        "mrr": 0.197
+      },
+      "byTag": {
+        "broad": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "comfort": {
+          "cases": 2,
+          "hitAt1": 0.5,
+          "hitAt3": 0.5,
+          "hitAt5": 0.5,
+          "mrr": 0.5
+        },
+        "comparison-section": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "configuration": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 1
+        },
+        "en": {
+          "cases": 2,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 1
+        },
+        "family-trap": {
+          "cases": 4,
+          "hitAt1": 0,
+          "hitAt3": 0.25,
+          "hitAt5": 0.25,
+          "mrr": 0.125
+        },
+        "follow-up": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "known-conflict": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "lineup": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 1
+        },
+        "pair": {
+          "cases": 6,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "pl": {
+          "cases": 31,
+          "hitAt1": 0.129,
+          "hitAt3": 0.161,
+          "hitAt5": 0.161,
+          "mrr": 0.145
+        },
+        "positioning": {
+          "cases": 2,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "possibly-unanswerable": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "product-example": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "single": {
+          "cases": 27,
+          "hitAt1": 0.222,
+          "hitAt3": 0.259,
+          "hitAt5": 0.259,
+          "mrr": 0.241
+        },
+        "slang": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "variant-trap": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        }
+      },
+      "misses": [
+        "smash-vertex05",
+        "net-viper-26",
+        "defense-nox-ml10",
+        "spin-metalbone",
+        "stability-wilson-blade",
+        "who-for-oxdog-tourx",
+        "shape-hirostar-redstone",
+        "stiffness-starvie-triton",
+        "beginner-head-vibe",
+        "power-access-kuikma",
+        "handling-royal-whip",
+        "vibration-siux-diablo",
+        "control-drop-shot-axion",
+        "core-dunlop-fx-pro",
+        "other-brands-pearl",
+        "takeaway-volt-900",
+        "smash-at10-attack-12k",
+        "defense-wilson-bela-pro",
+        "cmp-viper-veron",
+        "cmp-extreme-motion-viper",
+        "cmp-at10-12k-18k",
+        "cmp-power-oxdog",
+        "cmp-comfort-varlion-sw",
+        "followup-net",
+        "slang-bandeja-viper",
+        "durability-starvie-raptor"
+      ]
+    },
+    "aspectOnlyPolishGlossary": {
+      "overall": {
+        "cases": 33,
+        "hitAt1": 0.545,
+        "hitAt3": 0.697,
+        "hitAt5": 0.727,
+        "mrr": 0.627
+      },
+      "byTag": {
+        "broad": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "comfort": {
+          "cases": 2,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 1
+        },
+        "comparison-section": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 1
+        },
+        "configuration": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 1
+        },
+        "en": {
+          "cases": 2,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 1
+        },
+        "family-trap": {
+          "cases": 4,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 0.5
+        },
+        "follow-up": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "known-conflict": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 1
+        },
+        "lineup": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 1
+        },
+        "pair": {
+          "cases": 6,
+          "hitAt1": 0,
+          "hitAt3": 0.5,
+          "hitAt5": 0.5,
+          "mrr": 0.25
+        },
+        "pl": {
+          "cases": 31,
+          "hitAt1": 0.516,
+          "hitAt3": 0.677,
+          "hitAt5": 0.71,
+          "mrr": 0.603
+        },
+        "positioning": {
+          "cases": 2,
+          "hitAt1": 0.5,
+          "hitAt3": 0.5,
+          "hitAt5": 0.5,
+          "mrr": 0.5
+        },
+        "possibly-unanswerable": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "product-example": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "single": {
+          "cases": 27,
+          "hitAt1": 0.667,
+          "hitAt3": 0.741,
+          "hitAt5": 0.778,
+          "mrr": 0.711
+        },
+        "slang": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "mrr": 0
+        },
+        "variant-trap": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "mrr": 0.5
+        }
+      },
+      "misses": [
+        "defense-nox-ml10",
+        "spin-metalbone",
+        "beginner-head-vibe",
+        "control-drop-shot-axion",
+        "cmp-viper-veron",
+        "cmp-extreme-motion-viper",
+        "followup-net",
+        "slang-bandeja-viper",
+        "durability-starvie-raptor"
+      ]
+    }
+  }
+}
