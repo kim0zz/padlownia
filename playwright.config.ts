@@ -7,7 +7,8 @@ export default defineConfig({
   workers: 1,
   timeout: 30000,
   use: { baseURL: 'http://127.0.0.1:3100', trace: 'retain-on-failure' },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'], channel: process.env.PLAYWRIGHT_CHANNEL || 'msedge' } }],
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'], channel: process.env.PLAYWRIGHT_CHANNEL || 'msedge',
+    ...(process.env.PLAYWRIGHT_EXECUTABLE ? { launchOptions: { executablePath: process.env.PLAYWRIGHT_EXECUTABLE } } : {}) } }],
   webServer: {
     command: 'npm run dev --workspace @padlownia/web -- --port 3100',
     url: 'http://127.0.0.1:3100',
