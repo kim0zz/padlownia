@@ -16,6 +16,11 @@
 .source-info-panel { position: absolute; z-index: 20; top: 100%; left: 0; min-width: 240px; max-width: min(320px, 90vw); background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-small); box-shadow: var(--shadow-popover); padding: var(--space-3); font-size: var(--text-sm); font-weight: var(--weight-regular); text-align: left; overflow-wrap: anywhere; }
 .source-info-panel > * + * { margin-top: var(--space-2); }
 .source-info-panel p { margin-bottom: 0; }
+/* Phones: the panel becomes a sheet pinned to the bottom of the screen, so it can never leave the viewport.
+   The repeated class only raises specificity above the column-specific placements in catalogue/comparison CSS. */
+@media (max-width: 640px) {
+  .source-info[open] .source-info-panel.source-info-panel.source-info-panel { position: fixed; top: auto; left: var(--space-4); right: var(--space-4); bottom: var(--space-4); z-index: 60; min-width: 0; max-width: none; }
+}
 .source-info-claim { font-weight: var(--weight-semibold); }
 .source-info-date { color: var(--muted); font-size: var(--text-xs); }
 .source-info-dev { color: var(--muted); font-size: var(--text-xs); }

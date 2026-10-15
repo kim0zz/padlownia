@@ -69,7 +69,19 @@ svg { flex-shrink: 0; }
   .site-footer { margin: 0 20px; flex-direction: column; align-items: start; gap: 16px; padding-top: 22px; }
 }
 @media (max-width: 640px) {
-  .header-inner nav { gap: var(--space-4); }
+  .header-inner nav { gap: var(--space-4); min-width: 0; }
+}
+/* Narrow phones: keep the header inside the viewport regardless of the system font's width. */
+@media (max-width: 420px) {
+  .header-inner { padding: 0 16px; gap: var(--space-3); }
+  .header-inner nav { gap: var(--space-3); }
+  .wordmark { font-size: var(--text-lg); gap: 8px; }
+  .wordmark-dot { margin-left: -8px; }
+}
+@media (max-width: 360px) {
+  .wordmark-text, .wordmark-dot { display: none; }
+}
+@media (max-width: 640px) {
   h1 { font-size: var(--text-2xl); }
 }
 @media (prefers-reduced-motion: reduce) {

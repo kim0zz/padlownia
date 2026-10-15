@@ -22,7 +22,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return <html lang="pl"><body>
     <a className="skip-link" href="#main">Przejdź do treści</a>
     <ComparisonProvider><header className="site-header"><div className="header-inner">
-      <Link href="/" className="wordmark" aria-label="Padłownia — strona główna"><span className="brand-mark" aria-hidden="true">p.</span>padłownia<span className="wordmark-dot">.</span></Link>
+      <Link href="/" className="wordmark" aria-label="Padłownia — strona główna"><span className="brand-mark" aria-hidden="true">p.</span><span className="wordmark-text">padłownia</span><span className="wordmark-dot">.</span></Link>
       <nav aria-label="Nawigacja główna"><Link href="/" className="nav-link">Katalog</Link><ComparisonNav /></nav>
       {dev && <span className="environment-label">Wersja developerska</span>}
     </div></header>
