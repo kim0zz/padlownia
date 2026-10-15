@@ -191,7 +191,7 @@ test('weight, year and shape filters combine, with sorting and the clear link', 
 test('"Tylko z ocenami" and sorting are applied from the URL and from the controls', async ({ page }) => {
   await page.goto('/?rated=1');
   await expect(visibleCards(page)).toHaveCount(1);
-  await expect(page.getByLabel('Tylko z ocenami')).toBeChecked();
+  await expect(page.getByLabel('Tylko z ocenami').filter({ visible: true })).toBeChecked();
   await page.goto('/');
   await expect(visibleCards(page).first()).toBeVisible();
   await hydrated(page);
@@ -201,7 +201,7 @@ test('"Tylko z ocenami" and sorting are applied from the URL and from the contro
   await expect(firstLink).toHaveAccessibleName('Zobacz profil TESTLAB Vector Lite 2026');
   await page.goto('/?sort=nonsense&weight=999');
   await expect(visibleCards(page)).toHaveCount(6);
-  await expect(page.getByLabel('Sortuj')).toHaveValue('newest');
+  await expect(page.getByLabel('Sortuj').filter({ visible: true })).toHaveValue('newest');
 });
 
 test('the whole card opens the profile, while the source popover and the comparison button stay independent', async ({ page }) => {

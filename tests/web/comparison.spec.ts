@@ -303,6 +303,8 @@ test('"Tylko różnice" hides identical rows and the identity header stays under
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(comparisonPath(control2026, pro2026));
   const rows = comparison(page).locator('.comparison-row:visible');
+  // Wait for the streamed content to replace the loading fallback before counting rows.
+  await expect(rows.first()).toBeVisible();
   const before = await rows.count();
   await page.getByRole('checkbox', { name: 'Tylko różnice' }).check();
   // Orbit Control and Orbit Pro differ in shape and mass; balance, core and surface are empty on both sides.
