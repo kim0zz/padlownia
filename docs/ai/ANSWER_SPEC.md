@@ -1,6 +1,6 @@
-# Specyfikacja odpowiedzi asystenta — wersja robocza v0 (15.10.2026)
+# Specyfikacja odpowiedzi asystenta — v1 (15.10.2026)
 
-Dla każdego typu pytania opisuję, co asystent rozpoznaje, co pobiera, co pokazuje i jak brzmi odpowiedź. Podstawa: decyzje P-002–P-005, P-011, P-024, P-032–P-039. **Status: do Twojej akceptacji.** Pytania otwarte są na końcu.
+Dla każdego typu pytania opisuję, co asystent rozpoznaje, co pobiera, co pokazuje i jak brzmi odpowiedź. Podstawa: decyzje P-002–P-005, P-011, P-024, P-032–P-044. **Status: pytania A–F rozstrzygnięte przez właściciela 15.10.2026.** Otwarte zostaje tylko pytanie 1 (prawdziwe pytania znajomych).
 
 ## Zasady wspólne dla wszystkich odpowiedzi
 
@@ -55,8 +55,8 @@ Dla każdego typu pytania opisuję, co asystent rozpoznaje, co pobiera, co pokaz
   - „dużo mocy” → `power_ceiling` / `power`;
   - „wybaczająca” → `sweet_spot`, `off_center_stability` / `forgiveness`;
   - „dla początkującego” → poziom = beginner, wysoki `power_accessibility`.
-  Progi do ustalenia na danych (pytanie A).
-- **Pokazujemy:** 3–8 kart `racket_card`, posortowanych według zadanej cechy w **jednej** skali (tej, którą wybrał filtr) + informacja, ile rakiet pominięto, bo nie mają tej oceny.
+  Progi do ustalenia na danych. Domyślnie oceny padel.how (P-040).
+- **Pokazujemy:** do 8 kart `racket_card` (P-043), posortowanych według zadanej cechy w skali padel.how. Pod spodem osobna lista „Inne rakiety wg PadelTrue” dla rakiet bez ocen padel.how (P-040). Nigdy jedna lista z obu skal.
 - **Tekst:** 1–2 zdania, jak rozumiemy „miękka” i skąd to wiemy („wg indeksu sztywności padel.how, to model redakcji, nie pomiar”).
 - **Brak wyników:** mówimy, który filtr eliminuje wszystko, i proponujemy jego poluzowanie.
 
@@ -67,9 +67,16 @@ Dla każdego typu pytania opisuję, co asystent rozpoznaje, co pobiera, co pokaz
   - „atak / lewa strona” → `power_ceiling`, rotacja;
   - „obrona / prawa strona” → kontrola, obrona;
   - poziom → `player_level`, `demand`.
-- **Ranking (proponowane ograniczenie, czeka na potwierdzenie):** dopasowanie liczone z **ocen podawanych przez jedno źródło** i wag wynikających z profilu. Nie powstaje żadna „ocena Padłowni” pokazywana jako liczba; pokazujemy kolejność i powody. Rakiety bez ocen w wybranym źródle są pominięte, z informacją o tym.
-- **Pokazujemy:** 3–5 kart w kolejności dopasowania, przy każdej 2–3 powody („komfort 8/10 i sztywność 38/100 wg padel.how”) i jeden fragment recenzji.
-- **Tekst:** jak zrozumieliśmy Twój profil (żeby można było poprawić: „Zakładam poziom średni i ból łokcia — czy dobrze?”) i ograniczenia („nie testowaliśmy rakiet sami; ranking opiera się na ocenach padel.how”).
+- **Najpierw krótka ankieta (P-044).** Zanim padnie rekomendacja, asystent zawsze dopytuje o brakujące elementy profilu, jednym ekranem z odpowiedziami do kliknięcia:
+  - poziom: początkujący / średni / zaawansowany;
+  - strona kortu: lewa / prawa / obie;
+  - styl: atak / obrona / wszechstronny;
+  - dolegliwości ręki/łokcia: tak / nie;
+  - opcjonalnie: preferowana waga / marka / „bez marki X”.
+  Pytamy tylko o to, czego jeszcze nie wiemy. Ankieta jest deterministyczna, bez modelu, więc nic nie kosztuje. Odpowiedzi pamiętamy do końca rozmowy (P-037), więc kolejne rekomendacje już nie pytają.
+- **Ranking (P-033, potwierdzone):** kolejność liczona z **ocen padel.how** (P-040) i wag wynikających z profilu. Nie pokazujemy żadnej liczby typu „dopasowanie 87%” ani własnej „oceny Padłowni”, tylko kolejność i powody. Rakiety bez ocen padel.how są w osobnej liście wg PadelTrue albo pominięte, z informacją o tym.
+- **Pokazujemy:** 3–5 kart w kolejności dopasowania (P-043), przy każdej 2–3 powody („komfort 8/10 i sztywność 38/100 wg padel.how”) i jeden fragment recenzji.
+- **Tekst:** podsumowanie profilu z ankiety i ograniczenia („nie testowaliśmy rakiet sami; kolejność opiera się na ocenach redakcji padel.how”).
 - **Kontynuacja:** „pokaż lżejsze”, „bez Babolata”, „porównaj dwie pierwsze” → I6 / I3.
 
 ### I6. Kontynuacja
@@ -88,7 +95,8 @@ Dla każdego typu pytania opisuję, co asystent rozpoznaje, co pobiera, co pokaz
 ### I8. Poza zakresem
 *Buty, zasady gry, technika, kontuzje, ceny „dziś”, sklepy, inne sporty*
 - **Odpowiedź:** krótko, czym asystent się zajmuje (rakiety: parametry, oceny, recenzje, porównania), i ewentualnie przekierowanie do katalogu.
-- **Ceny:** w danych są tylko ceny z dnia pobrania (snapshot). Na razie nie odpowiadamy o ceny (pytanie C).
+- **Ceny:** w danych są tylko ceny z dnia pobrania (snapshot). Na razie ich nie podajemy (P-041): „Nie mam aktualnych cen; sprawdź w sklepie.”
+- **Technika, zasady, taktyka:** poradniki padel.how dołączymy później jako osobny tryb (P-042). Na razie krótka informacja, że asystent zajmuje się rakietami.
 - **Zdrowie** („boli mnie łokieć”) w kontekście wyboru rakiety jest OK (komfort, sztywność). Porad medycznych nie dajemy.
 
 ### I9. Stany systemu
@@ -107,14 +115,19 @@ Dla każdego typu pytania opisuję, co asystent rozpoznaje, co pobiera, co pokaz
 | Walidacja odpowiedzi | testy kontraktu (`tests/ai/gateway.test.ts`) | jest |
 | Odpowiedzi end-to-end | po wyborze modelu: Twoja ocena próbki + automatyczna walidacja | później (P-039) |
 
-## Pytania otwarte do Ciebie
+## Decyzje właściciela (15.10.2026)
+
+| # | Pytanie | Decyzja |
+|---|---|---|
+| A | Domyślne źródło ocen | padel.how domyślnie, PadelTrue jako osobna lista, nigdy jeden ranking z obu skal (P-040) |
+| B | Własna liczbowa ocena w rankingu | Nie. Tylko kolejność i powody z ocen źródła (P-033) |
+| C | Ceny z dnia pobrania | Na razie pomijamy (P-041) |
+| D | Poradniki padel.how | Później, jako osobny tryb (P-042) |
+| E | Liczba wyników | Wyszukiwanie do 8, rekomendacja 3–5 z powodami (P-043) |
+| F | Brakujący profil gracza | **Zawsze dopytać** krótką ankietą przed rekomendacją (P-044). Inaczej niż moja rekomendacja |
+
+## Nadal otwarte
 
 | # | Pytanie | Moja rekomendacja |
 |---|---|---|
-| A | **Ranking i „miękka / mocna”:** które źródło ocen jest domyślne? padel.how (217 rakiet, 10 kategorii, ocena redakcji) czy PadelTrue (281 rakiet, 5 kategorii, wyliczane z parametrów)? | padel.how domyślnie (bogatsze, z recenzją), PadelTrue jako druga lista „inne rakiety wg PadelTrue”. Nigdy nie mieszamy obu w jednym rankingu. |
-| B | **Potwierdzenie ograniczenia do P-033:** ranking z ocen źródeł i dopasowania, bez własnej liczbowej „oceny Padłowni”? | Tak. Inaczej łamiemy zasadę „nie wymyślamy ocen” z `AGENTS.md`. |
-| C | **Ceny:** pokazywać ceny z dnia pobrania (z datą) czy pomijać? | Na razie pomijać. Ceny szybko się starzeją, a nie mamy aktualizacji. |
-| D | **Poradniki padel.how** (371 dokumentów: technika, zasady, taktyka): włączyć później do asystenta? | Później, jako osobny tryb. Na start skupiamy się na rakietach. |
-| E | **Ile wyników** w wyszukiwaniu i rekomendacji? | Wyszukiwanie: do 8 kart. Rekomendacja: 3–5 z powodami. |
-| F | **Profil gracza:** dopytywać o brakujące informacje (poziom, strona kortu) przed rekomendacją czy zgadywać i pokazać założenia? | Pokazać założenia i od razu dać wynik. Dopytać tylko, gdy nie wiemy nic. |
 | 1 | **Prawdziwe pytania znajomych** (20–30) | Nadal najważniejsze. Każde przypiszę do typu I1–I9 i zrobię z nich zestaw testowy. |
