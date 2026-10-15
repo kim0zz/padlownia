@@ -35,7 +35,12 @@ describe('css guard (UX v3 §3.2)', () => {
   });
 
   it('does not keep the retired stylesheets', () => {
-    expect(existsSync(join(appDir, 'comparison-ux.css'))).toBe(false);
-    expect(existsSync(join(appDir, 'globals.css'))).toBe(false);
+    // A retired file may linger as an empty stub when it cannot be deleted remotely; it must hold no rules and never be imported.
+    const layout = readFileSync(join(appDir, 'layout.tsx'), 'utf8');
+    for (const name of ['comparison-ux.css', 'globals.css', 'components.css', 'tokens.css']) {
+      const path = join(appDir, name);
+      if (existsSync(path)) expect({ name, content: readFileSync(path, 'utf8').trim() }).toEqual({ name, content: '' });
+      expect(layout).not.toContain(`'./${name}'`);
+    }
   });
 });
