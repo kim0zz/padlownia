@@ -10,6 +10,9 @@
 /* Picker and combobox */
 .comparison-picker { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) auto; gap: 12px; align-items: end; margin: 0; padding: 16px 0; }
 .comparison-change { margin: 0 0 var(--space-3); background: var(--forest-soft); padding: 0 16px; border: 1px solid var(--line); border-radius: 8px; }
+.comparison-change:not([open]) { margin: 0; padding: 0; border: 0; background: none; }
+/* Closed: the header's "Zmień" button is the visible control; the summary appears only on keyboard focus. */
+.comparison-change:not([open]) > summary:not(:focus-visible) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .comparison-change > summary { padding: 12px 0; min-height: 44px; font-size: var(--text-sm); font-weight: var(--weight-bold); }
 .racket-combobox { position: relative; min-width: 0; }
 .racket-combobox > label { display: block; font-size: var(--text-xs); font-weight: var(--weight-semibold); margin-bottom: 6px; }

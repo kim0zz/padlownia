@@ -60,7 +60,7 @@ test('text search and dropdown select precise IDs with keyboard, and editing nev
   await page.getByRole('option').click();
   await comparisonPicker(page).getByRole('button', { name: 'Porównaj rakiety', exact: true }).click();
   await expect(comparison(page)).toBeVisible();
-  await visibleText(page, 'Zmień porównywane rakiety', { exact: true }).click();
+  await page.getByRole('link', { name: 'Zmień porównywane rakiety' }).click();
   await left.fill('no-such-model');
   await expect(visibleText(page, 'Brak wyników. Spróbuj innej nazwy.', { exact: true })).toBeVisible();
   await expect(comparisonPicker(page).locator('input[name="left"]')).toHaveValue('');
@@ -150,7 +150,7 @@ test('profile and GET search navigation retain selection and the URL reproduces 
   await page.reload();
   await expect(comparison(page)).toBeVisible();
   await expect(tray(page)).toHaveCount(0);
-  await visibleText(page, 'Zmień porównywane rakiety', { exact: true }).click();
+  await page.getByRole('link', { name: 'Zmień porównywane rakiety' }).click();
   await expect(comparisonPicker(page).getByLabel('Rakieta 1 · model, wariant i rok', { exact: true })).toHaveValue(labels.control2026);
   await expect(comparisonPicker(page).getByLabel('Rakieta 2 · model, wariant i rok', { exact: true })).toHaveValue(labels.control2025);
   const identities = comparison(page).locator('.comparison-header-cell');
@@ -218,7 +218,7 @@ test('same-route removal clears the search selection and explicit URLs replace s
   await expect(navigation.getByRole('link', { name: 'Porównaj (2/2)', exact: true })).toBeVisible();
   await page.goto(comparisonPath(pro2026, unknownYear));
   await expect(comparison(page)).toBeVisible();
-  await visibleText(page, 'Zmień porównywane rakiety', { exact: true }).click();
+  await page.getByRole('link', { name: 'Zmień porównywane rakiety' }).click();
   await expect(leftSelect).toHaveValue(labels.pro2026);
   await expect(rightSelect).toHaveValue('TESTLAB Arc · Standard · Rok nieznany');
   const selected = await page.evaluate(() => JSON.parse(sessionStorage.getItem('padlownia:comparison:v1')!));

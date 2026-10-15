@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 function openPicker(focus: boolean) {
   const picker = document.getElementById('change-pair');
   if (!(picker instanceof HTMLDetailsElement)) return false;
+  if (focus && picker.open) { picker.open = false; return true; }
   picker.open = true;
   picker.scrollIntoView({ block: 'start' });
   if (focus) picker.querySelector('input')?.focus({ preventScroll: true });
