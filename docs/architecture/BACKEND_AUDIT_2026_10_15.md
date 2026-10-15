@@ -21,7 +21,7 @@ Fundament danych jest **solidny i bezpieczny**, ale **przeinwestowany względem 
 
 ### B2. Ścieżka odczytu: każdy widok czyta i przesyła cały katalog
 `getCatalogue()` przy **każdym** żądaniu tworzy nową pulę `pg`, wykonuje zapytanie o tożsamość środowiska, a potem `published_catalogue()` — jedną funkcję zwracającą **wszystkie 444 rakiety ze wszystkimi obserwacjami i ocenami** jako JSON (skorelowane podzapytania per rakieta i per obserwacja). Następnie zamyka pulę. Profil jednej rakiety i porównanie dwóch też ściągają całość i filtrują w JS. Strony są `force-dynamic`, bez żadnego cache.
-- Skutek (hipoteza do zmierzenia): czas odpowiedzi rzędu sekund na Supabase Free, który będzie rósł z katalogiem, oraz zbędne zestawianie TLS przy każdym wejściu.
+- **Zmierzone 15.10.2026 na Dev:** `published_catalogue()` wykonuje się **~900 ms** (`EXPLAIN ANALYZE`: 83,9 tys. trafień w bufor, zapis do plików tymczasowych) i zwraca **5,7 MB** JSON-a dla 444 rakiet. Do tego nowa pula i TLS przy każdym żądaniu. Ta sama aplikacja na lokalnym eksporcie (`CATALOGUE_MODE=snapshot`) renderuje stronę w **20–50 ms** — cały koszt leży w ścieżce odczytu z bazy.
 - Dane zmieniają się wyłącznie przy publikacji wydania — idealny przypadek dla cache kluczowanego `active_release_id`.
 
 ### B3. Słabe łączenie źródeł — porównywanie „dwóch źródeł tej samej rakiety” prawie nie występuje
