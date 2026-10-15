@@ -2,12 +2,9 @@
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 
-export type RacketOption = { id: string; label: string; brand: string; year: number | null };
-const fold = (text: string) => text.normalize('NFKD').replace(/\p{M}/gu, '').toLocaleLowerCase('pl').replaceAll('ł', 'l');
-export function searchRacketOptions(options: RacketOption[], query: string) {
-  const words = fold(query).trim().split(/\s+/).filter(Boolean);
-  return options.filter((option) => words.every((word) => fold(option.label).includes(word)));
-}
+import { searchRacketOptions, type RacketOption } from '../lib/search';
+
+export { searchRacketOptions, type RacketOption };
 
 export function RacketCombobox({ name, label, options, initialId }: { name: string; label: string; options: RacketOption[]; initialId: string }) {
   const listId = useId();

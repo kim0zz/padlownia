@@ -1,11 +1,14 @@
 import Link from 'next/link';
 import type { CatalogueEntry } from '@padlownia/database';
-import { claimLabel, formatWeight, shapeLabels } from '../lib/catalogue';
+import { claimLabel, formatWeight, isUnverifiedClaim, shapeLabels } from '../lib/catalogue';
 import { SourceCitation } from './evidence';
 import { AddToComparison } from './comparison-selection';
 import { racketLabel } from '../lib/comparison';
-import { RacketVisual } from './racket-visual';
-import { approvedImageFor } from '../lib/catalogue-images';
+import { displayBrand, displayModel, displayVariant } from '../lib/display';
+import { ImageCredit, RacketVisual } from './racket-visual';
+import { approvedImageFor, type IllustratedCatalogueEntry, type PublicRacketImage } from '../lib/catalogue-images';
+import { Badge } from './ui/badge';
+import { SourceInfo } from './ui/source-info';
 
 export { SourceCitation, RatingCitation, SourceLicenceNotice } from './evidence';
 
@@ -39,18 +42,48 @@ export function SpecSummary({ entry, field }: { entry: CatalogueEntry; field: 's
   </dd></div>;
 }
 
-export function RacketCard({ entry, index }: { entry: CatalogueEntry; index: number }) {
-  const hasConflict = entry.specs.some((spec) => spec.conflict);
-  return <article className="racket-card">
-    <div className="card-heading"><span className="card-number">{String(index + 1).padStart(2, '0')}</span><span className="year-badge">{entry.modelYear ?? 'Rok nieznany'}</span></div>
-    <p className="racket-brand">{entry.brand}</p>
-    <h3><Link href={`/rakiety/${encodeURIComponent(entry.id)}`}>{entry.model}</Link></h3>
-    <p className="racket-variant">{entry.variant || 'Wariant nieustalony'}</p>
-    <RacketVisual entry={{ image: approvedImageFor(entry) }} />
-    <dl className="card-specs"><SpecSummary entry={entry} field="shape" /><SpecSummary entry={entry} field="weight" /></dl>
-    <div className="card-bottom">{hasConflict ? <span className="conflict-label">Rozbieżne źródła</span> : <span className="muted">Parametry ze źródłami</span>}
-      <Link className="profile-link" href={`/rakiety/${encodeURIComponent(entry.id)}`} aria-label={`Zobacz profil ${entry.brand} ${entry.model} ${entry.variant ?? ''} ${entry.modelYear ?? 'rok nieznany'}`}><Arrow /></Link>
+/** One line of key facts ("Okrągła · 360–375 g") with the shared source popover; the details stay one click away. */
+function CardFacts({ entry, image }: { entry: IllustratedCatalogueEntry; image?: PublicRacketImage }) {
+  const shapeSpec = entry.specs.find((spec) => spec.selected && spec.key === 'shape');
+  const weightSpec = entry.specs.find((spec) => spec.selected && (spec.key === 'weight' || spec.key === 'weight_g'));
+  const facts = [
+    entry.shape ? shapeLabels[entry.shape] ?? entry.shape : null,
+    entry.weightMinG !== null || entry.weightMaxG !== null ? formatWeight(entry.weightMinG, entry.weightMaxG) : null,
+  ].filter((fact): fact is string => fact !== null);
+  const sources = ([['Kształt', shapeSpec], ['Masa', weightSpec]] as const).flatMap(([name, spec]) => spec ? [{ evidence: spec.evidence, claim: `${name}: ${claimLabel(spec)}` }] : []);
+  const unverified = [shapeSpec, weightSpec].some((spec) => spec && isUnverifiedClaim(spec));
+  return <>
+    <div className="card-facts">
+      <p className={facts.length ? 'card-facts-text' : 'card-facts-text muted'}>{facts.length ? facts.join(' · ') : 'Kształt i masa nieustalone'}</p>
+      {(sources.length > 0 || image) && <SourceInfo label="Źródło: kształt i masa" items={sources}>
+        {image && <p className="source-info-image">Zdjęcie: <ImageCredit image={image} /></p>}
+      </SourceInfo>}
     </div>
-    <AddToComparison id={entry.id} releaseId={entry.releaseId} label={racketLabel(entry)} />
+    {unverified && <Badge tone="warning"><span title="Przypisane producentowi — niezweryfikowane">Niezweryfikowane</span></Badge>}
+  </>;
+}
+
+/** Catalogue card; also the `racket_card` block of the structured view. The whole card opens the profile via a stretched link. */
+export function RacketCard({ entry }: { entry: IllustratedCatalogueEntry }) {
+  const hasConflict = entry.specs.some((spec) => spec.conflict);
+  const image = approvedImageFor(entry);
+  const ratingSources = [...new Set(entry.ratings.map((rating) => rating.evidence.sourceName))];
+  const variant = displayVariant(entry.variant);
+  return <article className="racket-card">
+    <div className="card-top">
+      <p className="racket-brand">{displayBrand(entry.brand)}</p>
+      {entry.modelYear === null ? <Badge tone="warning">Rok nieznany</Badge> : <Badge>{entry.modelYear}</Badge>}
+    </div>
+    <div className="card-main">
+      <div className="card-name">
+        <h3><Link href={`/rakiety/${encodeURIComponent(entry.id)}`} aria-label={`Zobacz profil ${entry.brand} ${entry.model} ${entry.variant ?? ''} ${entry.modelYear ?? 'rok nieznany'}`}>{displayModel(entry)}</Link></h3>
+        <p className={variant ? 'racket-variant' : 'racket-variant muted'}>{variant ?? 'wariant nieustalony'}</p>
+      </div>
+      {image && <RacketVisual compact entry={{ image }} />}
+    </div>
+    <CardFacts entry={entry} image={image} />
+    <p className="card-ratings">{ratingSources.length ? `Oceny: ${ratingSources.join(', ')}` : 'Brak ocen'}</p>
+    {hasConflict && <Badge tone="warning">Rozbieżne źródła</Badge>}
+    <AddToComparison id={entry.id} releaseId={entry.releaseId} label={racketLabel(entry)} compact />
   </article>;
 }

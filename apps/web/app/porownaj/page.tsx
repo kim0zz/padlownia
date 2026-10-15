@@ -19,7 +19,7 @@ export default async function ComparisonPage({ searchParams }: { searchParams: P
   const result = await getCatalogue();
   const request = resolveComparison(params, result.entries);
   const dev = showDevDetails();
-  const options = filterCatalogue(result.entries, parseFilters({}));
+  const options = filterCatalogue(result.entries, parseFilters({ sort: 'name' }));
   return <main id="main" className="main-shell comparison-page">
     <PageHeader title="Porównanie" back={{ href: '/', label: 'Katalog rakiet' }} actions={<ClearComparison />} />
     {result.status !== 'ready' ? <Unavailable setup={result.status === 'setup'} /> : <>

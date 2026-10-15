@@ -74,11 +74,12 @@ export function ClearComparison() {
   return context?.selection ? <Link className="text-button" href="/porownaj" onClick={context.clear}>Wyczyść wybór</Link> : null;
 }
 
-export function AddToComparison({ id, releaseId, label }: SelectionItem & { releaseId: string }) {
+export function AddToComparison({ id, releaseId, label, compact = false }: SelectionItem & { releaseId: string; compact?: boolean }) {
+  const size = compact ? ' comparison-add-compact' : '';
   const context = useContext(Context);
-  if (!context) return <Link className="button button-secondary comparison-add" href={comparisonUrl({ releaseId, items: [{ id, label }] })}>Wybierz do porównania</Link>;
+  if (!context) return <Link className={`button button-secondary comparison-add${size}`} href={comparisonUrl({ releaseId, items: [{ id, label }] })}>Wybierz do porównania</Link>;
   const selected = context.selection?.releaseId === releaseId && context.selection.items.some((item) => item.id === id);
-  return <button type="button" className="button button-secondary comparison-add" disabled={!context.ready} aria-pressed={Boolean(selected)}
+  return <button type="button" className={`button button-secondary comparison-add${size}`} disabled={!context.ready} aria-pressed={Boolean(selected)}
     aria-label={`${selected ? 'Usuń z porównania' : 'Dodaj do porównania'}: ${label}`} onClick={() => context.toggle(releaseId, { id, label })}>
     {selected ? 'Wybrano do porównania' : 'Dodaj do porównania'} <span aria-hidden="true">{selected ? '✓' : '+'}</span>
   </button>;

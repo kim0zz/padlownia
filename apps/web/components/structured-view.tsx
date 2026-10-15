@@ -14,6 +14,6 @@ export function StructuredView({ input, entries, dev = false }: { input: unknown
   return <>{result.payload.blocks.map((block, index) => {
     if (block.type === 'racket_comparison') return <RacketComparison key={index} left={byId.get(block.racketIds[0])!} right={byId.get(block.racketIds[1])!} dev={dev} />;
     if (block.type === 'racket_specs') return <RacketSpecs key={index} entry={byId.get(block.racketId)!} dev={dev} />;
-    return <RacketCard key={index} entry={byId.get(block.racketId)!} index={index} />;
+    return <RacketCard key={index} entry={byId.get(block.racketId)!} />;
   })}<SourceLicenceNotice entries={entries.filter((entry) => usedIds.has(entry.id))} /></>;
 }
