@@ -12,7 +12,14 @@ Dokument roboczy przygotowany pod nieobecność właściciela. Nic tu nie zmieni
 
 ## Pytania do Ciebie
 
-Odpowiedzi na nie blokują kolejne kroki. Przy każdym podaję swoją rekomendację.
+**Odpowiedzi właściciela z 15.10.2026** (zapisane jako P-033…P-039 w `DECISIONS.md`):
+- **2 → pełne rekomendacje**, także rankingi dla opisanego gracza. Proponowane ograniczenie do Twojego potwierdzenia: ranking z ocen podawanych przez źródła i dopasowania do cech, bez wymyślonej „oceny Padłowni”.
+- **3 →** zgodnie z rekomendacją. **4 →** zgodnie z rekomendacją. **5 →** zgodnie z rekomendacją.
+- **6 →** zgoda na benchmark do 5 zł, ale **dopiero po dopracowaniu zachowania asystenta i wyszukiwania** bez płatnych modeli. **7 →** konto OpenRouter później.
+- **8 →** zgodnie z rekomendacją. **9 →** zgodnie z rekomendacją. **10 →** stały pipeline.
+- **1 → otwarte.** Następny krok: specyfikacja odpowiedzi (`docs/ai/ANSWER_SPEC.md`).
+
+Pierwotna lista pytań z moimi rekomendacjami:
 
 | # | Pytanie | Moja rekomendacja |
 |---|---|---|
