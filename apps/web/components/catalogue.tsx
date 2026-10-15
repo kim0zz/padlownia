@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { claimLabel, formatWeight, isUnverifiedClaim, shapeLabels } from '../lib/catalogue';
+import { claimLabel, formatWeight, shapeLabels } from '../lib/catalogue';
 import { AddToComparison } from './comparison-selection';
 import { racketLabel } from '../lib/comparison';
 import { displayBrand, displayModel, displayVariant } from '../lib/display';
@@ -15,11 +15,12 @@ export function Arrow({ direction = 'right' }: { direction?: 'left' | 'right' })
 }
 
 /** The Supabase notice is technical information: shown only in developer mode. Fixture data is always labelled. */
-export function ModeNotice({ mode, dev = false }: { mode: 'fixture' | 'supabase'; dev?: boolean }) {
+export function ModeNotice({ mode, dev = false }: { mode: 'fixture' | 'snapshot' | 'supabase'; dev?: boolean }) {
   if (mode === 'supabase' && !dev) return null;
   return <aside className={`mode-notice ${mode === 'fixture' ? 'fixture-notice' : ''}`} aria-label="Pochodzenie danych">
     <span className="status-dot" aria-hidden="true" />
     {mode === 'fixture' ? <p><strong>Dane demonstracyjne.</strong> Syntetyczne rakiety i źródła do testów interfejsu. Nie opisują rzeczywistych produktów.</p>
+      : mode === 'snapshot' ? <p><strong>Lokalny snapshot.</strong> Kopia opublikowanego katalogu Dev odczytana z pliku — tylko do lokalnych testów.</p>
       : <p><strong>Supabase Dev.</strong> Wyświetlamy wyłącznie zatwierdzoną, opublikowaną wersję katalogu developerskiego.</p>}
   </aside>;
 }
@@ -41,7 +42,6 @@ function CardFacts({ entry, image }: { entry: IllustratedCatalogueEntry; image?:
     entry.weightMinG !== null || entry.weightMaxG !== null ? formatWeight(entry.weightMinG, entry.weightMaxG) : null,
   ].filter((fact): fact is string => fact !== null);
   const sources = ([['Kształt', shapeSpec], ['Masa', weightSpec]] as const).flatMap(([name, spec]) => spec ? [{ evidence: spec.evidence, claim: `${name}: ${claimLabel(spec)}` }] : []);
-  const unverified = [shapeSpec, weightSpec].some((spec) => spec && isUnverifiedClaim(spec));
   return <>
     <div className="card-facts">
       <p className={facts.length ? 'card-facts-text' : 'card-facts-text muted'}>{facts.length ? facts.join(' · ') : 'Kształt i masa nieustalone'}</p>
@@ -49,7 +49,6 @@ function CardFacts({ entry, image }: { entry: IllustratedCatalogueEntry; image?:
         {image && <p className="source-info-image">Zdjęcie: <ImageCredit image={image} /></p>}
       </SourceInfo>}
     </div>
-    {unverified && <Badge tone="warning"><span title="Przypisane producentowi — niezweryfikowane">Niezweryfikowane</span></Badge>}
   </>;
 }
 

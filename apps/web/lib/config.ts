@@ -1,4 +1,4 @@
-export type CatalogueConfig = { mode: 'fixture' } | { mode: 'supabase'; databaseUrl: string; projectRef: string };
+export type CatalogueConfig = { mode: 'fixture' } | { mode: 'snapshot'; path: string } | { mode: 'supabase'; databaseUrl: string; projectRef: string };
 export class CatalogueSetupError extends Error {
   constructor() { super('CATALOGUE_SETUP_REQUIRED'); }
 }
@@ -6,6 +6,11 @@ export class CatalogueSetupError extends Error {
 /** Credentials never leave server code. Validate both the intended dev environment and project identity. */
 export function resolveCatalogueConfig(env: Record<string, string | undefined>): CatalogueConfig {
   if (env.CATALOGUE_MODE === 'fixture') return { mode: 'fixture' };
+  // Local export of the published Dev catalogue (e.g. .local/catalogue-export.json); development only.
+  if (env.CATALOGUE_MODE === 'snapshot') {
+    if (env.APP_ENV !== 'development' || !env.CATALOGUE_SNAPSHOT_PATH?.trim()) throw new CatalogueSetupError();
+    return { mode: 'snapshot', path: env.CATALOGUE_SNAPSHOT_PATH.trim() };
+  }
   if (env.CATALOGUE_MODE !== 'supabase' || env.APP_ENV !== 'development') throw new CatalogueSetupError();
   const projectRef = env.DEV_SUPABASE_PROJECT_REF;
   if (!projectRef || !/^[a-z0-9]{20}$/.test(projectRef) || !env.WEB_DATABASE_URL) throw new CatalogueSetupError();

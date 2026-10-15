@@ -50,3 +50,35 @@ describe('server catalogue isolation', () => {
     expect(stubs.close).toHaveBeenCalledOnce();
   });
 });
+
+describe('local snapshot mode', () => {
+  const entry = (id: string, releaseId = 'release-a') => ({ id, releaseId, brand: 'TESTLAB', model: 'Orbit', variant: '', modelYear: 2026, shape: null, weightMinG: null, weightMaxG: null, balanceCm: null, core: null, surface: null, specs: [], ratings: [] });
+  it('reads a local export only in development with an explicit path', async () => {
+    const { mkdtempSync, writeFileSync } = await import('node:fs');
+    const { join } = await import('node:path');
+    const { tmpdir } = await import('node:os');
+    const path = join(mkdtempSync(join(tmpdir(), 'padlownia-snapshot-')), 'catalogue.json');
+    writeFileSync(path, JSON.stringify([entry('a'), entry('b')]));
+    vi.stubEnv('CATALOGUE_MODE', 'snapshot'); vi.stubEnv('APP_ENV', 'development'); vi.stubEnv('CATALOGUE_SNAPSHOT_PATH', path);
+    const result = await getCatalogue();
+    expect(result.status).toBe('ready');
+    expect(result.status === 'ready' && result.mode).toBe('snapshot');
+    expect(result.entries.map((item) => item.id)).toEqual(['a', 'b']);
+    expect(stubs.create).not.toHaveBeenCalled();
+    vi.stubEnv('APP_ENV', 'production');
+    expect(await getCatalogue()).toEqual({ status: 'setup', entries: [] });
+    vi.stubEnv('APP_ENV', 'development'); vi.stubEnv('CATALOGUE_SNAPSHOT_PATH', '');
+    expect(await getCatalogue()).toEqual({ status: 'setup', entries: [] });
+  });
+  it('rejects malformed, duplicated or mixed-release exports', async () => {
+    const { parseCatalogueSnapshot } = await import('../../apps/web/lib/catalogue-server');
+    expect(parseCatalogueSnapshot(JSON.stringify([entry('a')]))).toHaveLength(1);
+    for (const bad of ['{}', '[1]', JSON.stringify([entry('a'), entry('a')]), JSON.stringify([entry('a'), entry('b', 'release-b')]), JSON.stringify([{ ...entry('a'), specs: null }])]) {
+      expect(() => parseCatalogueSnapshot(bad)).toThrow();
+    }
+  });
+  it('a missing snapshot file is an unavailable state, not fixtures', async () => {
+    vi.stubEnv('CATALOGUE_MODE', 'snapshot'); vi.stubEnv('APP_ENV', 'development'); vi.stubEnv('CATALOGUE_SNAPSHOT_PATH', '/nonexistent/padlownia.json');
+    expect(await getCatalogue()).toEqual({ status: 'unavailable', entries: [] });
+  });
+});

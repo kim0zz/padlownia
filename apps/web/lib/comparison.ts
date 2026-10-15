@@ -15,7 +15,12 @@ export function canonicalSpecKey(key: string) {
 }
 
 /** Row order: the key parameters first, then everything else alphabetically by label. */
-export const SPEC_ORDER: readonly string[] = ['shape', 'weight', 'balance', 'core', 'surface', 'frame', 'thickness', 'player_level'];
+const vocab = (values: Record<string, string>) => Object.freeze(Object.assign(Object.create(null) as Record<string, string>, values));
+const firmnessLabels = vocab({ soft: 'Miękka', 'medium-soft': 'Średnio miękka', medium: 'Średnia', 'medium-hard': 'Średnio twarda', hard: 'Twarda' });
+const playerLevelLabels = vocab({ beginner: 'Początkujący', intermediate: 'Średniozaawansowany', advanced: 'Zaawansowany', professional: 'Profesjonalny', pro: 'Profesjonalny' });
+const textureLabels = vocab({ rough: 'Szorstka', not_rough: 'Gładka', smooth: 'Gładka' });
+
+export const SPEC_ORDER: readonly string[] = ['shape', 'weight', 'balance', 'firmness', 'core', 'surface', 'texture', 'frame', 'thickness', 'player_level'];
 
 const BASE_SPEC_KEYS: readonly string[] = ['shape', 'weight', 'balance', 'core', 'surface'];
 
@@ -55,9 +60,12 @@ export function specDisplayValue(spec: CatalogueSpec) {
   const key = canonicalSpecKey(spec.key);
   if (key === 'shape' && spec.normalizedText) return shapeLabels[spec.normalizedText] ?? spec.normalizedText;
   if (key === 'balance' && spec.normalizedText) {
-    const balanceLabels = Object.assign(Object.create(null) as Record<string, string>, { head_heavy: 'Na główkę', head_light: 'Na rączkę', even: 'Zrównoważony', medium: 'Średni', high: 'Wysoki', low: 'Niski' });
+    const balanceLabels = Object.assign(Object.create(null) as Record<string, string>, { head_heavy: 'Na główkę', head_light: 'Na rączkę', even: 'Zrównoważony', medium: 'Średni', high: 'Wysoki', low: 'Niski', medium_high: 'Średnio wysoki', medium_low: 'Średnio niski' });
     return balanceLabels[spec.normalizedText] ?? spec.normalizedText;
   }
+  // Source vocabularies with a closed set of values are translated; free text stays as the source wrote it.
+  const vocabulary = key === 'firmness' ? firmnessLabels : key === 'player_level' ? playerLevelLabels : key === 'texture' ? textureLabels : null;
+  if (vocabulary && spec.normalizedText && vocabulary[spec.normalizedText]) return vocabulary[spec.normalizedText]!;
   if (key === 'weight' && spec.unit === 'g') {
     const min = spec.valueMin ?? spec.numericValue;
     const max = spec.valueMax ?? spec.numericValue;

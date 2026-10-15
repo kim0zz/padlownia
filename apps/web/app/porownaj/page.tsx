@@ -23,7 +23,7 @@ export default async function ComparisonPage({ searchParams }: { searchParams: P
   return <main id="main" className="main-shell comparison-page">
     <PageHeader title="Porównanie" back={{ href: '/', label: 'Katalog rakiet' }} actions={<ClearComparison />} />
     {result.status !== 'ready' ? <Unavailable setup={result.status === 'setup'} /> : <>
-      {result.mode === 'fixture' && <ModeNotice mode={result.mode} />}
+      {result.mode !== 'supabase' && <ModeNotice mode={result.mode} />}
       <ComparisonFeedback status={request.status} />
       {options.length === 0 || !request.currentRelease ? <section className="empty-state"><h2>Brak danych do porównania.</h2><p>Katalog potrzebuje jednej opublikowanej wersji danych.</p></section> : <>
         {request.status === 'ready' ? <><details className="comparison-change" id="change-pair"><summary>Zmień porównywane rakiety</summary><ComparisonPicker entries={options} request={request} /></details><RememberComparison selection={{ releaseId: request.currentRelease, items: [request.left, request.right].map((id) => ({ id, label: racketLabel(result.entries.find((entry) => entry.id === id)!) })) }} /><StructuredView input={request.payload} entries={result.entries} dev={dev} /></>

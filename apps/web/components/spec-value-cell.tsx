@@ -9,7 +9,7 @@ import { SourceInfo } from './ui/source-info';
 export function specValueText(spec: CatalogueSpec): string {
   const value = specDisplayValue(spec);
   const key = canonicalSpecKey(spec.key);
-  return key === 'core' || key === 'surface' ? displayMaterial(value) ?? value : value;
+  return ['core', 'surface', 'frame', 'texture'].includes(key) ? displayMaterial(value) ?? value : value;
 }
 
 /**
@@ -22,8 +22,9 @@ export function SpecValueCell({ specs, observations = specs, specLabel, dev = fa
     {specs.length > 0 ? specs.map((spec) => <div className="comparison-value" key={spec.evidence.observationId}>
       <strong>{specValueText(spec)}</strong>
       <SourceInfo label={`Źródło: ${specLabel}`} items={[{ evidence: spec.evidence, claim: claimLabel(spec) }]} dev={dev} />
-      {isUnverifiedClaim(spec) && <Badge tone="warning"><span title={claimLabel(spec)}>Niezweryfikowane</span></Badge>}
-    </div>) : <p className="comparison-unknown">Brak danych</p>}
+      {/* Systemic for some sources (~1/3 of values), so a quiet marker rather than a warning; conflicts keep the warning tone. */}
+      {isUnverifiedClaim(spec) && <Badge><span title={claimLabel(spec)}>Niezweryfikowane</span></Badge>}
+    </div>) : <p className="comparison-unknown">{observations.some((spec) => spec.conflict) ? 'Źródła podają różne wartości' : 'Brak danych'}</p>}
     {observations.some((spec) => spec.conflict) && <p className="comparison-badges"><Badge tone="warning">Rozbieżne źródła</Badge></p>}
   </>;
 }

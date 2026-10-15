@@ -322,3 +322,17 @@ describe('profile rows of one racket (UX v3 §7.2)', () => {
     expect(entryRatingGroups(fixtureCatalogue[5]!)).toEqual([]);
   });
 });
+
+describe('real-data vocabularies (Dev export 2026-10-15)', () => {
+  it('translates closed vocabularies and keeps free text', async () => {
+    const { specDisplayValue } = await import('../../apps/web/lib/comparison');
+    const base = { rawValue: 'x', numericValue: null, valueMin: null, valueMax: null, unit: null, claimType: 'retailer_claim', validationStatus: 'valid', measurementContext: {}, selected: true, conflict: false, evidence: { observationId: 'o', sourceCode: 's', sourceName: 'S', sourceUrl: null, retrievedAt: '2026-10-14T00:00:00Z', path: '/', attribution: null } } as const;
+    const value = (key: string, normalizedText: string) => specDisplayValue({ ...base, key, normalizedText } as never);
+    expect(value('firmness', 'medium-hard')).toBe('Średnio twarda');
+    expect(value('player_level', 'advanced')).toBe('Zaawansowany');
+    expect(value('texture', 'rough')).toBe('Szorstka');
+    expect(value('texture', 'raised 3d spin pattern')).toBe('raised 3d spin pattern');
+    expect(value('balance', 'medium_high')).toBe('Średnio wysoki');
+    expect(value('firmness', '__proto__')).toBe('__proto__');
+  });
+});

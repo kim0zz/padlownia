@@ -47,11 +47,13 @@ describe('racket card (catalogue and racket_card block)', () => {
     expect(card(pro2026)).toContain('<span class="badge badge-warning">Rozbieżne źródła</span>');
     expect(card(control2026)).not.toContain('Rozbieżne źródła');
   });
-  it('marks an unverified manufacturer attribution', () => {
+  it('keeps an unverified manufacturer attribution in the source popover, not as a warning badge', () => {
+    // Real Dev data: ~40% of cards carry an unverified attribution, so a per-card warning badge is noise.
     const entry = structuredClone(control2026);
     entry.specs[0]!.evidence.attribution!.verified = false;
-    expect(card(entry)).toContain('Niezweryfikowane');
-    expect(card(control2026)).not.toContain('Niezweryfikowane');
+    expect(card(entry)).toContain('Przypisane producentowi — niezweryfikowane');
+    expect(card(entry)).not.toContain('badge-warning');
+    expect(card(control2026)).not.toContain('niezweryfikowane');
   });
   it('renders a thumbnail only for an approved image and no placeholder otherwise', () => {
     const withImage = card(control2026);

@@ -28,8 +28,9 @@ export default async function RacketPage({ params }: { params: Promise<{ id: str
   return <main id="main" className="main-shell profile-shell">
     <PageHeader back={{ href: '/', label: 'Katalog' }} title={displayModel(entry)}
       meta={<>
-        <p className={variant ? 'profile-variant' : 'profile-variant muted'}>{variant ?? 'Wariant nieustalony'}</p>
-        <p>{displayBrand(entry.brand)} · {entry.modelYear ?? <Badge tone="warning">Rocznik nieznany</Badge>}</p>
+        {/* Most source records carry no separate variant (it is part of the model name), so "unknown" goes to the meta line, not a subtitle. */}
+        {variant && <p className="profile-variant">{variant}</p>}
+        <p>{displayBrand(entry.brand)} · {entry.modelYear ?? <Badge tone="warning">Rocznik nieznany</Badge>}{!variant && <> · wariant nieustalony</>}</p>
       </>}
       actions={<AddToComparison id={entry.id} releaseId={entry.releaseId} label={racketLabel(entry)} />} />
     <ModeNotice mode={result.mode} dev={dev} />

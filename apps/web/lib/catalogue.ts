@@ -101,7 +101,7 @@ export const shapeLabels = labels({ round: 'Okrągła', teardrop: 'Łezka', diam
 export const specLabels = labels({
   shape: 'Kształt', weight: 'Masa', weight_g: 'Masa', balance: 'Balans', balance_cm: 'Balans',
   core: 'Rdzeń', surface: 'Powierzchnia', surface_material: 'Powierzchnia', frame: 'Rama',
-  thickness: 'Grubość', player_level: 'Poziom gracza',
+  thickness: 'Grubość', player_level: 'Poziom gracza', firmness: 'Twardość', texture: 'Faktura powierzchni',
 });
 export const claimLabels = labels({
   manufacturer_declared: 'Deklaracja producenta', retailer_claim: 'Informacja sprzedawcy',
