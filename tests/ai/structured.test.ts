@@ -30,6 +30,8 @@ describe('detectAspects', () => {
     ['Czy nadaje się dla początkującego?', ['level']],
     ['Czy jest wytrzymała?', ['durability']],
     ['Czym różni się od poprzedniej wersji?', []],
+    ['Szukam rakiety damskiej na lewą stronę do ataku', ['target', 'court_side', 'style']],
+    ['Coś dla dziecka, junior', ['target']],
   ])('%s → %j', (question, aspects) => expect(detectAspects(question)).toEqual(aspects));
 
   it('ignores racket names once stripped: "Ventus Control 12K" is not a question about control or materials', () => {
@@ -63,6 +65,15 @@ describe('structuredEvidence', () => {
   it('reports which asked aspects the catalogue can answer, and lists everything for a general question', () => {
     expect(coveredAspects(entry, ['power', 'net', 'durability', 'balance'])).toEqual(['power', 'balance']);
     expect(structuredEvidence(entry, []).length).toBe(7);
+  });
+
+  it('uses the new editorial classifications and the relative stiffness index', () => {
+    const classified: StructuredEntry = { ...entry,
+      ratings: [...entry.ratings, { ...rating('stiffness_index', 72, 'r-stiff'), scaleMax: 100 }],
+      specs: [...entry.specs, spec('court_side', { normalizedText: 'left' }, 's-side'), spec('profile_tags', { normalizedText: 'arm-friendly|control' }, 's-tags')] };
+    expect(structuredEvidence(classified, ['court_side'])[0]!.text).toBe('padel.how: strona kortu left');
+    expect(structuredEvidence(classified, ['stiffness'])[0]!.text).toBe('padel.how (ocena redakcji): indeks sztywności (względny w katalogu padel.how) 72/100');
+    expect(structuredEvidence(classified, ['comfort']).map((item) => item.id)).toContain('s-tags');
   });
 
   it('feeds the answer validator: numbers must come from the cited evidence lines', () => {

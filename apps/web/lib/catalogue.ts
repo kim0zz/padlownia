@@ -102,6 +102,7 @@ export const specLabels = labels({
   shape: 'Kształt', weight: 'Masa', weight_g: 'Masa', balance: 'Balans', balance_cm: 'Balans',
   core: 'Rdzeń', surface: 'Powierzchnia', surface_material: 'Powierzchnia', frame: 'Rama',
   thickness: 'Grubość', player_level: 'Poziom gracza', firmness: 'Twardość', texture: 'Faktura powierzchni',
+  court_side: 'Strona kortu', play_style: 'Styl gry', demand: 'Wymagalność', gender: 'Przeznaczenie', junior: 'Rakieta juniorska', profile_tags: 'Profil wg PadelTrue',
 });
 export const claimLabels = labels({
   manufacturer_declared: 'Deklaracja producenta', retailer_claim: 'Informacja sprzedawcy',

@@ -18,7 +18,8 @@ export const ratingDimensionLabels: Readonly<Record<string, string>> = Object.fr
   sweet_spot: 'Pole optymalnego trafienia',
   spin_generation: 'Nadawanie rotacji',
   power_ceiling: 'Maksymalny potencjał mocy',
-  power_accessibility: 'Łatwość uzyskania mocy',
+  stiffness_index: 'Indeks sztywności (względny)',
+  power_accessibility:'Łatwość uzyskania mocy',
 }));
 
 /** Position within the rating's own scale (0–1), or null when the value cannot be placed on it. */

@@ -17,7 +17,7 @@ export interface StructuredEntry {
 }
 
 export const ASPECT_IDS = ['power', 'control', 'defense', 'net', 'sweet_spot', 'stability', 'spin', 'handling', 'comfort', 'stiffness',
-  'level', 'shape', 'weight', 'balance', 'materials', 'core', 'thickness', 'court_side', 'durability'] as const;
+  'level', 'style', 'target', 'shape', 'weight', 'balance', 'materials', 'core', 'thickness', 'court_side', 'durability'] as const;
 export type Aspect = typeof ASPECT_IDS[number];
 
 interface AspectDefinition {
@@ -49,11 +49,15 @@ export const ASPECTS: Record<Aspect, AspectDefinition> = {
   handling: { label: 'zwrotność', keywords: /zwrotn|w rece|w reku|manewr|maneuv|handling|prowadz/,
     ratings: [{ source: 'padelhow', dimension: 'maneuverability' }, { source: 'padeltrue', dimension: 'handling' }], specs: ['weight', 'balance'], reviewKinds: ['handling', 'net', 'shape'] },
   comfort: { label: 'komfort', keywords: /komfort|wygod|lokc|lokiec|ramie|ramien|na reke|wibrac|elbow|\barm\b|comfort|\bbol/,
-    ratings: [{ source: 'padelhow', dimension: 'comfort' }, { source: 'padeltrue', dimension: 'comfort' }], specs: ['firmness', 'core'], reviewKinds: ['feel', 'takeaways'] },
+    ratings: [{ source: 'padelhow', dimension: 'comfort' }, { source: 'padeltrue', dimension: 'comfort' }], specs: ['firmness', 'core', 'profile_tags'], reviewKinds: ['feel', 'takeaways'] },
   stiffness: { label: 'twardość', keywords: /tward|miekk|sztywn|stiff|\bsoft\b|\bhard\b|odczuci|\bfeel\b/,
-    ratings: [], specs: ['firmness', 'core'], reviewKinds: ['feel', 'construction'] },
+    ratings: [{ source: 'padelhow', dimension: 'stiffness_index' }], specs: ['firmness', 'core'], reviewKinds: ['feel', 'construction'] },
   level: { label: 'poziom gracza', keywords: /poczatkuj|beginner|zaawansow|advanced|srednio ?zaaw|intermediate|poziom|dla kogo\b|dla jakiego gracza|nadaje sie dla/,
-    ratings: [{ source: 'padelhow', dimension: 'power_accessibility' }, { source: 'padelhow', dimension: 'sweet_spot' }], specs: ['player_level'], reviewKinds: ['positioning', 'takeaways'] },
+    ratings: [{ source: 'padelhow', dimension: 'power_accessibility' }, { source: 'padelhow', dimension: 'sweet_spot' }], specs: ['player_level', 'demand', 'profile_tags'], reviewKinds: ['positioning', 'takeaways'] },
+  style: { label: 'styl gry', keywords: /styl gry|do ataku|ofensyw|atakuj|wszechstronn|all.?round|do obrony|defensyw|kontrolersk/,
+    ratings: [], specs: ['play_style'], reviewKinds: ['positioning', 'takeaways'] },
+  target: { label: 'przeznaczenie', keywords: /damsk|kobiet|\bwomen|\blady|junior|dzieci|dziecka|mlodziez|dla dziewczyn/,
+    ratings: [], specs: ['gender', 'junior'], reviewKinds: ['positioning', 'identification'] },
   shape: { label: 'kształt', keywords: /ksztalt|shape|diament|diamond|\blz[ay]?\b|teardrop|okragl|\bround\b|hybryd/,
     ratings: [], specs: ['shape'], reviewKinds: ['shape'] },
   weight: { label: 'waga', keywords: /\bwag[aię]|wazy|wazi|gram|weigh|ciezk|lekk/, ratings: [], specs: ['weight'], reviewKinds: ['construction', 'handling', 'faq'] },
@@ -62,9 +66,9 @@ export const ASPECTS: Record<Aspect, AspectDefinition> = {
     ratings: [], specs: ['surface', 'frame'], reviewKinds: ['construction'] },
   core: { label: 'rdzeń', keywords: /rdzen|rdzeni|piank|\beva\b|foam|\bcore/, ratings: [], specs: ['core'], reviewKinds: ['construction'] },
   thickness: { label: 'grubość', keywords: /grubos|thick|\d+ ?mm\b/, ratings: [], specs: ['thickness'], reviewKinds: ['construction'] },
-  // Present in source files but not imported into the catalogue yet: answers come from reviews only.
+  // padel.how editorial classification (imported from parser 1.3.0).
   court_side: { label: 'strona kortu', keywords: /lew[aąey]? stron|praw[aąey]? stron|\blew[aey]\b|\bpraw[aey]\b|left side|right side|strona kortu/,
-    ratings: [], specs: [], reviewKinds: ['positioning', 'takeaways', 'verdict', 'faq'] },
+    ratings: [], specs: ['court_side'], reviewKinds: ['positioning', 'takeaways', 'verdict', 'faq'] },
   durability: { label: 'wytrzymałość', keywords: /wytrzymal|durab|trwal|pek|zlam/, ratings: [], specs: [], reviewKinds: ['construction', 'faq'] },
 };
 
@@ -80,11 +84,12 @@ export function detectAspects(question: string): Aspect[] {
 const RATING_LABELS: Record<string, string> = {
   power_ceiling: 'moc maksymalna', power_accessibility: 'łatwość generowania mocy', control: 'kontrola', defensive_output: 'obrona',
   net_performance: 'gra przy siatce', sweet_spot: 'sweet spot', off_center_stability: 'stabilność poza środkiem', spin_generation: 'rotacja',
-  maneuverability: 'zwrotność', comfort: 'komfort', overall: 'ocena ogólna', power: 'moc', handling: 'prowadzenie', forgiveness: 'wybaczalność', value: 'jakość do ceny',
+  maneuverability: 'zwrotność', comfort: 'komfort', overall: 'ocena ogólna', stiffness_index: 'indeks sztywności (względny w katalogu padel.how)', power: 'moc', handling: 'prowadzenie', forgiveness: 'wybaczalność', value: 'jakość do ceny',
 };
 const SPEC_LABELS: Record<string, string> = {
   shape: 'kształt', weight: 'waga', balance: 'balans', core: 'rdzeń', surface: 'materiał powierzchni', texture: 'faktura', thickness: 'grubość',
-  player_level: 'poziom gracza', firmness: 'twardość', frame: 'rama',
+  player_level: 'poziom gracza', firmness: 'twardość', frame: 'rama', court_side: 'strona kortu', play_style: 'styl gry', demand: 'wymagalność',
+  gender: 'przeznaczenie', junior: 'juniorska', profile_tags: 'tagi profilu',
 };
 const KIND_LABELS: Record<string, string> = { editorial: 'ocena redakcji', rule_derived: 'ocena wyliczona z parametrów' };
 

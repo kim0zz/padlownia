@@ -59,8 +59,23 @@ Potrzebne do wyszukiwania po cechach (I4) i rekomendacji (I5). Liczby to rozkła
 
 Uwaga: oceny padel.how są ściśnięte (większość rakiet ma 6,5–8,5), więc progi typu „≥ 8” wybierają zwykle górne ~20–25%.
 
-## Nowa decyzja do podjęcia
+## Nowe pola w danych (P-045, parser i normalizator 1.3.0)
 
-**Brakujące dane w bazie.** Pliki padel.how mają indeks sztywności (0–100, model redakcji), stronę kortu, styl gry i „wymagalność”. Importer celowo je pominął, więc asystent nie może z nich korzystać. Dodanie ich wymaga zmiany normalizatora, nowego wydania danych na Dev i Twojej zgody.
+Właściciel zdecydował 15.10.2026: pola zachowane wcześniej tylko w archiwum (`raw_payload`) stają się zwykłymi obserwacjami. **Kod jest gotowy i przetestowany lokalnie. Na Dev jeszcze nie ma**, bo to wymaga nowego wydania danych i zgody właściciela.
 
-Moja rekomendacja: dodać. Odblokowuje to „miękka/twarda” wg padel.how (dziś tylko PadelTrue), „lewa/prawa strona” i „atak/obrona” w rekomendacjach z ankiety (P-044).
+| Pole | Źródło | Jak zapisane | Wynik na prawdziwym pliku |
+|---|---|---|---|
+| strona kortu | padel.how | parametr, ocena redakcji (`editorial_assessment`) | obie 78, lewa 72, prawa 30; 37 pustych pominiętych |
+| styl gry (lista) | padel.how | jeden parametr, wartości posortowane (`attacking\|spin`) | 217, wszystkie w słowniku |
+| wymagalność | padel.how | parametr, ocena redakcji | wymagająca 87, wybaczająca 54, umiarkowana 39 |
+| przeznaczenie / junior | padel.how | parametry, ocena redakcji | unisex 196, damskie 17, juniorskie 4; junior: tak 6 |
+| indeks sztywności | padel.how | **ocena** redakcyjna 0–100 z zastrzeżeniem „względna w katalogu padel.how, nie pomiar” | 217 |
+| tagi profilu | PadelTrue | jeden parametr, oznaczony jako wynik modelu PadelTrue | 281 (np. „arm-friendly” w 63) |
+
+- `feel.power_on_demand` pominięte: we wszystkich 217 rakietach jest równe ocenie „łatwość generowania mocy”.
+- Puste wartości źródła nie tworzą obserwacji, więc nie generują pracy przeglądowej. Nieznane wartości spoza słownika idą do przeglądu, nie są zgadywane.
+- Symulacja na obu prawdziwych plikach: 0 błędów, **0 rekordów ze zmienionym statusem** przez nowe pola.
+- Klasyfikacje redakcyjne nigdy nie trafiają do kanonicznych wartości fizycznych (waga, kształt). Bramka publikacji to wymusza.
+- Mapa aspektów rozszerzona o „styl gry” i „przeznaczenie”. „Strona kortu” i „twardość” korzystają z nowych pól, a „komfort” z tagu „arm-friendly”.
+
+**Wydanie na Dev (do zgody właściciela):** ponowne przetworzenie tych samych snapshotów wersją 1.3.0 tworzy nowe przebiegi. Zgodnie z ADR-004 wcześniejsze decyzje przeglądowe (wyjątki i ręczne dopasowania) trzeba ponownie zastosować do nowych wyników, zanim stare przebiegi zostaną wycofane. Potem bramka, zatwierdzenie i publikacja, a poprzednie wydanie zostaje do wycofania zmian (rollback). To operacja na bazie Dev, warta osobnej, uważnej sesji.

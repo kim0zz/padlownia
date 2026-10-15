@@ -48,6 +48,7 @@ Recorded 2026-10-13. **Accepted** means explicitly selected by project owner in 
 | P-042 | Accepted | Guides in the assistant | Owner chose 2026-10-15: padel.how guides (technique, rules, tactics) come later as a separate mode; the first assistant covers rackets only. |
 | P-043 | Accepted | Result counts | Owner chose 2026-10-15: feature search shows up to 8 rackets; recommendations show 3–5, each with reasons. |
 | P-044 | Accepted | Player profile before recommending | Owner chose 2026-10-15: always ask a short profile question set (level, court side, style, arm/elbow issues) before a recommendation; answers persist for the conversation (P-037). |
+| P-045 | Accepted | Additional source fields | Owner chose 2026-10-15: padel.how court side, play style, demand, gender/junior and the relative stiffness index, plus PadelTrue profile tags, become catalogue observations (parser/normalizer 1.3.0), labelled as editorial or model-derived. Publishing them on Dev requires a reprocessing release and separate owner approval. |
 | T-001 | Accepted | Agent framework | Defer LangGraph/LangChain and orchestration frameworks until measured need; see ADR-001. |
 | D-001 | Proposed | Schema | Separate canonical rackets, source records, specs/ratings/evidence and source permissions. |
 | D-002 | Proposed | Git layout | `apps/web`, `apps/worker`, `packages/domain`, `packages/ai`, `evals`, `supabase`. |
