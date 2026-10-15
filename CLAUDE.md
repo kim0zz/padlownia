@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Read `AGENTS.md` first — its rules are binding. Current priorities: `docs/product/ROADMAP.md`. Latest audits: `docs/architecture/BACKEND_AUDIT_2026_10_15.md`, `docs/design/UX_V3_RESULTS.md`.
+Read `AGENTS.md` first — its rules are binding. New session? Start with `docs/HANDOFF.md`. Current priorities: `docs/product/ROADMAP.md`. Latest audits: `docs/architecture/BACKEND_AUDIT_2026_10_15.md`, `docs/design/UX_V3_RESULTS.md`.
 
 ## Practical notes
 - Gate before any hand-off: `npm run check` and `npm run test:e2e`. Report exact counts; never claim unrun checks.
