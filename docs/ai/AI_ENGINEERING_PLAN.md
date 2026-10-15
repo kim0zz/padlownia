@@ -5,7 +5,7 @@ Dokument roboczy przygotowany pod nieobecność właściciela. Nic tu nie zmieni
 ## W skrócie
 
 1. **Większość pytań do asystenta to nie „AI”, tylko wyszukiwanie po parametrach.** „Szukam miękkiej rakiety NOX” to filtr: marka = NOX, sztywność z oceny padel.how. Recenzje (RAG) są potrzebne do pytań „jak gra / dlaczego / czym się różni”. Asystent powinien więc być **dyspozytorem**: rozpoznaje, o co chodzi, wywołuje gotowe zapytania do bazy i dobiera fragmenty recenzji, a model tylko składa z tego odpowiedź.
-2. **Najważniejszy element to rozpoznanie, o którą rakietę chodzi.** W pomiarze samo oddzielenie nazwy rakiety od tematu pytania podniosło trafność z 18% do 55% (pierwszy wynik). Pomyłka rocznika albo wersji (12K/18K, S/W, Pro/Light) psuje całą odpowiedź, nawet z idealnym modelem. To następny moduł do zbudowania, z własnym testem.
+2. **Najważniejszy element to rozpoznanie, o którą rakietę chodzi.** W pomiarze samo oddzielenie nazwy rakiety od tematu pytania podniosło trafność z 18% do 55% (pierwszy wynik). Pomyłka rocznika albo wersji (12K/18K, S/W, Pro/Light) psuje całą odpowiedź, nawet z idealnym modelem. Zbudowałem pierwszą wersję tego modułu (bez AI): na moich 32 pytaniach-pułapkach trafia w 100%, ale pisałem je razem z modułem, więc to wynik zawyżony. Prawdziwy test to Twoje pytania.
 3. **Pieniądze nie są ograniczeniem, jakość jest.** Zamiana wszystkich recenzji na wektory (embeddingi) to ~480 tys. tokenów, czyli grosze. Jedno pytanie do taniego modelu to rząd 1–2 groszy, więc 100 zł to tysiące pytań. Limit kosztów jest już zaimplementowany i sprawdzany przed każdym wywołaniem.
 4. **Pytania są po polsku, recenzje po angielsku.** Proste wyszukiwanie słów bez pomocy daje ~45% trafności w top 5. Z małym słowniczkiem PL→EN i usunięciem nazwy rakiety: 73%. Kolejny krok to wektory wielojęzyczne albo tłumaczenie pytania. Wybierzemy na podstawie pomiaru, a nie intuicji.
 5. **Odpowiedź modelu musi być sprawdzalna automatycznie.** Zrobiłem kontrakt odpowiedzi: model zwraca ID rakiet i krótkie zdania oznaczone jako fakt, opinia recenzenta, wniosek AI albo niepewność, każde z cytatami. Serwer odrzuca odpowiedź z cytatem, którego model nie dostał, z liczbą, której nie ma w źródłach, albo ze zbyt długim cytatem.
@@ -39,7 +39,7 @@ pytanie ─► 1. rozpoznanie rakiet i intencji ─► 2. dane strukturalne (SQL
                                                      6. log kosztu/czasu ◄── 5. walidacja serwera ─► komponenty UI
 ```
 
-1. **Rozpoznanie** (do zbudowania): dopasowanie tekstu do katalogu (marka, model, rocznik, wariant). Jeśli pasuje kilka rakiet, zadajemy pytanie z listą do kliknięcia zamiast zgadywać (P-024: każdy wariant i rocznik to osobny produkt). Intencje z P-003: wyszukiwanie po cechach, statystyki, porównanie dwóch, kontynuacja.
+1. **Rozpoznanie** (pierwsza wersja jest, `packages/ai/src/resolver.ts`): dopasowanie tekstu do katalogu (marka, model, rocznik, wariant). Jeśli pasuje kilka rakiet, zadajemy pytanie z listą do kliknięcia zamiast zgadywać (P-024: każdy wariant i rocznik to osobny produkt). Intencje z P-003: wyszukiwanie po cechach, statystyki, porównanie dwóch, kontynuacja.
 2. **Dane strukturalne:** te same funkcje bazy co klasyczny katalog (Etap 1 je przyspieszy). „Miękka NOX” → filtr. „Statystyki AT10” → karta profilu. Model nie wymyśla liczb, tylko je dostaje.
 3. **Fragmenty recenzji:** wyszukiwanie zawsze **zawężone do rozpoznanych rakiet**. Wzmianka o innej rakiecie w recenzji nie jest dowodem o niej (zasada z audytu źródła: mention is not identity).
 4. **Model** dostaje: pytanie, dane rakiet, 6–12 fragmentów z ID i instrukcję zwrotu JSON w kontrakcie (`packages/ai/src/answer.ts`). Tekst recenzji jest oznaczony jako dane, nie polecenia (ochrona przed wstrzyknięciem instrukcji, tzw. prompt injection).
@@ -54,9 +54,21 @@ pytanie ─► 1. rozpoznanie rakiet i intencji ─► 2. dane strukturalne (SQL
 | Wyszukiwanie bazowe | `packages/ai/src/lexical.ts` | Klasyczne BM25 (ranking po słowach) ze słowniczkiem PL→EN, usuwaniem nazwy rakiety i równym podziałem przy porównaniach. Darmowe. To poprzeczka, którą muszą przeskoczyć droższe metody. |
 | Zestaw testowy | `evals/retrieval/golden-v0.jsonl` | 33 pytania po polsku (i 2 po angielsku), z oczekiwanymi sekcjami. **Ułożone przeze mnie, do Twojego przeglądu.** |
 | Pomiar | `apps/worker/src/eval-retrieval.ts` | `npx tsx apps/worker/src/eval-retrieval.ts`: liczy trafność na lokalnym korpusie. Zapisuje tylko liczby, bez tekstu recenzji. |
+| Rozpoznawanie rakiet | `packages/ai/src/resolver.ts`, `evals/resolver/golden-v0.jsonl`, `apps/worker/src/eval-resolver.ts` | Zamienia tekst („AT10 18K”, „starvie raptor plus”, „metalbon hrd”) na dokładne ID z katalogu. Pilnuje rocznika (nigdy nie wybiera go po cichu), wariantów (S/W, 12K/18K, Pro/Light, „+”), literówek (1 znak) i porównań („X i Y”, „X 12K czy 18K”). Gdy pasuje kilka rakiet, zwraca listę do wyboru. Gdy jedna pasuje najlepiej, ale są bardziej szczegółowe wersje, zwraca ją z alternatywami. |
 | Bramka modelu | `packages/ai/src/gateway.ts`, `budget.ts` | Jedno miejsce wywołań modeli. Lista dozwolonych modeli z cenami, limit miesięczny i limit na pojedyncze wywołanie sprawdzane **przed** wywołaniem, rezerwacja najgorszego przypadku (równoległe pytania nie przebiją limitu), timeout, log. Dostawca OpenRouter jest gotowy, ale bez klucza nic nie wywoła. |
 | Kontrakt odpowiedzi | `packages/ai/src/answer.ts` | Format odpowiedzi modelu i automatyczna kontrola (cytaty, liczby, ID, długość cytatów). |
-| Testy | `tests/ai/*.test.ts` | 30 testów na syntetycznych danych (żaden tekst recenzji nie trafia do publicznego repo). |
+| Testy | `tests/ai/*.test.ts` | 37 testów na syntetycznych danych (żaden tekst recenzji nie trafia do publicznego repo). |
+
+## Rozpoznawanie rakiet: wynik i ograniczenia
+
+32 przypadki (dokładne nazwy, literówki, niejasne „AT10 18K” / „Babolat Viper”, rocznik spoza katalogu, rakieta tenisowa, pary do porównania): **32/32**. Wynik: `evals/results/resolver-2026-10-15.json`. Na pytaniach, których moduł nie widział, zachowuje się rozsądnie: „head speed” → 5 opcji do wyboru, „royal m27” → Light albo Poly, „wilson blade” → Blade V4 plus 3 alternatywy.
+
+Znane ograniczenia (do dalszej pracy):
+- Marka spoza katalogu nie wyklucza dopasowania („Wilson Pure Court”, gdy w katalogu nie ma Wilsona, trafi w inną rakietę ze słowem „Pure”).
+- Sama marka („NOX”) to dziś „nie znaleziono”. Powinna przejść do wyszukiwania po cechach z filtrem marki.
+- Nawiązania w rozmowie („a ta druga?”, „poprzednia wersja”) wymagają pamięci wybranych rakiet, czego jeszcze nie ma.
+- Słowa wariantów są na sztywnej liście. Nowe serie z innymi oznaczeniami trzeba będzie dopisać.
+- Nazwy biorę dziś z pliku padel.how. Docelowo resolver musi pracować na kanonicznym katalogu z bazy (444 profile, oba źródła), czyli po R3 z Etapu 1.
 
 ## Pierwszy pomiar wyszukiwania (bez AI, koszt 0 zł)
 
@@ -95,7 +107,7 @@ Pytania o jedną rakietę: 78% w top 5. Porównania dwóch rakiet: 50%. Pełny r
 ## Proponowana kolejność dalszej pracy
 
 1. Ty: przegląd 33 pytań i dopisanie prawdziwych (pytanie 1), decyzje 2–10.
-2. Moduł rozpoznawania rakiet + jego zestaw testowy (pułapki: rocznik, 12K/18K, S/W, Pro/Light, „Viper” w kilku rodzinach Babolata).
+2. Rozpoznawanie rakiet na kanonicznym katalogu z bazy (po R3) + Twoje prawdziwe pytania jako test. Pierwsza wersja modułu już jest.
 3. Pomiar embeddingów i tłumaczenia pytania (po zgodzie na koszt < 5 zł).
 4. Migracja `knowledge_chunks` + `pgvector` + `ai_usage` (za zgodą na Dev).
 5. Pierwszy działający asystent dla dwóch intencji („statystyki X” i „porównaj X i Y”) w trybie developerskim, bez publikacji.

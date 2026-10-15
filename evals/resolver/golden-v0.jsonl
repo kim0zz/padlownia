@@ -1,0 +1,34 @@
+// Racket mention resolver golden set v0 — drafted by Claude 2026-10-15 against padel.how slugs; NOT yet reviewed by the owner.
+// expect: list of mentions; each is {"id": exact} or {"ambiguous": [ids that must ALL be offered]} or {"none": true}.
+{"id":"exact-air-viper","question":"Pokaż statystyki Babolat Air Viper 2.6","expect":[{"id":"babolat-air-viper-2-6-review"}]}
+{"id":"exact-extreme-motion","question":"Jak gra HEAD Extreme Motion?","expect":[{"id":"head-extreme-motion-2026-review"}]}
+{"id":"exact-metalbone-hrd","question":"Metalbone HRD+ 2026","expect":[{"id":"adidas-metalbone-hrd-2026-review"}]}
+{"id":"exact-vertex-geo","question":"Bullpadel Vertex 05 GEO","expect":[{"id":"bullpadel-vertex-05-geo-2026-review"}]}
+{"id":"exact-hack-hybrid","question":"hack 04 hybrid","expect":[{"id":"bullpadel-hack-04-hybrid-2026"}]}
+{"id":"exact-raptor-plus","question":"StarVie Raptor+","expect":[{"id":"starvie-raptor-plus-2026-review"}]}
+{"id":"exact-raptor-plus-word","question":"starvie raptor plus","expect":[{"id":"starvie-raptor-plus-2026-review"}]}
+{"id":"exact-triton-power","question":"Tritón Power+ od StarVie","expect":[{"id":"starvie-triton-power-plus-2026-review"}]}
+{"id":"exact-triton-no-accent","question":"triton power plus","expect":[{"id":"starvie-triton-power-plus-2026-review"}]}
+{"id":"exact-oxdog-pro-light","question":"Oxdog Ultimate Pro Light","expect":[{"id":"oxdog-ultimate-pro-light-2026-review"}]}
+{"id":"exact-coello-pro","question":"HEAD Coello Pro","expect":[{"id":"head-coello-pro-2026"}]}
+{"id":"exact-ml10","question":"NOX ML10","expect":[{"id":"nox-ml10-ventus-control-3k-2026-review"}]}
+{"id":"exact-speed-one-x","question":"HEAD Speed One X","expect":[{"id":"head-speed-one-x-2025-review"}]}
+{"id":"exact-bela-pro","question":"Wilson Bela Pro","expect":[{"id":"wilson-bela-pro-v3-review"}]}
+{"id":"exact-at10-attack-12k","question":"NOX AT10 Attack 12K","expect":[{"id":"nox-at10-attack-12k-2026-review"}]}
+{"id":"exact-varlion-s","question":"Varlion Bourne CUBE Elbowcare S","expect":[{"id":"varlion-bourne-rega-2026-review"}]}
+{"id":"exact-varlion-w","question":"Varlion Bourne Cube Elbowcare W","expect":[{"id":"varlion-bourne-cube-elbowcare-w-2025-2026-review"}]}
+{"id":"typo-metalbone","question":"adidas metalbon hrd","expect":[{"id":"adidas-metalbone-hrd-2026-review"}]}
+{"id":"typo-bullpadel","question":"bulpadel vertex 05 geo","expect":[{"id":"bullpadel-vertex-05-geo-2026-review"}]}
+{"id":"amb-at10-18k","question":"NOX AT10 18K","expect":[{"ambiguous":["nox-at10-18k-2026-review","nox-at10-attack-18k-2026-review"]}]}
+{"id":"amb-babolat-viper","question":"Babolat Viper","expect":[{"ambiguous":["babolat-air-viper-2-6-review","babolat-counter-viper-2-6-review","babolat-technical-viper-3-0-review"]}]}
+{"id":"amb-varlion-cube","question":"Varlion Bourne CUBE Elbowcare","expect":[{"ambiguous":["varlion-bourne-rega-2026-review","varlion-bourne-cube-elbowcare-w-2025-2026-review"]}]}
+{"id":"amb-hack04","question":"Bullpadel Hack 04","expect":[{"id":"bullpadel-hack-04-2026"}]}
+{"id":"amb-oxdog-ultimate-pro","question":"Oxdog Ultimate Pro","expect":[{"id":"oxdog-ultimate-pro-2026-review"}]}
+{"id":"amb-metalbone","question":"Adidas Metalbone","expect":[{"id":"adidas-metalbone-2026-review"}]}
+{"id":"none-tennis","question":"Babolat Pure Drive","expect":[{"none":true}]}
+{"id":"none-year","question":"NOX AT10 Attack 12K 2024","expect":[{"none":true}]}
+{"id":"none-generic","question":"Szukam miękkiej rakiety dla początkującego","expect":[{"none":true}]}
+{"id":"pair-product-example","question":"Porównaj HEAD Extreme Motion i Babolat Air Viper 2.6","expect":[{"id":"head-extreme-motion-2026-review"},{"id":"babolat-air-viper-2-6-review"}]}
+{"id":"pair-vs","question":"Metalbone HRD+ vs Vertex 05 GEO","expect":[{"id":"adidas-metalbone-hrd-2026-review"},{"id":"bullpadel-vertex-05-geo-2026-review"}]}
+{"id":"pair-oxdog","question":"Oxdog Ultimate Pro czy Oxdog Ultimate Pro+","expect":[{"id":"oxdog-ultimate-pro-2026-review"},{"id":"oxdog-ultimate-pro-plus-2026-review"}]}
+{"id":"pair-12k-18k","question":"NOX AT10 12K czy 18K","expect":[{"ambiguous":["nox-at10-12k-2026-review","nox-at10-attack-12k-2026-review"]},{"ambiguous":["nox-at10-18k-2026-review","nox-at10-attack-18k-2026-review"]}]}
