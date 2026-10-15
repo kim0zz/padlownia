@@ -1,5 +1,11 @@
 import Link from 'next/link';
+import { Notice } from '../components/ui/notice';
+import { PageHeader } from '../components/ui/page-header';
 
 export default function NotFound() {
-  return <main id="main" className="main-shell"><section className="empty-state"><p className="section-kicker">PROFIL NIEDOSTĘPNY</p><h1>Nie znaleźliśmy tej rakiety.</h1><p>Ten profil nie występuje w bieżącej opublikowanej wersji katalogu.</p><Link href="/" className="button">Wróć do katalogu</Link></section></main>;
+  return <main id="main" className="main-shell">
+    <PageHeader title="Nie znaleźliśmy tej rakiety." />
+    <Notice tone="info"><p>Ten profil nie występuje w bieżącej opublikowanej wersji katalogu.</p></Notice>
+    <p className="page-actions"><Link href="/" className="button">Wróć do katalogu</Link></p>
+  </main>;
 }

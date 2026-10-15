@@ -212,7 +212,7 @@ describe('structured comparison renders only authoritative catalogue facts', () 
     ] };
     const html = view(input, entries);
     expect(html).toContain('class="racket-card"');
-    expect(html).toContain('class="observation-list"');
+    expect(html).toContain('class="spec-table"');
     expect(html).toContain('aria-label="Zestawienie dwóch rakiet"');
     expect(html).toContain('365 ± 5 g');
     expect(html).toContain('Diamond');

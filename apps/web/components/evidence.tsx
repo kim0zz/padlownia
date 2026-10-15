@@ -1,5 +1,5 @@
-import type { CatalogueEntry, CatalogueEvidence, CatalogueRating } from '@padlownia/database';
-import { formatDate, methodologyCitation, safeSourceUrl } from '../lib/catalogue';
+import type { CatalogueEntry, CatalogueEvidence } from '@padlownia/database';
+import { safeSourceUrl } from '../lib/catalogue';
 
 /** Source data is rendered as text and vetted links, never as executable markup. */
 export function SourceCitation({ evidence }: { evidence: CatalogueEvidence }) {
@@ -13,15 +13,6 @@ export function SourceCitation({ evidence }: { evidence: CatalogueEvidence }) {
       {evidence.attribution?.name ?? 'Źródło parametru'} <span aria-hidden="true">↗</span>
     </a>}
   </span>;
-}
-
-export function RatingCitation({ rating }: { rating: CatalogueRating }) {
-  const methodology = methodologyCitation(rating.methodology);
-  return <>
-    {methodology.url && <p><a className="source-link" href={methodology.url} rel="noreferrer">Metodologia ocen — {rating.evidence.sourceName}</a></p>}
-    {methodology.note ? <p>{methodology.note}</p> : !methodology.url && <p>Metodologia nie została podana.</p>}
-    <div className="observation-source"><SourceCitation evidence={rating.evidence} /><span>Pobrano {formatDate(rating.evidence.retrievedAt)}</span></div>
-  </>;
 }
 
 export function SourceLicenceNotice({ entries }: { entries: CatalogueEntry[] }) {

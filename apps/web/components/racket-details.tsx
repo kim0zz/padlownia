@@ -1,12 +1,9 @@
-import type { CatalogueEntry, CatalogueRating, CatalogueSpec } from '@padlownia/database';
-import { claimLabel, formatDate, ratingLabels, rawText, specLabels } from '../lib/catalogue';
-import { RatingCitation, SourceCitation } from './evidence';
-import { ratingDimensionLabels, ratingPosition } from '../lib/ratings';
+import type { CatalogueEntry, CatalogueSpec } from '@padlownia/database';
+import { claimLabel, formatDate, rawText, specLabels } from '../lib/catalogue';
+import { SourceCitation } from './evidence';
 import { specValueText } from './spec-value-cell';
 import { Badge } from './ui/badge';
 import { Notice } from './ui/notice';
-
-export { ratingDimensionLabels, ratingPosition } from '../lib/ratings';
 
 /** Full observation: the normalised value first, the source's original wording second, then kind, context, citation and (developer mode) the source trail. */
 export function ObservationDetails({ spec, releaseId, dev = false }: { spec: CatalogueSpec; releaseId: string; dev?: boolean }) {
@@ -34,23 +31,6 @@ export function ObservationDetails({ spec, releaseId, dev = false }: { spec: Cat
         <div><dt>Wersja danych</dt><dd>{releaseId}</dd></div>
       </dl>
     </details>}
-  </article>;
-}
-
-export function RatingCard({ rating }: { rating: CatalogueRating }) {
-  const hasPosition = ratingPosition(rating) !== null;
-  return <article className="rating-card">
-    <span className="rating-kind">{ratingLabels[rating.kind] ?? 'Ocena źródła'}</span>
-    <h3>{ratingDimensionLabels[rating.dimension] ?? rating.dimension}</h3>
-    <p className="rating-value">
-      {rating.validationStatus === 'valid' && rating.value !== null
-        ? <>{rating.value}<span> / {rating.scaleMax ?? '?'}</span></>
-        : 'Nieustalona'}
-    </p>
-    {hasPosition && <meter className="rating-meter" min={rating.scaleMin!} max={rating.scaleMax!} value={rating.value!} aria-label={`${ratingDimensionLabels[rating.dimension] ?? rating.dimension}: ${rating.value} w skali ${rating.scaleMin}–${rating.scaleMax}`} />}
-    <p>Skala źródła: {rating.scaleMin ?? '?'}–{rating.scaleMax ?? '?'}. Oryginał: {rawText(rating.rawValue)}.</p>
-    {rating.validationStatus !== 'valid' && <p>Interpretacja oceny niepotwierdzona.</p>}
-    <RatingCitation rating={rating} />
   </article>;
 }
 

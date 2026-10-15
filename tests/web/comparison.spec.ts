@@ -207,7 +207,7 @@ test('same-route removal clears the search selection and explicit URLs replace s
   await expect(tray(page)).toHaveCount(0);
   await comparison(page).getByRole('link', { name: `Usuń z wyboru: ${labels.control2025}`, exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Dodaj drugą rakietę.', exact: true })).toBeVisible();
-  await expect(visibleText(page, 'WYBÓR 1 Z 2', { exact: true })).toBeVisible();
+  await expect(visibleText(page, 'Wybrano 1 z 2.')).toBeVisible();
   await expect(leftSelect).toHaveValue(labels.control2026);
   await expect(rightSelect).toHaveValue('');
   await expect(comparison(page)).toHaveCount(0);
@@ -366,10 +366,26 @@ test('fixture gallery exposes source scales and unknown states with accessible r
   await expect(page.getByRole('heading', { name: 'Galeria komponentów', exact: true })).toBeVisible();
   await expect(fixtureNotice(page)).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Deklaracja, pomiar i brak jednostki', exact: true })).toBeVisible();
+  const values = page.getByRole('region', { name: 'Wartość parametru', exact: true });
+  await expect(values.getByText('Brak danych', { exact: true })).toBeVisible();
+  await expect(values.getByText('Rozbieżne źródła', { exact: true })).toBeVisible();
+  await expect(values.getByText('Niezweryfikowane', { exact: true })).toBeVisible();
+  await expect(values.getByText('Brak potwierdzonej wartości', { exact: true })).toBeVisible();
   const ratings = page.getByRole('region', { name: 'Oceny źródłowe', exact: true });
-  await expect(ratings.getByText('Skala źródła: 0–10. Oryginał: 8/10.', { exact: true })).toBeVisible();
-  await expect(ratings.getByText('Skala źródła: 0–100. Oryginał: 65/100.', { exact: true })).toBeVisible();
+  await expect(ratings.getByText('skala 0–10', { exact: true })).toBeVisible();
+  await expect(ratings.getByText('skala 0–100', { exact: true })).toBeVisible();
+  await expect(ratings.getByText('Niepełne dane modelu', { exact: true })).toBeVisible();
   await expect(ratings.getByText('Nieustalona', { exact: true })).toBeVisible();
+  // The scale and original value moved from the rating card into the source popover: open it with the keyboard.
+  for (const [dimension, text] of [['Kontrola', 'Skala źródła: 0–10. Oryginał: 8/10.'], ['Łatwość uzyskania mocy', 'Skala źródła: 0–100. Oryginał: 65/100.']] as const) {
+    const summary = ratings.locator(`summary[aria-label^="Źródło oceny: ${dimension}"]`);
+    await summary.focus();
+    await page.keyboard.press('Enter');
+    await expect(ratings.getByText(text, { exact: true })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(ratings.getByText(text, { exact: true })).toBeHidden();
+  }
+  await expect(page.getByRole('region', { name: 'Zestawienie dwóch rakiet' }).locator('.comparison-header-cell')).toHaveCount(2);
   await expect(page.getByRole('region', { name: 'Brak danych i błąd odczytu', exact: true }).getByRole('heading', { name: 'Nie udało się pobrać katalogu.', exact: true })).toBeVisible();
   await expectNoPageOverflow(page);
   await expectAccessible(page);

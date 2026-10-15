@@ -2,9 +2,6 @@
 .comparison-page > .page-header { padding: var(--space-1) 0; }
 .comparison-page > .fixture-notice { padding: 7px 12px; margin-bottom: 12px; }
 .comparison-page > .mode-notice { margin-top: var(--space-5); }
-.comparison-intro { padding: var(--space-5) 0 var(--space-6); }
-.comparison-intro h1 { font-size: var(--text-3xl); letter-spacing: -0.02em; margin-bottom: var(--space-5); }
-.comparison-intro h1 span { color: var(--muted); }
 .comparison-error { margin: var(--space-5) 0 0; }
 
 /* Picker and combobox */

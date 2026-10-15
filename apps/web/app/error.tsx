@@ -1,5 +1,12 @@
 'use client';
 
+import { Notice } from '../components/ui/notice';
+import { PageHeader } from '../components/ui/page-header';
+
 export default function ErrorPage({ reset }: { reset: () => void }) {
-  return <main id="main" className="main-shell"><section className="empty-state" role="alert"><p className="section-kicker">BŁĄD WYŚWIETLANIA</p><h1>Nie udało się otworzyć strony.</h1><p>Spróbuj ponownie. Szczegóły połączenia i dane techniczne nie są wyświetlane publicznie.</p><button className="button" onClick={reset}>Spróbuj ponownie</button></section></main>;
+  return <main id="main" className="main-shell">
+    <PageHeader title="Nie udało się otworzyć strony." />
+    <Notice tone="warning" role="alert"><p>Spróbuj ponownie. Szczegóły połączenia i dane techniczne nie są wyświetlane publicznie.</p></Notice>
+    <p className="page-actions"><button type="button" className="button" onClick={reset}>Spróbuj ponownie</button></p>
+  </main>;
 }

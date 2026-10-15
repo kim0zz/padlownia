@@ -10,6 +10,6 @@ export function ComparisonFeedback({ status }: { status: ComparisonRequest['stat
 }
 
 export function EmptyComparison({ partial = false }: { partial?: boolean }) {
-  return <section className="empty-state"><span className="section-kicker">WYBÓR {partial ? '1' : '0'} Z 2</span><h2>{partial ? 'Dodaj drugą rakietę.' : 'Co chcesz porównać?'}</h2>
-    <p>Wybierz dwie pozycje powyżej lub dodaj je z katalogu. Rocznik i wariant pozostają częścią każdego wyboru.</p><Link href="/" className="button button-secondary">Przejdź do katalogu<Arrow /></Link></section>;
+  return <section className="empty-state"><h2>{partial ? 'Dodaj drugą rakietę.' : 'Co chcesz porównać?'}</h2>
+    <p>{partial ? 'Wybrano 1 z 2. ' : ''}Wybierz dwie pozycje powyżej lub dodaj je z katalogu. Rocznik i wariant pozostają częścią każdego wyboru.</p><Link href="/" className="button button-secondary">Przejdź do katalogu<Arrow /></Link></section>;
 }

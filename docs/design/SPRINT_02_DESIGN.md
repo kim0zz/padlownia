@@ -1,3 +1,5 @@
+Zastąpione przez [UX v3](UX_V3_RESULTS.md).
+
 # Sprint 02 comparison and shared UI
 
 Update 2026-10-15: the owner-requested [compact UX refinement](COMPARISON_UX_REFINEMENT.md) replaces the large comparison hero, native selectors and spacious rows below. That document and the current screenshots describe the latest UI; this receipt retains the initial implementation and verification context.

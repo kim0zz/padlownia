@@ -55,7 +55,6 @@
 .card-ratings { margin: 0; font-size: var(--text-sm); color: var(--muted); overflow-wrap: anywhere; }
 .racket-card .comparison-add { position: relative; z-index: 1; margin-top: auto; }
 .comparison-add-compact { min-height: 36px; padding: 6px 12px; }
-.card-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 20px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 
 .pagination { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: var(--space-4); margin-top: var(--space-6); }
 .pagination span { font-size: var(--text-sm); }
@@ -64,8 +63,9 @@
 .loading-shell { padding-top: var(--space-5); min-height: 70vh; }
 .skeleton { background: var(--meter-track); border-radius: var(--radius); }
 .skeleton-title { height: 40px; width: min(320px, 90%); margin-bottom: var(--space-4); }
-.skeleton-search { height: var(--control-height); margin-bottom: var(--space-4); }
-.skeleton-card { height: 200px; }
+.skeleton-search { height: var(--control-height); margin-bottom: var(--space-3); }
+.skeleton-filters { height: var(--control-height); max-width: 640px; margin-bottom: var(--space-4); }
+.skeleton-card { height: 176px; }
 
 @media (min-width: 640px) {
   .racket-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }

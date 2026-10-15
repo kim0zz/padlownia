@@ -240,6 +240,11 @@ macOS / Linux:
 PLAYWRIGHT_CHANNEL=chromium npm run test:e2e
 ```
 
+Zmienne środowiskowe interfejsu i testów:
+
+- `SHOW_DEV_DETAILS=1` — pokazuje w interfejsie dane techniczne: ślad pochodzenia obserwacji, identyfikatory i wersję danych, etykietę „Wersja developerska” oraz komunikat Supabase Dev. Domyślnie wyłączone; konfiguracja Playwrighta włącza je dla testów.
+- `PLAYWRIGHT_EXECUTABLE` — opcjonalna ścieżka do przeglądarki używanej przez testy E2E (np. `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`), gdy kanał z `PLAYWRIGHT_CHANNEL` nie jest zainstalowany.
+
 CI używa Ubuntu, Node 22 i `npx playwright install --with-deps chromium`, potem E2E z `PLAYWRIGHT_CHANNEL=chromium`. Nie przekazuje sekretów i nie łączy się z chmurą. Testy obejmują wyszukiwanie, profile, klawiaturę, stany puste/brak danych, responsive layout i automatyczny axe. Zrzuty powstają w `docs/design/screenshots/`; ponowne generowanie może zmienić śledzone pliki. Wyniki lokalne raportuj oddzielnie od GitHub Actions.
 
 ## Backup i reset

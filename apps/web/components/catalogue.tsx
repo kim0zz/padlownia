@@ -1,7 +1,5 @@
 import Link from 'next/link';
-import type { CatalogueEntry } from '@padlownia/database';
 import { claimLabel, formatWeight, isUnverifiedClaim, shapeLabels } from '../lib/catalogue';
-import { SourceCitation } from './evidence';
 import { AddToComparison } from './comparison-selection';
 import { racketLabel } from '../lib/comparison';
 import { displayBrand, displayModel, displayVariant } from '../lib/display';
@@ -10,7 +8,7 @@ import { approvedImageFor, type IllustratedCatalogueEntry, type PublicRacketImag
 import { Badge } from './ui/badge';
 import { SourceInfo } from './ui/source-info';
 
-export { SourceCitation, RatingCitation, SourceLicenceNotice } from './evidence';
+export { SourceCitation, SourceLicenceNotice } from './evidence';
 
 export function Arrow({ direction = 'right' }: { direction?: 'left' | 'right' }) {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" className={direction === 'left' ? 'arrow-left' : ''}><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>;
@@ -27,19 +25,11 @@ export function ModeNotice({ mode, dev = false }: { mode: 'fixture' | 'supabase'
 }
 
 export function Unavailable({ setup }: { setup: boolean }) {
-  return <section className="empty-state" role="status"><span className="section-kicker">{setup ? 'Konfiguracja katalogu' : 'Połączenie niedostępne'}</span>
+  return <section className="empty-state" role="status">
     <h2>{setup ? 'Katalog czeka na podłączenie danych.' : 'Nie udało się pobrać katalogu.'}</h2>
     <p>{setup ? 'Środowisko developerskie nie ma jeszcze poprawnej konfiguracji źródła danych. Instrukcja uruchomienia znajduje się w README projektu.' : 'Opublikowane dane są chwilowo niedostępne. Spróbuj ponownie za chwilę.'}</p>
     <Link href="/" className="button button-secondary">Odśwież katalog <Arrow /></Link>
   </section>;
-}
-
-export function SpecSummary({ entry, field }: { entry: CatalogueEntry; field: 'shape' | 'weight' }) {
-  const source = entry.specs.find((spec) => spec.selected && (spec.key === field || (field === 'weight' && spec.key === 'weight_g')));
-  const value = field === 'shape' ? (entry.shape ? shapeLabels[entry.shape] ?? entry.shape : 'Brak danych') : formatWeight(entry.weightMinG, entry.weightMaxG);
-  return <div className="spec-summary"><dt>{field === 'shape' ? 'Kształt' : 'Masa'}</dt><dd><span>{value}</span>
-    {source ? <><small>{claimLabel(source)}</small><SourceCitation evidence={source.evidence} /></> : <small>Wartość nieustalona</small>}
-  </dd></div>;
 }
 
 /** One line of key facts ("Okrągła · 360–375 g") with the shared source popover; the details stay one click away. */
@@ -63,8 +53,8 @@ function CardFacts({ entry, image }: { entry: IllustratedCatalogueEntry; image?:
   </>;
 }
 
-/** Catalogue card; also the `racket_card` block of the structured view. The whole card opens the profile via a stretched link. */
-export function RacketCard({ entry }: { entry: IllustratedCatalogueEntry }) {
+/** Catalogue card; also the `racket_card` block of the structured view. The whole card opens the profile via a stretched link. `comparable={false}` omits the selection button (component gallery). */
+export function RacketCard({ entry, comparable = true }: { entry: IllustratedCatalogueEntry; comparable?: boolean }) {
   const hasConflict = entry.specs.some((spec) => spec.conflict);
   const image = approvedImageFor(entry);
   const ratingSources = [...new Set(entry.ratings.map((rating) => rating.evidence.sourceName))];
@@ -84,6 +74,6 @@ export function RacketCard({ entry }: { entry: IllustratedCatalogueEntry }) {
     <CardFacts entry={entry} image={image} />
     <p className="card-ratings">{ratingSources.length ? `Oceny: ${ratingSources.join(', ')}` : 'Brak ocen'}</p>
     {hasConflict && <Badge tone="warning">Rozbieżne źródła</Badge>}
-    <AddToComparison id={entry.id} releaseId={entry.releaseId} label={racketLabel(entry)} compact />
+    {comparable && <AddToComparison id={entry.id} releaseId={entry.releaseId} label={racketLabel(entry)} compact />}
   </article>;
 }

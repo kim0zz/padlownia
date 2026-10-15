@@ -1,7 +1,10 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ConflictNotice, ObservationDetails, RacketSpecs, RatingCard } from '../../apps/web/components/racket-details';
+import { ConflictNotice, ObservationDetails, RacketSpecs } from '../../apps/web/components/racket-details';
+import { RatingGroups } from '../../apps/web/components/rating-groups';
+import { RatingEntry } from '../../apps/web/components/rating-parts';
+import { groupMethodology } from '../../apps/web/lib/ratings';
 import { SourceCitation } from '../../apps/web/components/evidence';
 import { fixtureCatalogue } from '../../apps/web/lib/fixtures';
 
@@ -104,31 +107,38 @@ describe('shared observations and citations', () => {
 });
 
 describe('shared source ratings', () => {
+  const withRatings = (...ratings: (typeof fixtureCatalogue)[number]['ratings']) => ({ ...fixtureCatalogue[0]!, ratings });
   it('preserves original methodologies, independent scales and Polish dimensions', () => {
     const editorial = fixtureCatalogue[0]!.ratings[0]!;
     const derived = { ...editorial, dimension: 'power_accessibility', kind: 'rule_derived' as const, value: 65, scaleMax: 100, rawValue: '65/100',
-      methodology: 'https://example.com/synthetic-methodology\nSyntetyczne zastrzeżenie źródła.' };
-    const first = renderToStaticMarkup(createElement(RatingCard, { rating: editorial }));
-    const second = renderToStaticMarkup(createElement(RatingCard, { rating: derived }));
-    expect(first).toContain('Ocena redakcyjna');
-    expect(first).toContain('<h3>Kontrola</h3>');
-    expect(first).toContain('Skala źródła: 0–10');
-    expect(second).toContain('Wynik algorytmu');
-    expect(second).toContain('<h3>Łatwość uzyskania mocy</h3>');
-    expect(second).toContain('Skala źródła: 0–100');
-    expect(second).toContain('href="https://example.com/synthetic-methodology"');
-    expect(second).toContain('Syntetyczne zastrzeżenie źródła.');
+      methodology: 'https://example.com/synthetic-methodology\nSyntetyczne zastrzeżenie źródła.',
+      evidence: { ...editorial.evidence, observationId: 'derived-1', sourceCode: 'derived-source', sourceName: 'Syntetyczny model' } };
+    const html = renderToStaticMarkup(createElement(RatingGroups, { entry: withRatings(editorial, derived) }));
+    // Each source is its own group with its own scale; nothing is merged.
+    expect(html.match(/class="rating-group"/g)).toHaveLength(2);
+    expect(html).toContain('skala 0–10');
+    expect(html).toContain('skala 0–100');
+    expect(html).toContain('Ocena redakcyjna');
+    expect(html).toContain('<p class="rating-row-label">Kontrola</p>');
+    expect(html).toContain('Skala źródła: 0–10');
+    expect(html).toContain('Wynik algorytmu');
+    expect(html).toContain('<p class="rating-row-label">Łatwość uzyskania mocy</p>');
+    expect(html).toContain('Skala źródła: 0–100');
+    expect(html).toContain('href="https://example.com/synthetic-methodology"');
+    expect(html).toContain('Syntetyczne zastrzeżenie źródła.');
   });
 
   it('does not promote invalid numbers and does not discard a validated zero', () => {
     const rating = { ...fixtureCatalogue[0]!.ratings[0]!, value: 0 };
-    const zero = renderToStaticMarkup(createElement(RatingCard, { rating }));
-    expect(zero).toContain('<p class="rating-value">0<span> / 10</span></p>');
-    const invalid = renderToStaticMarkup(createElement(RatingCard, { rating: { ...rating, value: 11, validationStatus: 'invalid' } }));
+    const entryHtml = (value: typeof rating) => renderToStaticMarkup(createElement(RatingEntry, { rating: value, group: groupMethodology([value]), tone: 'a', label: 'Kontrola' }));
+    expect(entryHtml(rating)).toContain('<p class="rating-value">0<span class="rating-scale"> / 10</span></p>');
+    const invalid = entryHtml({ ...rating, value: 11, validationStatus: 'invalid' });
     expect(invalid).toContain('<p class="rating-value">Nieustalona</p>');
     expect(invalid).toContain('Interpretacja oceny niepotwierdzona');
-    const unknown = renderToStaticMarkup(createElement(RatingCard, { rating: { ...rating, dimension: 'constructor', value: null, scaleMin: null, scaleMax: null, rawValue: null, validationStatus: 'unknown' } }));
-    expect(unknown).toContain('<h3>constructor</h3>');
+    expect(invalid).not.toContain('<meter');
+    const unknownRating = { ...rating, dimension: 'constructor', value: null, scaleMin: null, scaleMax: null, rawValue: null, validationStatus: 'unknown' as const };
+    const unknown = renderToStaticMarkup(createElement(RatingGroups, { entry: withRatings(unknownRating) }));
+    expect(unknown).toContain('<p class="rating-row-label">constructor</p>');
     expect(unknown).toContain('Skala źródła: ?–?');
     expect(unknown).toContain('Oryginał: Brak wartości.');
   });
@@ -144,9 +154,19 @@ describe('component gallery isolation', () => {
     expect(html).not.toContain('Supabase Dev.');
     expect(html).toContain('Widok ze struktury danych');
     expect(html).toContain('racket_specs');
+    expect(html).toContain('racket_comparison');
     expect(html).toContain('Parametry jeszcze nieustalone.');
     expect(html).toContain('Nie udało się pobrać katalogu.');
     expect(html).not.toContain('Dodaj do porównania');
     expect(html).not.toContain('href="/porownaj');
+  });
+
+  it('keeps every state of the former gallery on the page', () => {
+    const html = renderToStaticMarkup(createElement(ComponentGalleryPage));
+    for (const state of ['Pełna wartość', 'Brak wartości', 'Konflikt źródeł', 'Bez weryfikacji producenta', 'Niezweryfikowane', 'Nieznana jednostka', 'Pomiar egzemplarza', '~26.5',
+      'Rozbieżne źródła', 'skala 0–10', 'skala 0–100', 'Niepełne dane modelu', 'Nieustalona', 'brak oceny', 'Brak opublikowanych ocen dla tego wariantu',
+      'Rok nieznany', 'Co chcesz porównać', 'Dodaj drugą rakietę.', 'Wersja danych w tym odnośniku nie jest już aktualna']) expect(html, state).toContain(state);
+    expect(html.match(/class="badge badge-(neutral|warning|info)"/g)?.length).toBeGreaterThanOrEqual(3);
+    for (const tone of ['neutral', 'warning', 'info']) expect(html).toContain(`badge badge-${tone}`);
   });
 });

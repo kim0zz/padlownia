@@ -4,7 +4,8 @@ import { createElement } from 'react';
 import { fixtureCatalogue } from '../../apps/web/lib/fixtures';
 import { approvedImageFor, attachApprovedImages, catalogueImageSchema } from '../../apps/web/lib/catalogue-images';
 import { RacketVisual } from '../../apps/web/components/racket-visual';
-import { ratingPosition, RatingCard } from '../../apps/web/components/racket-details';
+import { RatingGroups } from '../../apps/web/components/rating-groups';
+import { ratingPosition } from '../../apps/web/lib/ratings';
 import { searchRacketOptions } from '../../apps/web/components/racket-combobox';
 import { racketLabel } from '../../apps/web/lib/comparison';
 
@@ -72,7 +73,7 @@ describe('search and source-scale visual encoding', () => {
     expect(ratingPosition({ ...rating, value: 50, scaleMin: 0, scaleMax: 100 })).toBe(0.5);
     expect(ratingPosition({ ...rating, value: 0 })).toBe(0);
     for (const changed of [{ scaleMin: null }, { scaleMax: null }, { scaleMax: 0 }, { value: 11 }, { value: null }, { value: Infinity }, { validationStatus: 'unknown' as const }]) expect(ratingPosition({ ...rating, ...changed })).toBeNull();
-    const html = renderToStaticMarkup(createElement(RatingCard, { rating }));
+    const html = renderToStaticMarkup(createElement(RatingGroups, { entry }));
     expect(html).toContain('<meter');
     expect(html).toContain('min="0" max="10" value="8"');
     expect(html).toContain('Skala źródła: 0–10. Oryginał: 8/10.');

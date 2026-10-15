@@ -1,3 +1,5 @@
+Zastąpione przez [UX v3](UX_V3_RESULTS.md).
+
 # Porównanie — gęsty układ i wyszukiwanie
 
 Zlecenie właściciela z 15.10.2026: tekstowe wyszukiwanie z dropdownem, obie rakiety od razu po porównaniu, znacznie więcej parametrów w pierwszym widoku, graficzne oceny i pomocnicza zieleń. Jest to poprawka UX w otwartym PR Sprintu 02; nie wymaga zmiany przyjętych reguł danych ani merge'a wcześniejszej wersji.

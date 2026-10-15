@@ -1,12 +1,15 @@
 /* Component gallery (/komponenty). */
-.component-gallery-intro { padding-top: var(--space-7); max-width: 75ch; }
-.component-gallery-section { margin-top: var(--space-7); }
-.component-gallery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); }
-.component-gallery-example { min-width: 0; }
-.component-gallery-caption { color: var(--muted); font-size: var(--text-sm); }
-.component-gallery-links { display: flex; flex-wrap: wrap; gap: var(--space-4); }
-.component-gallery-code { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--soft); border-radius: var(--radius); padding: var(--space-5); font-size: var(--text-sm); }
+.component-gallery-section { margin-top: var(--space-6); }
+.component-gallery-section > h2 { font-size: var(--text-xl); letter-spacing: -0.02em; margin-bottom: var(--space-2); }
+.component-gallery-section > * + * { margin-top: var(--space-3); }
+.component-gallery-caption { color: var(--muted); font-size: var(--text-sm); margin-bottom: 0; }
+.component-gallery-links { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); font-size: var(--text-sm); }
+.component-gallery-links a { display: inline-flex; align-items: center; min-height: 32px; }
+.component-gallery-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.component-gallery-inline { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--text-sm); }
+.component-gallery-bars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
+.component-gallery-code { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--soft); border-radius: var(--radius-small); padding: var(--space-4); font-size: var(--text-sm); }
 
 @media (max-width: 640px) {
-  .component-gallery-grid { grid-template-columns: 1fr; }
+  .component-gallery-bars { grid-template-columns: 1fr; }
 }
