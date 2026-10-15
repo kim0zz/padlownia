@@ -6,3 +6,4 @@ export * from './gateway.js';
 export * from './answer.js';
 export * from './resolver.js';
 export * from './dense.js';
+export * from './structured.js';
