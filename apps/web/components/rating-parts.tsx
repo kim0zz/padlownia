@@ -1,8 +1,9 @@
 import type { CatalogueRating } from '@padlownia/database';
 import { methodologyCitation, rawText, ratingLabels, safeSourceUrl } from '../lib/catalogue';
-import { groupKindLabel, groupMethodology, groupScaleLabel, isIncompleteModel, ratingDimensionLabels } from '../lib/ratings';
+import { groupKindLabel, groupMethodology, groupScaleLabel, isIncompleteModel, ratingDimensionLabels, ratingPosition } from '../lib/ratings';
 import { Badge } from './ui/badge';
 import { SourceInfo } from './ui/source-info';
+import { StatBar } from './ui/stat-bar';
 
 /**
  * Header of the ratings of one source: scale, kind, methodology link and the caveat shared by
@@ -46,4 +47,13 @@ export function RatingSourceInfo({ rating, group, dev = false, label }: { rating
     {ownHref && <p><a className="source-link" href={ownHref} rel="noreferrer">Metodologia ocen ↗</a></p>}
     {ownNote && <p className="source-info-note">{ownNote}</p>}
   </SourceInfo>;
+}
+
+/** One rating as the comparison and the profile show it: number in the source's scale, a bar within that scale, and the source popover. */
+export function RatingEntry({ rating, group, tone, label, dev = false }: { rating: CatalogueRating; group: ReturnType<typeof groupMethodology>; tone: 'a' | 'b'; label: string; dev?: boolean }) {
+  return <div className="rating-entry">
+    <RatingValue rating={rating} />
+    {ratingPosition(rating) !== null && <StatBar tone={tone} min={rating.scaleMin!} max={rating.scaleMax!} value={rating.value!} label={`${label}: ${rating.value} w skali ${rating.scaleMin}–${rating.scaleMax}`} />}
+    <RatingSourceInfo rating={rating} group={group} dev={dev} label={`Źródło oceny: ${label}`} />
+  </div>;
 }

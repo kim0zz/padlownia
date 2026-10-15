@@ -37,7 +37,8 @@ describe('released profile rendering with extensible source attributes', () => {
     stubs.catalogue.mockResolvedValue({ status: 'ready', mode: 'supabase', entries: [entry] });
     const html = renderToStaticMarkup(await RacketPage({ params: Promise.resolve({ id: entry.id }) }));
     expect(html).toContain(`href="${methodology}"`);
-    expect(html).toContain(`Metodologia ocen — ${sourceName}`);
+    // The group header's link reads "Metodologia" visually and "Metodologia ocen — {source}" for assistive technology.
+    expect(html).toContain(`Metodologia<span class="sr-only"> ocen — ${sourceName}</span>`);
     expect(html).toContain('Pobrano 14 października 2026');
     expect(html).toContain('href="https://example.com/synthetic-review"');
     expect(html).toContain('Skala źródła: 0–10');
@@ -75,5 +76,81 @@ describe('released profile rendering with extensible source attributes', () => {
     expect(html).not.toContain('href="javascript:');
     expect(html).not.toContain('<script>');
     expect(html).toContain('&lt;script&gt;untrusted&lt;/script&gt;');
+  });
+});
+
+describe('profile layout (UX v3 §7)', () => {
+  const render = async (id: string, entries = fixtureCatalogue) => {
+    stubs.catalogue.mockResolvedValue({ status: 'ready', mode: 'fixture', entries });
+    return renderToStaticMarkup(await RacketPage({ params: Promise.resolve({ id }) }));
+  };
+  const text = (html: string) => html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+
+  it('puts the model in the h1, brand and year in the meta line and "Dodaj do porównania" in the header', async () => {
+    const html = await render('fixture-orbit-control-2026');
+    expect(html).toContain('<h1 class="page-header-title">Orbit</h1>');
+    expect(html).toContain('<p>TESTLAB · 2026</p>');
+    expect(html).toMatch(/<div class="page-header-actions">[^]*comparison-add/);
+    expect(html).toContain('>Katalog</a>');
+  });
+  it('shows Parametry and Oceny side by side as two sections, without the retired hero, guides and eyebrows', async () => {
+    const html = await render('fixture-orbit-control-2026');
+    expect(html).toContain('<h2 id="spec-title">Parametry</h2>');
+    expect(html).toContain('<h2 id="ratings-title">Oceny</h2>');
+    expect(html.indexOf('id="spec-title"')).toBeLessThan(html.indexOf('id="ratings-title"'));
+    for (const retired of ['profile-hero', 'profile-description', 'profile-key-specs', 'reading-guide', 'missing-specs', 'section-kicker', 'class="eyebrow', 'FAKTY Z KONTEKSTEM', 'PERSPEKTYWA ŹRÓDŁA', 'Ten profil dotyczy dokładnie', 'rating-card']) expect(html).not.toContain(retired);
+  });
+  it('renders the parameter rows with the comparison cell (value, source popover) and an explicit "Brak danych"', async () => {
+    const html = await render('fixture-orbit-control-2026');
+    expect(html).toMatch(/<dt class="spec-row-label">Kształt<\/dt><dd class="spec-row-cell"><div class="comparison-value"><strong>Okrągła<\/strong>/);
+    expect(html).toMatch(/<dt class="spec-row-label">Masa<\/dt><dd class="spec-row-cell"><div class="comparison-value"><strong>360–370 g<\/strong>/);
+    expect(html).toMatch(/<dt class="spec-row-label">Balans<\/dt><dd class="spec-row-cell"><p class="comparison-unknown">Brak danych<\/p>/);
+    expect(html).toContain('aria-label="Źródło: Kształt: ');
+  });
+  it('groups ratings under their source with the shared caveat once and a bar in the source scale', async () => {
+    const html = await render('fixture-orbit-control-2026');
+    expect(html).toContain('class="rating-group-title"');
+    expect(html).toContain('data-dimension="control"');
+    expect(html).toContain('<meter class="stat-bar stat-bar-a" min="0" max="10" value="8"');
+    expect(html.match(/class="rating-group-header"/g)).toHaveLength(1);
+  });
+  it('states the absence of ratings without computing one', async () => {
+    const html = await render('fixture-orbit-pro-2026');
+    expect(text(html)).toContain('Brak opublikowanych ocen dla tego wariantu. Nie wyliczamy własnej oceny liczbowej.');
+    expect(html).not.toContain('rating-group-header');
+  });
+  it('keeps every observation in one collapsed section with a count and a one-line legend', async () => {
+    const html = await render('fixture-orbit-control-2026');
+    const count = fixtureCatalogue[0]!.specs.length;
+    expect(html).toContain(`<details class="profile-observations"><summary>Wszystkie obserwacje źródeł (${count})</summary>`);
+    expect(html).not.toContain('<details class="profile-observations" open');
+    expect(html).toContain('class="profile-legend"');
+    expect(html).toContain('Oryginał: <span class="raw-value">372 g with one overgrip</span>');
+    expect(html).toContain('<p class="observation-value">372 g</p>');
+  });
+  it('keeps the conflict notice and both conflicting observations on a conflicting profile', async () => {
+    const html = await render('fixture-orbit-pro-2026');
+    expect(html).toContain('class="notice notice-warning"');
+    expect(text(html)).toContain('Źródła podają rozbieżne parametry.');
+    expect(html).toContain('Rozbieżne źródła');
+    expect(html.match(/<h3>Kształt<\/h3>/g)).toHaveLength(2);
+  });
+  it('links other versions of the same model as chips with variant and year', async () => {
+    const html = await render('fixture-orbit-pro-2026');
+    expect(html).toContain('aria-label="Inne wersje"');
+    expect(html).toContain(`<a class="chip-link" href="/rakiety/fixture-orbit-control-2026">Control · 2026</a>`);
+    expect(html).toContain(`<a class="chip-link" href="/rakiety/fixture-orbit-control-2025">Control · 2025</a>`);
+    expect(html).not.toContain('href="/rakiety/fixture-orbit-pro-2026"');
+    expect(await render('fixture-vector-attack-2026')).toContain('chip-link');
+    expect(await render('fixture-arc-unknown')).not.toContain('Inne wersje');
+  });
+  it('states an unknown year and an empty parameter list explicitly', async () => {
+    const html = await render('fixture-arc-unknown');
+    expect(html).toContain('<span class="badge badge-warning">Rocznik nieznany</span>');
+    expect(html).toContain('Parametry jeszcze nieustalone.');
+    expect(html).not.toContain('profile-observations');
+  });
+  it('labels fixture data on the profile', async () => {
+    expect(await render('fixture-orbit-control-2026')).toContain('Dane demonstracyjne.');
   });
 });

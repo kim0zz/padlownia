@@ -1,5 +1,6 @@
 import type { CatalogueEntry, CatalogueSpec } from '@padlownia/database';
 import { formatWeight, rawText, shapeLabels, specLabels } from './catalogue';
+import { sortDimensions } from './ratings';
 
 export function racketLabel(entry: CatalogueEntry) {
   const name = entry.model.toLocaleLowerCase('pl').startsWith(`${entry.brand.toLocaleLowerCase('pl')} `) ? entry.model : `${entry.brand} ${entry.model}`;
@@ -16,17 +17,31 @@ export function canonicalSpecKey(key: string) {
 /** Row order: the key parameters first, then everything else alphabetically by label. */
 export const SPEC_ORDER: readonly string[] = ['shape', 'weight', 'balance', 'core', 'surface', 'frame', 'thickness', 'player_level'];
 
-export function comparisonRows(left: CatalogueEntry, right: CatalogueEntry) {
-  const keys = new Set(['shape', 'weight', 'balance', 'core', 'surface', ...left.specs.map((spec) => canonicalSpecKey(spec.key)), ...right.specs.map((spec) => canonicalSpecKey(spec.key))]);
+const BASE_SPEC_KEYS: readonly string[] = ['shape', 'weight', 'balance', 'core', 'surface'];
+
+/** The five key parameters always get a row (even without data), then every other key present, in SPEC_ORDER / alphabetical order. */
+function orderedSpecKeys(entries: readonly CatalogueEntry[]) {
+  const keys = new Set([...BASE_SPEC_KEYS, ...entries.flatMap((entry) => entry.specs.map((spec) => canonicalSpecKey(spec.key)))]);
   const rank = (key: string) => { const index = SPEC_ORDER.indexOf(key); return index === -1 ? SPEC_ORDER.length : index; };
-  const sorted = [...keys].sort((a, b) => rank(a) - rank(b) || (rank(a) < SPEC_ORDER.length ? 0 : (specLabels[a] ?? a).localeCompare(specLabels[b] ?? b, 'pl')));
-  return sorted.map((key) => ({
+  return [...keys].sort((a, b) => rank(a) - rank(b) || (rank(a) < SPEC_ORDER.length ? 0 : (specLabels[a] ?? a).localeCompare(specLabels[b] ?? b, 'pl')));
+}
+
+/** All observations of one parameter of one racket, and the valid selected ones among them. */
+function specCell(entry: CatalogueEntry, key: string) {
+  const observations = entry.specs.filter((spec) => canonicalSpecKey(spec.key) === key);
+  return { observations, selected: observations.filter((spec) => spec.selected && spec.validationStatus === 'valid') };
+}
+
+export function comparisonRows(left: CatalogueEntry, right: CatalogueEntry) {
+  return orderedSpecKeys([left, right]).map((key) => ({
     key, label: specLabels[key] ?? key,
-    cells: [left, right].map((entry) => {
-      const observations = entry.specs.filter((spec) => canonicalSpecKey(spec.key) === key);
-      return { entryId: entry.id, observations, selected: observations.filter((spec) => spec.selected && spec.validationStatus === 'valid') };
-    }),
+    cells: [left, right].map((entry) => ({ entryId: entry.id, ...specCell(entry, key) })),
   }));
+}
+
+/** Rows of the profile's parameter table: the same order and cell content as one comparison column. */
+export function entrySpecRows(entry: CatalogueEntry) {
+  return orderedSpecKeys([entry]).map((key) => ({ key, label: specLabels[key] ?? key, ...specCell(entry, key) }));
 }
 
 /** true when the selected values of the two rackets differ, or only one side has a value. */
@@ -70,4 +85,15 @@ export function comparisonRatingRows(source: ReturnType<typeof comparisonRatingS
   return [...dimensions].map((dimension) => ({ dimension, cells: source.cells.map((cell) => ({
     entryId: cell.entryId, ratings: cell.ratings.filter((rating) => rating.dimension === dimension),
   })) }));
+}
+
+/** Ratings of one racket grouped by source, then by dimension in display order. Presentation only: scales are never joined. */
+export function entryRatingGroups(entry: CatalogueEntry) {
+  const sources = new Map(entry.ratings.map((rating) => [rating.evidence.sourceCode, rating.evidence.sourceName]));
+  return [...sources].map(([code, name]) => {
+    const ratings = entry.ratings.filter((rating) => rating.evidence.sourceCode === code);
+    const rows = sortDimensions([...new Set(ratings.map((rating) => rating.dimension))])
+      .map((dimension) => ({ dimension, ratings: ratings.filter((rating) => rating.dimension === dimension) }));
+    return { code, name, ratings, rows };
+  });
 }

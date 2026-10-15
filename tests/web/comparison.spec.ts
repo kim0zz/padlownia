@@ -130,7 +130,7 @@ test('profile and GET search navigation retain selection and the URL reproduces 
   await expect(page.getByRole('heading', { name: 'Orbit', level: 1, exact: true })).toBeVisible();
   await expect(tray(page).getByText(labels.control2026, { exact: true })).toBeVisible();
   await add(page, labels.control2025).click();
-  await page.getByRole('main').getByRole('link', { name: 'Wróć do katalogu', exact: true }).click();
+  await page.getByRole('main').getByRole('link', { name: 'Katalog', exact: true }).click();
 
   // The native GET form performs a document navigation, exercising session restore.
   await page.getByLabel('Szukaj marki, modelu lub wariantu').fill('orbit');

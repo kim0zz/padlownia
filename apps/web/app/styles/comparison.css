@@ -100,7 +100,7 @@
 .all-observations-columns > [data-column="b"] { border-left-color: var(--col-b); }
 .all-observations-who { margin: 0 0 var(--space-1); font-size: var(--text-xs); color: var(--muted); overflow-wrap: anywhere; }
 .all-observations-columns .observation { padding: var(--space-3); }
-.all-observations-columns .raw-value { margin-top: var(--space-2); font-size: var(--text-lg); }
+.all-observations-columns .observation-value { margin-top: var(--space-2); font-size: var(--text-lg); }
 .all-observations-columns .observation-title h3 { font-size: var(--text-md); }
 
 .comparison-image-credits { margin: var(--space-4) 0 0; font-size: var(--text-xs); color: var(--muted); }

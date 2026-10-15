@@ -2,16 +2,15 @@ import Link from 'next/link';
 import type { CatalogueEntry } from '@padlownia/database';
 import { comparisonRatingRows, comparisonRatingSources, comparisonRows, racketLabel, rowDiffers } from '../lib/comparison';
 import { displayBrand, displayModel, displayVariant } from '../lib/display';
-import { groupMethodology, ratingDimensionLabels, ratingPosition, sortDimensions } from '../lib/ratings';
+import { groupMethodology, ratingDimensionLabels, sortDimensions } from '../lib/ratings';
 import { approvedImageFor } from '../lib/catalogue-images';
 import { ObservationDetails } from './racket-details';
 import { ImageCredit, RacketVisual } from './racket-visual';
 import { RemoveComparisonItem } from './comparison-selection';
 import { ChangePairLink } from './change-pair-link';
 import { SpecValueCell } from './spec-value-cell';
-import { RatingGroupHeader, RatingSourceInfo, RatingValue } from './rating-parts';
+import { RatingEntry, RatingGroupHeader } from './rating-parts';
 import { Badge } from './ui/badge';
-import { StatBar } from './ui/stat-bar';
 
 type Row = ReturnType<typeof comparisonRows>[number];
 const columns = ['a', 'b'] as const;
@@ -80,11 +79,7 @@ function RatingComparison({ left, right, dev }: { left: CatalogueEntry; right: C
           return <div className="comparison-rating-row" key={row.dimension} data-dimension={row.dimension}>
             <p className="comparison-row-label">{label}</p>
             {row.cells.map((cell, index) => <div key={cell.entryId} className="comparison-rating-cell" data-column={columns[index]} aria-label={`${label}: ${racketLabel(entries[index]!)}`}>
-              {cell.ratings.length ? cell.ratings.map((rating) => <div className="rating-entry" key={rating.evidence.observationId}>
-                <RatingValue rating={rating} />
-                {ratingPosition(rating) !== null && <StatBar tone={columns[index]!} min={rating.scaleMin!} max={rating.scaleMax!} value={rating.value!} label={`${label}: ${rating.value} w skali ${rating.scaleMin}–${rating.scaleMax}`} />}
-                <RatingSourceInfo rating={rating} group={group} dev={dev} label={`Źródło oceny: ${label}`} />
-              </div>) : <p className="comparison-unknown">brak oceny</p>}
+              {cell.ratings.length ? cell.ratings.map((rating) => <RatingEntry key={rating.evidence.observationId} rating={rating} group={group} tone={columns[index]!} label={label} dev={dev} />) : <p className="comparison-unknown">brak oceny</p>}
             </div>)}
           </div>;
         })}

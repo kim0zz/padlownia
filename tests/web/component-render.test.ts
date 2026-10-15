@@ -18,6 +18,9 @@ describe('shared observations and citations', () => {
     const spec = entry.specs.find((item) => item.claimType === 'measured_specimen')!;
     const html = renderToStaticMarkup(createElement(ObservationDetails, { spec, releaseId: entry.releaseId, dev: true }));
     expect(html).toContain('372 g with one overgrip');
+    // The normalised value leads; the source's own wording follows as "Oryginał: …".
+    expect(html).toContain('<p class="observation-value">372 g</p>');
+    expect(html).toContain('<p class="observation-original">Oryginał: <span class="raw-value">372 g with one overgrip</span></p>');
     expect(html).toContain('Pomiar egzemplarza');
     expect(html).toContain('Jeden overgrip; pojedynczy egzemplarz');
     expect(html).toContain('<summary>Ślad pochodzenia danych</summary>');
@@ -63,7 +66,7 @@ describe('shared observations and citations', () => {
     spec.measurementContext = { note: '<script>untrusted</script>' };
     const html = renderToStaticMarkup(createElement(ObservationDetails, { spec, releaseId: 'fixture-release-01' }));
     expect(html).toContain('<h3>__proto__</h3>');
-    expect(html).toContain('<p class="raw-value">0</p>');
+    expect(html).toContain('Oryginał: <span class="raw-value">0</span>');
     expect(html).toContain('&lt;script&gt;untrusted&lt;/script&gt;');
     expect(html).not.toContain('<script>');
   });

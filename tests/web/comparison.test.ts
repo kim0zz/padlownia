@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { CatalogueEntry, CatalogueSpec } from '@padlownia/database';
 import { fixtureCatalogue } from '../../apps/web/lib/fixtures';
-import { canonicalSpecKey, comparisonRatingRows, comparisonRatingSources, comparisonRows, racketLabel, rowDiffers, specDisplayValue } from '../../apps/web/lib/comparison';
+import { canonicalSpecKey, comparisonRatingRows, comparisonRatingSources, comparisonRows, entryRatingGroups, entrySpecRows, racketLabel, rowDiffers, specDisplayValue } from '../../apps/web/lib/comparison';
 import { resolveComparison } from '../../apps/web/lib/comparison-request';
 import { comparisonUrl, readSelection, toggleSelection, type ComparisonSelection } from '../../apps/web/lib/comparison-selection';
 import type { SearchParams } from '../../apps/web/lib/catalogue';
@@ -273,5 +273,52 @@ describe('comparison row order and differences (UX v3 §5.3)', () => {
     expect(rowDiffers(byKey('core'))).toBe(false);
     expect(rowDiffers(comparisonRows(first, first).find((row) => row.key === 'weight')!)).toBe(false);
     expect(rowDiffers(comparisonRows(first, fixtureCatalogue[5]!).find((row) => row.key === 'shape')!)).toBe(true);
+  });
+});
+
+describe('profile rows of one racket (UX v3 §7.2)', () => {
+  it('uses the comparison order: key parameters first (even without data), then the rest alphabetically', () => {
+    const entry = structuredClone(first);
+    entry.specs.push(spec({ key: 'player_level', rawValue: 'Advanced', normalizedText: 'advanced' }), spec({ key: 'frame', rawValue: 'carbon', normalizedText: 'carbon' }), spec({ key: 'zeta', rawValue: 'z' }), spec({ key: 'alpha', rawValue: 'a' }));
+    expect(entrySpecRows(entry).map((row) => row.key)).toEqual(['shape', 'weight', 'balance', 'core', 'surface', 'frame', 'player_level', 'alpha', 'zeta']);
+    expect(entrySpecRows(entry).map((row) => row.key)).toEqual(comparisonRows(entry, entry).map((row) => row.key));
+  });
+  it('keeps the selected valid values apart from every original observation, and merges the weight_g alias into one row', () => {
+    const weight = entrySpecRows(first).find((row) => row.key === 'weight')!;
+    expect(weight.label).toBe('Masa');
+    expect(weight.observations.length).toBeGreaterThan(weight.selected.length);
+    expect(weight.selected.map(specDisplayValue)).toEqual(['360–370 g']);
+    expect(weight.observations.some((observation) => observation.claimType === 'measured_specimen' && !observation.selected)).toBe(true);
+    expect(entrySpecRows(first).filter((row) => row.key === 'weight')).toHaveLength(1);
+  });
+  it('lists unselected and invalid observations without selecting them, and shows empty key rows for a racket without data', () => {
+    const entry = structuredClone(first);
+    entry.specs = [spec({ key: 'weight_g', validationStatus: 'unknown', selected: true })];
+    const weight = entrySpecRows(entry).find((row) => row.key === 'weight')!;
+    expect(weight.observations).toHaveLength(1);
+    expect(weight.selected).toEqual([]);
+    const empty = entrySpecRows(fixtureCatalogue[5]!);
+    expect(empty.map((row) => row.key)).toEqual(['shape', 'weight', 'balance', 'core', 'surface']);
+    expect(empty.every((row) => row.observations.length === 0 && row.selected.length === 0)).toBe(true);
+  });
+  it('keeps both conflicting observations of one parameter in its row', () => {
+    const shape = entrySpecRows(fixtureCatalogue[2]!).find((row) => row.key === 'shape')!;
+    expect(shape.observations).toHaveLength(2);
+    expect(shape.observations.some((observation) => observation.conflict)).toBe(true);
+  });
+  it('groups ratings by source and orders dimensions without merging scales', () => {
+    const entry = structuredClone(first);
+    const base = entry.ratings[0]!;
+    entry.ratings = [
+      { ...base, dimension: 'control', evidence: { ...base.evidence, observationId: 'synthetic-r1' } },
+      { ...base, dimension: 'overall', evidence: { ...base.evidence, observationId: 'synthetic-r2' } },
+      { ...base, dimension: 'power', scaleMax: 100, value: 80, evidence: { ...base.evidence, sourceCode: 'other', sourceName: 'Other source', observationId: 'synthetic-r3' } },
+    ];
+    const groups = entryRatingGroups(entry);
+    expect(groups.map((group) => group.name)).toEqual([base.evidence.sourceName, 'Other source']);
+    expect(groups[0]!.rows.map((row) => row.dimension)).toEqual(['overall', 'control']);
+    expect(groups[1]!.rows.map((row) => row.dimension)).toEqual(['power']);
+    expect(groups[1]!.ratings[0]!.scaleMax).toBe(100);
+    expect(entryRatingGroups(fixtureCatalogue[5]!)).toEqual([]);
   });
 });

@@ -15,10 +15,16 @@ test('catalogue exposes fixture state, exact profiles and keyboard navigation', 
   await expect(page.locator('.racket-card')).toHaveCount(1);
   await page.getByRole('link', { name: 'Zobacz profil TESTLAB Orbit Control 2026' }).click();
   await expect(page.getByRole('heading', { name: 'Orbit', exact: true, level: 1 })).toBeVisible();
-  await expect(page.getByText('Pomiar egzemplarza', { exact: true }).first()).toBeVisible();
-  await expect(page.getByText('372 g with one overgrip', { exact: true })).toBeVisible();
-  await expect(page.getByText('360–370 g', { exact: true })).toBeVisible();
-  await page.getByText('Ślad pochodzenia danych', { exact: true }).first().click();
+  // The parameter table shows the catalogue value; the original observations sit in one section that starts collapsed.
+  await expect(page.locator('.spec-row[data-spec="weight"] .comparison-value strong')).toHaveText('360–370 g');
+  const observations = page.locator('.profile-observations');
+  await expect(observations).not.toHaveAttribute('open', '');
+  await observations.locator(':scope > summary').click();
+  await expect(observations.getByText('Pomiar egzemplarza', { exact: true })).toBeVisible();
+  await expect(observations.getByText('372 g with one overgrip', { exact: true })).toBeVisible();
+  await expect(observations.getByText('360–370 g', { exact: true })).toBeVisible();
+  // Developer-only trail (SHOW_DEV_DETAILS=1 in playwright.config.ts).
+  await observations.getByText('Ślad pochodzenia danych', { exact: true }).first().click();
   await expect(page.getByText('fixture-release-01').first()).toBeVisible();
 });
 
@@ -31,7 +37,9 @@ test('empty search, unknown year and conflict remain explicit', async ({ page })
   await expect(page.getByRole('heading', { name: 'Parametry jeszcze nieustalone.' })).toBeVisible();
   await page.goto('/rakiety/fixture-orbit-pro-2026');
   await expect(page.getByText('Źródła podają rozbieżne parametry.', { exact: true })).toBeVisible();
+  await expect(page.locator('.spec-row[data-spec="shape"]').getByText('Rozbieżne źródła', { exact: true })).toBeVisible();
   await expect(page.locator('.observation').filter({ hasText: 'Kształt' })).toHaveCount(2);
+  await expect(page.getByRole('navigation', { name: 'Inne wersje' }).getByRole('link', { name: 'Control · 2026', exact: true })).toHaveAttribute('href', '/rakiety/fixture-orbit-control-2026');
   await page.goto('/rakiety/does-not-exist');
   await expect(page.getByRole('heading', { name: 'Nie znaleźliśmy tej rakiety.' })).toBeVisible();
 });
@@ -46,7 +54,7 @@ test('desktop and mobile screenshots, no horizontal overflow, WCAG AA automated 
   await page.screenshot({ path: 'docs/design/screenshots/catalogue-desktop.png', fullPage: true, caret: 'initial' });
   expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()).violations).toEqual([]);
   await page.goto('/rakiety/fixture-orbit-control-2026');
-  await expect(page.getByRole('heading', { name: 'Parametry i źródła', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Parametry', exact: true, level: 2 })).toBeVisible();
   await page.screenshot({ path: 'docs/design/screenshots/profile-desktop.png', fullPage: true, caret: 'initial' });
   expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()).violations).toEqual([]);
   await page.setViewportSize({ width: 375, height: 812 });
@@ -241,5 +249,39 @@ test('catalogue grid uses 4, 3, 2 columns and a single list column on a phone', 
     await expect(visibleCards(page).first()).toBeVisible();
   await hydrated(page);
     expect(await columns()).toBe(Math.min(expected, 6));
+  }
+});
+
+test('profile: parameters and ratings sit side by side and the ratings start above the fold on a desktop', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/rakiety/fixture-orbit-control-2026');
+  const heading = page.locator('.rating-group-header').filter({ visible: true }).first();
+  await expect(heading).toBeVisible();
+  const box = (await heading.boundingBox())!;
+  expect(box.y + box.height).toBeLessThan(900);
+  const specs = (await page.locator('.profile-specs').filter({ visible: true }).boundingBox())!;
+  const ratings = (await page.locator('.profile-ratings').filter({ visible: true }).boundingBox())!;
+  expect(ratings.x).toBeGreaterThan(specs.x + specs.width - 1);
+  expect(Math.abs(ratings.y - specs.y)).toBeLessThan(2);
+  // Below 1024 px the ratings follow the parameters in one column.
+  await page.setViewportSize({ width: 900, height: 900 });
+  const narrowSpecs = (await page.locator('.profile-specs').filter({ visible: true }).boundingBox())!;
+  const narrowRatings = (await page.locator('.profile-ratings').filter({ visible: true }).boundingBox())!;
+  expect(narrowRatings.y).toBeGreaterThan(narrowSpecs.y + narrowSpecs.height - 1);
+  expect(narrowRatings.x).toBeCloseTo(narrowSpecs.x, 0);
+});
+
+test('profile: rating source popover, open observations and a conflicting variant stay accessible on desktop and phone', async ({ page }) => {
+  for (const size of [{ width: 1440, height: 900 }, { width: 375, height: 812 }]) {
+    await page.setViewportSize(size);
+    await page.goto('/rakiety/fixture-orbit-control-2026');
+    await page.locator('.rating-row[data-dimension="control"] .source-info > summary').filter({ visible: true }).click();
+    await expect(page.getByText('Skala źródła: 0–10. Oryginał: 8/10.', { exact: true })).toBeVisible();
+    expect(await axe(page)).toEqual([]);
+    await page.goto('/rakiety/fixture-orbit-pro-2026');
+    await page.locator('.profile-observations > summary').filter({ visible: true }).click();
+    await expect(page.locator('.profile-observations').getByText('Diamond', { exact: true })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    expect(await axe(page)).toEqual([]);
   }
 });

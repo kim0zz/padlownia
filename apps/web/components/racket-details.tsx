@@ -2,20 +2,24 @@ import type { CatalogueEntry, CatalogueRating, CatalogueSpec } from '@padlownia/
 import { claimLabel, formatDate, ratingLabels, rawText, specLabels } from '../lib/catalogue';
 import { RatingCitation, SourceCitation } from './evidence';
 import { ratingDimensionLabels, ratingPosition } from '../lib/ratings';
+import { specValueText } from './spec-value-cell';
+import { Badge } from './ui/badge';
+import { Notice } from './ui/notice';
 
 export { ratingDimensionLabels, ratingPosition } from '../lib/ratings';
 
-/** Full original observation with its publication version and source trail. */
+/** Full observation: the normalised value first, the source's original wording second, then kind, context, citation and (developer mode) the source trail. */
 export function ObservationDetails({ spec, releaseId, dev = false }: { spec: CatalogueSpec; releaseId: string; dev?: boolean }) {
   return <article className="observation">
     <div className="observation-title">
       <h3>{specLabels[spec.key] ?? spec.key}</h3>
       <div className="observation-badges">
-        {spec.selected && <span className="selected-badge">Wartość katalogowa</span>}
-        {spec.conflict && <span className="conflict-label">Rozbieżność</span>}
+        {spec.selected && <Badge>Wartość katalogowa</Badge>}
+        {spec.conflict && <Badge tone="warning">Rozbieżność</Badge>}
       </div>
     </div>
-    <p className="raw-value">{rawText(spec.rawValue)}</p>
+    <p className="observation-value">{specValueText(spec)}</p>
+    <p className="observation-original">Oryginał: <span className="raw-value">{rawText(spec.rawValue)}</span></p>
     <p className="observation-kind">{claimLabel(spec)}</p>
     {Object.keys(spec.measurementContext).length > 0 && <p className="context-note">
       Kontekst: {Object.entries(spec.measurementContext).map(([key, value]) => `${key}: ${rawText(value)}`).join('; ')}
@@ -52,10 +56,9 @@ export function RatingCard({ rating }: { rating: CatalogueRating }) {
 
 export function ConflictNotice({ entry }: { entry: CatalogueEntry }) {
   if (!entry.specs.some((spec) => spec.conflict)) return null;
-  return <aside className="conflict-notice" aria-label="Rozbieżność źródeł">
-    <strong>Źródła podają rozbieżne parametry.</strong>
-    <p>Wartość katalogowa i alternatywne obserwacje pozostają widoczne poniżej. Rozbieżność nie jest uśredniana.</p>
-  </aside>;
+  return <Notice tone="warning">
+    <p><strong>Źródła podają rozbieżne parametry.</strong> Wartość katalogowa i alternatywne obserwacje pozostają widoczne poniżej. Rozbieżność nie jest uśredniana.</p>
+  </Notice>;
 }
 
 /** Presentational only: works with an already selected, released exact variant. */
