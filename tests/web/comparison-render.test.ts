@@ -22,6 +22,8 @@ const release = first.releaseId;
 const payload = (entries = fixtureCatalogue) => ({ version: 1, datasetVersion: entries[0]!.releaseId, blocks: [{ type: 'racket_comparison', racketIds: [entries[0]!.id, entries[2]!.id] }] });
 const view = (input: unknown, entries = fixtureCatalogue, dev = true) => renderToStaticMarkup(createElement(StructuredView, { input, entries, dev }));
 const text = (html: string) => html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+const headerMeta = (html: string, column: 'a' | 'b') => /<div class="comparison-header-cell" data-column="[ab]">/.test(html)
+  ? text(new RegExp(`<div class="comparison-header-cell" data-column="${column}">[\\s\\S]*?<p class="comparison-identity-meta">([\\s\\S]*?)</p>`).exec(html)?.[1] ?? '') : '';
 const page = async (params: SearchParams = {}) => renderToStaticMarkup(await ComparisonPage({ searchParams: Promise.resolve(params) }));
 const pairParams = { release, left: first.id, right: second.id };
 
@@ -38,8 +40,11 @@ describe('structured comparison renders only authoritative catalogue facts', () 
     const html = view(payload());
     expect(html).toContain(`href="/rakiety/${first.id}"`);
     expect(html).toContain(`href="/rakiety/${second.id}"`);
-    expect(html).toContain('RAKIETA 1 · 2026');
-    expect(html).toContain('RAKIETA 2 · 2026');
+    // The identity header replaced the "RAKIETA n · rok" kicker: column markers plus variant and year.
+    expect(html).toContain('data-column="a"');
+    expect(html).toContain('data-column="b"');
+    expect(headerMeta(html, 'a')).toBe('Control · 2026');
+    expect(headerMeta(html, 'b')).toBe('Pro · 2026');
     expect(text(html)).toContain('Control');
     expect(text(html)).toContain('Pro');
     expect(html).toContain('360–370 g');
@@ -69,6 +74,67 @@ describe('structured comparison renders only authoritative catalogue facts', () 
     expect(html).toContain('Pobrano 13 października 2026');
     expect(html).toContain('<strong>Łezka</strong>');
     expect(view(payload(), fixtureCatalogue, true)).toContain('class="provenance-details"');
+    // The source popovers carry technical IDs only in developer mode.
+    expect(html).not.toContain('source-info-dev');
+    expect(view(payload(), fixtureCatalogue, true)).toContain('source-info-dev');
+    // Every shown value keeps its source popover with kind, citation and retrieval date.
+    expect(html).toContain('class="source-info-panel"');
+    expect(html).toContain('Deklaracja producenta');
+  });
+
+  it('marks only the rows whose selected values differ and keeps the toggle server-rendered', () => {
+    const html = view(payload());
+    const row = (label: string) => new RegExp(`<section class="comparison-row" aria-label="${label}"([^>]*)>`).exec(html)![1]!;
+    expect(row('Kształt')).toContain('data-differs="true"');
+    expect(row('Masa')).toContain('data-differs="true"');
+    expect(row('Powierzchnia')).not.toContain('data-differs');
+    expect(row('Balans')).not.toContain('data-differs');
+    expect(html).toContain('class="only-diff-toggle"');
+    expect(html).toContain('Tylko różnice');
+    expect(html).not.toContain('Parametry są takie same');
+    // Identical selected values on both sides: no row is marked and the "same parameters" note is rendered.
+    const entries = fixtures();
+    entries[2]!.specs = entries[0]!.specs.map((spec) => ({ ...structuredClone(spec), evidence: { ...spec.evidence, observationId: `${spec.evidence.observationId}-right` } }));
+    const same = view(payload(entries), entries);
+    expect(same).not.toContain('data-differs');
+    expect(same).toContain('Parametry są takie same');
+  });
+
+  it('prints a methodology caveat shared by a whole source once, and keeps differing caveats per rating', () => {
+    const entries = fixtures();
+    const note = 'Wspólne zastrzeżenie metodologii.';
+    const base = entries[0]!.ratings[0]!;
+    base.methodology = `https://example.com/method ${note}`;
+    entries[2]!.ratings = [{ ...structuredClone(base), dimension: 'power', evidence: { ...base.evidence, observationId: 'shared-note-right' } }];
+    const shared = view(payload(entries), entries);
+    expect(shared.split(note)).toHaveLength(2);
+    expect(shared.split('href="https://example.com/method"')).toHaveLength(2);
+
+    entries[2]!.ratings[0]!.methodology = 'https://example.com/method Inne zastrzeżenie tej oceny.';
+    const distinct = view(payload(entries), entries);
+    expect(distinct.split(note)).toHaveLength(2);
+    expect(distinct).toContain('Inne zastrzeżenie tej oceny.');
+    expect(distinct).toContain('Zastrzeżenia metodologii różnią się między ocenami');
+  });
+
+  it('shows a rating on its own scale as a bar, flags incomplete model data once and orders dimensions', () => {
+    const entries = fixtures();
+    const base = entries[0]!.ratings[0]!;
+    base.methodology = 'Neutralne wartości za brakujące dane modelu.';
+    entries[0]!.ratings = [base, { ...structuredClone(base), dimension: 'overall', evidence: { ...base.evidence, observationId: 'overall-left' } }];
+    const html = view(payload(entries), entries);
+    expect(html.match(/Niepełne dane modelu/g)).toHaveLength(1);
+    expect(html).toContain('niepełne dane modelu</span>');
+    expect(html).toContain('min="0" max="10" value="8"');
+    expect(html.indexOf('data-dimension="overall"')).toBeLessThan(html.indexOf('data-dimension="control"'));
+  });
+
+  it('keeps the unverified manufacturer claim and conflicting sources on the first layer', () => {
+    const entries = fixtures();
+    entries[0]!.specs[0]!.evidence.attribution = { ...entries[0]!.specs[0]!.evidence.attribution!, verified: false };
+    const html = view(payload(entries), entries);
+    expect(html).toContain('<span title="Przypisane producentowi — niezweryfikowane">Niezweryfikowane</span>');
+    expect(html.match(/Rozbieżne źródła/g)).toHaveLength(1);
   });
 
   it('shows selected shape and conflicting raw observation without silently substituting the conflict', () => {
@@ -103,7 +169,7 @@ describe('structured comparison renders only authoritative catalogue facts', () 
     expect(html).toContain('Unknown balance remains a caveat.');
     expect(html).toContain('href="https://example.com/synthetic-ten-point-review"');
     expect(html).toContain('href="https://example.com/synthetic-hundred-point-review"');
-    expect(html.match(/Brak ocen z tego źródła dla tej kategorii\./g)).toHaveLength(2);
+    expect(html.match(/brak oceny/g)).toHaveLength(2);
     expect(html).toContain('CC BY 4.0');
   });
 
@@ -125,7 +191,7 @@ describe('structured comparison renders only authoritative catalogue facts', () 
     unknown.specs.push({ ...structuredClone(entries[0]!.specs[1]!), key: 'balance_cm', rawValue: '~26.5', numericValue: null, valueMin: null, valueMax: null, unit: null, selected: false, validationStatus: 'unknown', evidence: { ...entries[0]!.specs[1]!.evidence, observationId: 'unknown-balance' } });
     const input = { version: 1, datasetVersion: release, blocks: [{ type: 'racket_comparison', racketIds: [first.id, unknown.id] }] };
     const html = view(input, entries);
-    expect(html).toContain('ROK NIEZNANY');
+    expect(headerMeta(html, 'b')).toContain('rok nieznany');
     expect(html).toContain('Rocznik niepotwierdzony');
     expect(html).toContain('Brak danych');
     expect(html).toContain('~26.5');

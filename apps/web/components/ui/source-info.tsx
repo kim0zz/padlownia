@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import type { CatalogueEvidence } from '@padlownia/database';
 import { formatDate } from '../../lib/catalogue';
 import { SourceCitation } from '../evidence';
@@ -6,8 +6,9 @@ import { SourceCitation } from '../evidence';
 /**
  * Second information layer: one interaction away from every displayed value.
  * A native <details> keeps it working without JavaScript and in server-rendered markup.
+ * `children` carries value-specific context (e.g. a rating's scale and original) after the citations.
  */
-export function SourceInfo({ items, dev = false, label }: { items: { evidence: CatalogueEvidence; claim: string }[]; label: string; dev?: boolean }) {
+export function SourceInfo({ items, dev = false, label, children }: { items: { evidence: CatalogueEvidence; claim: string }[]; label: string; dev?: boolean; children?: ReactNode }) {
   const names = [...new Set(items.map((item) => item.evidence.sourceName))].join(', ');
   return <details className="source-info">
     <summary aria-label={names ? `${label}: ${names}` : label}>
@@ -22,6 +23,7 @@ export function SourceInfo({ items, dev = false, label }: { items: { evidence: C
         <p className="source-info-date">Pobrano {formatDate(evidence.retrievedAt)}</p>
         {dev && <p className="source-info-dev">{evidence.observationId} · {evidence.path}</p>}
       </Fragment>)}
+      {children}
     </div>
   </details>;
 }

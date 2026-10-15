@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { CatalogueEntry, CatalogueSpec } from '@padlownia/database';
 import { fixtureCatalogue } from '../../apps/web/lib/fixtures';
-import { canonicalSpecKey, comparisonRatingRows, comparisonRatingSources, comparisonRows, racketLabel, specDisplayValue } from '../../apps/web/lib/comparison';
+import { canonicalSpecKey, comparisonRatingRows, comparisonRatingSources, comparisonRows, racketLabel, rowDiffers, specDisplayValue } from '../../apps/web/lib/comparison';
 import { resolveComparison } from '../../apps/web/lib/comparison-request';
 import { comparisonUrl, readSelection, toggleSelection, type ComparisonSelection } from '../../apps/web/lib/comparison-selection';
 import type { SearchParams } from '../../apps/web/lib/catalogue';
@@ -256,5 +256,22 @@ describe('comparison selection transitions and optional persisted state', () => 
     expect(readSelection(JSON.stringify(stale))).toEqual(stale);
     const params = Object.fromEntries(new URL(comparisonUrl(stale), 'https://example.com').searchParams);
     expect(resolveComparison(params, fixtureCatalogue).status).toBe('stale_release');
+  });
+});
+
+describe('comparison row order and differences (UX v3 §5.3)', () => {
+  it('orders the key parameters first and everything else alphabetically by label', () => {
+    const left = structuredClone(first);
+    left.specs.push(spec({ key: 'player_level', rawValue: 'Advanced', normalizedText: 'advanced' }), spec({ key: 'frame', rawValue: 'carbon', normalizedText: 'carbon' }), spec({ key: 'zeta', rawValue: 'z' }), spec({ key: 'alpha', rawValue: 'a' }));
+    expect(comparisonRows(left, second).map((row) => row.key)).toEqual(['shape', 'weight', 'balance', 'core', 'surface', 'frame', 'player_level', 'alpha', 'zeta']);
+  });
+  it('marks a row as different when values differ or only one side has one, and not when both are empty or equal', () => {
+    const rows = comparisonRows(first, fixtureCatalogue[2]!);
+    const byKey = (key: string) => rows.find((row) => row.key === key)!;
+    expect(rowDiffers(byKey('shape'))).toBe(true);
+    expect(rowDiffers(byKey('weight'))).toBe(true);
+    expect(rowDiffers(byKey('core'))).toBe(false);
+    expect(rowDiffers(comparisonRows(first, first).find((row) => row.key === 'weight')!)).toBe(false);
+    expect(rowDiffers(comparisonRows(first, fixtureCatalogue[5]!).find((row) => row.key === 'shape')!)).toBe(true);
   });
 });

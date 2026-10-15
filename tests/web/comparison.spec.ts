@@ -25,6 +25,10 @@ const comparison = (page: Page) => page.getByRole('region', { name: 'Zestawienie
 const comparisonPicker = (page: Page) => page.getByRole('form', { name: 'Wybierz dwie rakiety' });
 const fixtureNotice = (page: Page) => page.getByRole('complementary', { name: 'Pochodzenie danych' }).getByText('Dane demonstracyjne.', { exact: true });
 
+// In dev mode app/loading.tsx streams the page as a Suspense boundary: right after `load` the real content may
+// still sit in a hidden `div[hidden]#S:n` next to the visible fallback. Page-level text lookups count visible nodes only.
+const visibleText = (page: Page, text: string, options?: { exact?: boolean }) => page.getByText(text, options).filter({ visible: true });
+
 async function expectNoPageOverflow(page: Page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 }
@@ -56,9 +60,9 @@ test('text search and dropdown select precise IDs with keyboard, and editing nev
   await page.getByRole('option').click();
   await comparisonPicker(page).getByRole('button', { name: 'Porównaj rakiety', exact: true }).click();
   await expect(comparison(page)).toBeVisible();
-  await page.getByText('Zmień porównywane rakiety', { exact: true }).click();
+  await visibleText(page, 'Zmień porównywane rakiety', { exact: true }).click();
   await left.fill('no-such-model');
-  await expect(page.getByText('Brak wyników. Spróbuj innej nazwy.', { exact: true })).toBeVisible();
+  await expect(visibleText(page, 'Brak wyników. Spróbuj innej nazwy.', { exact: true })).toBeVisible();
   await expect(comparisonPicker(page).locator('input[name="left"]')).toHaveValue('');
   await left.press('Escape');
   await expect(left).toHaveAttribute('aria-expanded', 'false');
@@ -101,7 +105,7 @@ test('selection is keyboard operable, limited to two precise rackets and removab
   await expect(tray(page).getByRole('listitem')).toHaveCount(2);
   await expect(page.getByRole('navigation', { name: 'Nawigacja główna' }).getByRole('link', { name: 'Porównaj (2/2)', exact: true })).toBeVisible();
   await add(page, labels.pro2026).click();
-  await expect(page.getByText('Wybrano już dwie rakiety. Usuń jedną z wyboru przed dodaniem kolejnej.', { exact: true })).toBeVisible();
+  await expect(visibleText(page, 'Wybrano już dwie rakiety. Usuń jedną z wyboru przed dodaniem kolejnej.', { exact: true })).toBeVisible();
   await expect(tray(page).getByRole('listitem')).toHaveCount(2);
   await expect(tray(page).getByText(labels.pro2026, { exact: true })).toHaveCount(0);
   await expect(add(page, labels.pro2026)).toHaveAttribute('aria-pressed', 'false');
@@ -146,13 +150,13 @@ test('profile and GET search navigation retain selection and the URL reproduces 
   await page.reload();
   await expect(comparison(page)).toBeVisible();
   await expect(tray(page)).toHaveCount(0);
-  await page.getByText('Zmień porównywane rakiety', { exact: true }).click();
+  await visibleText(page, 'Zmień porównywane rakiety', { exact: true }).click();
   await expect(comparisonPicker(page).getByLabel('Rakieta 1 · model, wariant i rok', { exact: true })).toHaveValue(labels.control2026);
   await expect(comparisonPicker(page).getByLabel('Rakieta 2 · model, wariant i rok', { exact: true })).toHaveValue(labels.control2025);
-  const identities = comparison(page).locator('.comparison-identity');
+  const identities = comparison(page).locator('.comparison-header-cell');
   await expect(identities).toHaveCount(2);
-  await expect(identities.nth(0).locator('.section-kicker')).toContainText('2026');
-  await expect(identities.nth(1).locator('.section-kicker')).toContainText('2025');
+  await expect(identities.nth(0).locator('.comparison-identity-meta')).toContainText('2026');
+  await expect(identities.nth(1).locator('.comparison-identity-meta')).toContainText('2025');
   await expect(identities.nth(0).getByRole('link', { name: 'Orbit', exact: true })).toHaveAttribute('href', `/rakiety/${control2026}`);
   await expect(identities.nth(1).getByRole('link', { name: 'Orbit', exact: true })).toHaveAttribute('href', `/rakiety/${control2025}`);
   const mass = comparison(page).locator('.comparison-row[aria-label="Masa"] .comparison-cell');
@@ -172,19 +176,19 @@ test('direct links expose incomplete, invalid and stale choices without silently
   await expect(comparison(page)).toHaveCount(0);
 
   await page.goto(comparisonPath(control2026, control2026));
-  await expect(page.getByText('Nieprawidłowy wybór. Porównanie wymaga dwóch różnych rakiet i poprawnego odnośnika.', { exact: true })).toBeVisible();
+  await expect(visibleText(page, 'Nieprawidłowy wybór. Porównanie wymaga dwóch różnych rakiet i poprawnego odnośnika.', { exact: true })).toBeVisible();
   await expect(comparison(page)).toHaveCount(0);
 
   await page.goto(comparisonPath(control2026, 'unknown-racket-id'));
-  await expect(page.getByText('Co najmniej jedna rakieta nie jest dostępna w tej publikacji. Wybierz dokładny model z aktualnego katalogu.', { exact: true })).toBeVisible();
+  await expect(visibleText(page, 'Co najmniej jedna rakieta nie jest dostępna w tej publikacji. Wybierz dokładny model z aktualnego katalogu.', { exact: true })).toBeVisible();
   await expect(comparison(page)).toHaveCount(0);
 
   await page.goto(`${comparisonPath(control2026, control2025)}&left=${pro2026}`);
-  await expect(page.getByText('Nieprawidłowy wybór. Porównanie wymaga dwóch różnych rakiet i poprawnego odnośnika.', { exact: true })).toBeVisible();
+  await expect(visibleText(page, 'Nieprawidłowy wybór. Porównanie wymaga dwóch różnych rakiet i poprawnego odnośnika.', { exact: true })).toBeVisible();
   await expect(comparison(page)).toHaveCount(0);
 
   await page.goto(comparisonPath(control2026, control2025, 'fixture-release-old'));
-  await expect(page.getByText('Wersja danych w tym odnośniku nie jest już aktualna.', { exact: false })).toBeVisible();
+  await expect(visibleText(page, 'Wersja danych w tym odnośniku nie jest już aktualna.', { exact: false })).toBeVisible();
   await expect(comparison(page)).toHaveCount(0);
   const refresh = page.getByRole('button', { name: 'Porównaj w aktualnej wersji', exact: true });
   await refresh.focus();
@@ -203,7 +207,7 @@ test('same-route removal clears the search selection and explicit URLs replace s
   await expect(tray(page)).toHaveCount(0);
   await comparison(page).getByRole('link', { name: `Usuń z wyboru: ${labels.control2025}`, exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Dodaj drugą rakietę.', exact: true })).toBeVisible();
-  await expect(page.getByText('WYBÓR 1 Z 2', { exact: true })).toBeVisible();
+  await expect(visibleText(page, 'WYBÓR 1 Z 2', { exact: true })).toBeVisible();
   await expect(leftSelect).toHaveValue(labels.control2026);
   await expect(rightSelect).toHaveValue('');
   await expect(comparison(page)).toHaveCount(0);
@@ -214,7 +218,7 @@ test('same-route removal clears the search selection and explicit URLs replace s
   await expect(navigation.getByRole('link', { name: 'Porównaj (2/2)', exact: true })).toBeVisible();
   await page.goto(comparisonPath(pro2026, unknownYear));
   await expect(comparison(page)).toBeVisible();
-  await page.getByText('Zmień porównywane rakiety', { exact: true }).click();
+  await visibleText(page, 'Zmień porównywane rakiety', { exact: true }).click();
   await expect(leftSelect).toHaveValue(labels.pro2026);
   await expect(rightSelect).toHaveValue('TESTLAB Arc · Standard · Rok nieznany');
   const selected = await page.evaluate(() => JSON.parse(sessionStorage.getItem('padlownia:comparison:v1')!));
@@ -235,18 +239,25 @@ test('comparison preserves source observations, specimen context, conflicts and 
   await expect(shape.locator('.comparison-cell')).toHaveCount(2);
   await expect(shape.locator('.comparison-value strong')).toHaveText(['Okrągła', 'Łezka']);
   await expect(shape.getByText('Rozbieżne źródła', { exact: true })).toBeVisible();
-  await shape.getByText('Obserwacje (2)', { exact: true }).click();
-  await expect(shape.getByText('Diamond', { exact: true })).toBeVisible();
-  await expect(shape.getByText('Ocena redakcyjna', { exact: true })).toBeVisible();
+  // Original observations moved from per-cell <details> to one "all observations" section.
+  const observations = comparison(page).locator('.comparison-all-observations');
+  await observations.locator(':scope > summary').click();
+  const shapeObservations = observations.locator('.all-observations-row[data-spec="shape"]');
+  await expect(shapeObservations.getByText('Diamond', { exact: true })).toBeVisible();
+  await expect(shapeObservations.getByText('Ocena redakcyjna', { exact: true })).toBeVisible();
 
-  const leftMass = comparison(page).locator('.comparison-row[aria-label="Masa"] .comparison-cell').nth(0);
-  await expect(leftMass.locator('.comparison-value strong')).toHaveText('360–370 g');
-  await leftMass.getByText('Obserwacje (2)', { exact: true }).click();
-  await expect(leftMass.getByText('372 g with one overgrip', { exact: true })).toBeVisible();
-  await expect(leftMass.getByText('Pomiar egzemplarza', { exact: true })).toBeVisible();
-  await expect(leftMass.getByText('Jeden overgrip; pojedynczy egzemplarz', { exact: false })).toBeVisible();
+  const mass = comparison(page).locator('.comparison-row[aria-label="Masa"] .comparison-cell');
+  await expect(mass.nth(0).locator('.comparison-value strong')).toHaveText('360–370 g');
+  const massObservations = observations.locator('.all-observations-row[data-spec="weight"]');
+  await expect(massObservations.getByText('372 g with one overgrip', { exact: true })).toBeVisible();
+  await expect(massObservations.getByText('Pomiar egzemplarza', { exact: true })).toBeVisible();
+  await expect(massObservations.getByText('Jeden overgrip; pojedynczy egzemplarz', { exact: false })).toBeVisible();
+
+  // The scale and original value of a rating live in its source popover; a missing rating is stated in the cell.
+  const control = comparison(page).locator('.comparison-rating-row[data-dimension="control"] .comparison-rating-cell');
+  await control.nth(0).locator('.source-info > summary').click();
   await expect(comparison(page).getByText('Skala źródła: 0–10. Oryginał: 8/10.', { exact: true })).toBeVisible();
-  await expect(comparison(page).getByText('Brak ocen z tego źródła dla tej kategorii.', { exact: true })).toBeVisible();
+  await expect(control.nth(1).getByText('brak oceny', { exact: true })).toBeVisible();
   await comparison(page).getByText('Wersja porównywanych danych', { exact: true }).click();
   await expect(comparison(page).locator('.comparison-release').getByText(release, { exact: true })).toBeVisible();
 
@@ -254,6 +265,64 @@ test('comparison preserves source observations, specimen context, conflicts and 
   await expect(comparison(page).getByText('Rocznik niepotwierdzony', { exact: true })).toBeVisible();
   await expect(comparison(page).locator('.comparison-row[aria-label="Kształt"] .comparison-cell').nth(1).getByText('Brak danych', { exact: true })).toBeVisible();
   await expect(comparison(page).locator('.comparison-row[aria-label="Masa"] .comparison-cell').nth(1).getByText('Brak danych', { exact: true })).toBeVisible();
+});
+
+test('source popovers open from the keyboard, close with Escape and stay inside the viewport in both columns', async ({ page }) => {
+  await page.goto(comparisonPath(control2026, pro2026));
+  await expect(comparison(page)).toBeVisible();
+  const cell = (label: string, index: number) => comparison(page).locator(`.comparison-row[aria-label="${label}"] .comparison-cell`).nth(index);
+  const shapeB = cell('Kształt', 1).locator('.source-info > summary');
+  const massA = cell('Masa', 0).locator('.source-info > summary');
+  await shapeB.focus();
+  await page.keyboard.press('Tab');
+  await expect(massA).toBeFocused();
+  await page.keyboard.press('Enter');
+  const panel = cell('Masa', 0).locator('.source-info-panel');
+  await expect(panel).toBeVisible();
+  await expect(panel.getByText('Pobrano', { exact: false })).toBeVisible();
+  await expect(panel.getByText('Deklaracja producenta', { exact: true })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(panel).toBeHidden();
+  await expect(massA).toBeFocused();
+
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 375, height: 812 }]) {
+    await page.setViewportSize(viewport);
+    for (const index of [0, 1]) {
+      const info = cell('Masa', index).locator('.source-info');
+      await info.locator(':scope > summary').click();
+      const box = (await info.locator('.source-info-panel').boundingBox())!;
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(viewport.width);
+      await expectNoPageOverflow(page);
+      await page.keyboard.press('Escape');
+    }
+  }
+});
+
+test('"Tylko różnice" hides identical rows and the identity header stays under the site header', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(comparisonPath(control2026, pro2026));
+  const rows = comparison(page).locator('.comparison-row:visible');
+  const before = await rows.count();
+  await page.getByRole('checkbox', { name: 'Tylko różnice' }).check();
+  // Orbit Control and Orbit Pro differ in shape and mass; balance, core and surface are empty on both sides.
+  await expect(rows).toHaveCount(2);
+  expect(before).toBeGreaterThan(2);
+  for (const row of await rows.all()) await expect(row).toHaveAttribute('data-differs', 'true');
+  await page.getByRole('checkbox', { name: 'Tylko różnice' }).uncheck();
+  await expect(rows).toHaveCount(before);
+
+  await page.evaluate(() => window.scrollTo(0, 1500));
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(300);
+  const header = (await comparison(page).locator('.comparison-header').boundingBox())!;
+  expect(header.y).toBeGreaterThanOrEqual(55);
+  expect(header.y).toBeLessThanOrEqual(70);
+
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.evaluate(() => window.scrollTo(0, 400));
+  const mobileHeader = (await comparison(page).locator('.comparison-header').boundingBox())!;
+  expect(mobileHeader.y).toBeGreaterThanOrEqual(55);
+  expect(mobileHeader.y).toBeLessThanOrEqual(70);
 });
 
 test('comparison is accessible on keyboard, desktop and mobile with synthetic screenshots', async ({ page }) => {
@@ -266,20 +335,23 @@ test('comparison is accessible on keyboard, desktop and mobile with synthetic sc
   await expect(page.getByRole('link', { name: 'Przejdź do treści', exact: true })).toBeFocused();
   await page.keyboard.press('Enter');
   await expectNoPageOverflow(page);
-  for (const identity of await comparison(page).locator('.comparison-identity').all()) {
-    const box = await identity.boundingBox();
-    expect(box!.y + box!.height).toBeLessThan(500);
-  }
-  const lastCoreRow = await comparison(page).locator('.comparison-row[aria-label="Powierzchnia"]').boundingBox();
-  expect(lastCoreRow!.y + lastCoreRow!.height).toBeLessThan(900);
+  // Above the fold at 1440x900: site header, page title, the mandatory fixture notice and the collapsed picker (about 240 px),
+  // then the identity bar, the key parameters and the first ratings.
+  const identityBar = (await comparison(page).locator('.comparison-header').boundingBox())!;
+  expect(identityBar.y + identityBar.height).toBeLessThan(330);
+  expect(identityBar.height).toBeLessThanOrEqual(80);
+  const lastCoreRow = (await comparison(page).locator('.comparison-row[aria-label="Powierzchnia"]').boundingBox())!;
+  expect(lastCoreRow.y + lastCoreRow.height).toBeLessThan(700);
+  const firstRatingGroup = (await comparison(page).locator('.rating-group-header').first().boundingBox())!;
+  expect(firstRatingGroup.y + firstRatingGroup.height).toBeLessThan(900);
   await expect(comparison(page).getByRole('meter')).toHaveCount(1);
   await expectAccessible(page);
   await page.screenshot({ path: 'docs/design/screenshots/comparison-desktop.png', fullPage: true, caret: 'initial' });
 
   await page.setViewportSize({ width: 375, height: 812 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await expect(page.getByRole('heading', { name: 'Porównanie rakiet', exact: true })).toBeVisible();
-  await expect(comparison(page).locator('.comparison-identity')).toHaveCount(2);
+  await expect(page.getByRole('heading', { name: 'Porównanie', level: 1, exact: true })).toBeVisible();
+  await expect(comparison(page).locator('.comparison-header-cell')).toHaveCount(2);
   await expectNoPageOverflow(page);
   await expectAccessible(page);
   await page.screenshot({ path: 'docs/design/screenshots/comparison-mobile.png', fullPage: true, caret: 'initial' });

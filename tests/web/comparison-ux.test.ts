@@ -72,10 +72,10 @@ describe('search and source-scale visual encoding', () => {
     expect(ratingPosition({ ...rating, value: 50, scaleMin: 0, scaleMax: 100 })).toBe(0.5);
     expect(ratingPosition({ ...rating, value: 0 })).toBe(0);
     for (const changed of [{ scaleMin: null }, { scaleMax: null }, { scaleMax: 0 }, { value: 11 }, { value: null }, { value: Infinity }, { validationStatus: 'unknown' as const }]) expect(ratingPosition({ ...rating, ...changed })).toBeNull();
-    const html = renderToStaticMarkup(createElement(RatingCard, { rating, compact: true }));
+    const html = renderToStaticMarkup(createElement(RatingCard, { rating }));
     expect(html).toContain('<meter');
     expect(html).toContain('min="0" max="10" value="8"');
-    expect(html).toContain('Metodologia i szczegóły');
+    expect(html).toContain('Skala źródła: 0–10. Oryginał: 8/10.');
     expect(html).toContain(rating.methodology);
   });
 });

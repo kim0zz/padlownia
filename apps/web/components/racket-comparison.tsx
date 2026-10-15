@@ -1,46 +1,129 @@
 import Link from 'next/link';
 import type { CatalogueEntry } from '@padlownia/database';
-import { claimLabel } from '../lib/catalogue';
-import { comparisonRows, comparisonRatingRows, comparisonRatingSources, racketLabel, specDisplayValue } from '../lib/comparison';
-import { SourceCitation } from './evidence';
-import { ObservationDetails, RatingCard } from './racket-details';
-import { RacketVisual } from './racket-visual';
-import { RemoveComparisonItem } from './comparison-selection';
+import { comparisonRatingRows, comparisonRatingSources, comparisonRows, racketLabel, rowDiffers } from '../lib/comparison';
+import { displayBrand, displayModel, displayVariant } from '../lib/display';
+import { groupMethodology, ratingDimensionLabels, ratingPosition, sortDimensions } from '../lib/ratings';
 import { approvedImageFor } from '../lib/catalogue-images';
+import { ObservationDetails } from './racket-details';
+import { ImageCredit, RacketVisual } from './racket-visual';
+import { RemoveComparisonItem } from './comparison-selection';
+import { ChangePairLink } from './change-pair-link';
+import { SpecValueCell } from './spec-value-cell';
+import { RatingGroupHeader, RatingSourceInfo, RatingValue } from './rating-parts';
+import { Badge } from './ui/badge';
+import { StatBar } from './ui/stat-bar';
+
+type Row = ReturnType<typeof comparisonRows>[number];
+const columns = ['a', 'b'] as const;
+
+function ColumnMark({ column }: { column: 'a' | 'b' }) {
+  return <span className="column-mark" data-column={column} aria-hidden="true">{column.toUpperCase()}</span>;
+}
+
+/** Sticky identity bar: stays under the site header while the parameters scroll. */
+function ComparisonHeader({ entries }: { entries: readonly [CatalogueEntry, CatalogueEntry] }) {
+  return <div className="comparison-header" role="group" aria-label="Porównywane rakiety">
+    <div className="comparison-header-corner"><ChangePairLink /></div>
+    {entries.map((entry, index) => {
+      const column = columns[index]!;
+      const image = approvedImageFor(entry);
+      return <div key={entry.id} className="comparison-header-cell" data-column={column}>
+        {image && <RacketVisual compact entry={{ image }} />}
+        <div className="comparison-header-copy">
+          <p className="comparison-header-name"><ColumnMark column={column} /><span className="comparison-header-brand">{displayBrand(entry.brand)}</span> <Link href={`/rakiety/${encodeURIComponent(entry.id)}`}>{displayModel(entry)}</Link></p>
+          <p className="comparison-identity-meta">{`${displayVariant(entry.variant) ?? 'wariant nieustalony'} · ${entry.modelYear ?? 'rok nieznany'}`}
+            {entry.modelYear === null && <> <Badge tone="warning">Rocznik niepotwierdzony</Badge></>}</p>
+        </div>
+        <RemoveComparisonItem id={entry.id} label={racketLabel(entry)} />
+      </div>;
+    })}
+  </div>;
+}
+
+function SpecComparisonTable({ rows, entries, dev }: { rows: Row[]; entries: readonly [CatalogueEntry, CatalogueEntry]; dev: boolean }) {
+  return <section className="comparison-specs" aria-labelledby="comparison-specs-title">
+    <div className="comparison-section-heading"><h2 id="comparison-specs-title">Parametry</h2></div>
+    <div className="comparison-toolbar">
+      <label className="only-diff"><input type="checkbox" id="only-diff" className="only-diff-toggle" /> Tylko różnice</label>
+      <p className="comparison-legend"><span className="diff-dot" aria-hidden="true" /> różnica między rakietami</p>
+    </div>
+    {!rows.some(rowDiffers) && <p className="comparison-no-diff">Parametry są takie same</p>}
+    <div className="comparison-table">
+      {rows.map((row) => {
+        const differs = rowDiffers(row);
+        return <section className="comparison-row" key={row.key} aria-label={row.label} data-differs={differs ? 'true' : undefined}>
+          <h3 className="comparison-row-label">{differs && <span className="diff-dot" aria-hidden="true" />}{row.label}{differs && <span className="sr-only"> (różnica)</span>}</h3>
+          {row.cells.map((cell, index) => <div className="comparison-cell" key={cell.entryId} data-column={columns[index]} aria-label={`${row.label}: ${racketLabel(entries[index]!)}`}>
+            <SpecValueCell specs={cell.selected} observations={cell.observations} specLabel={row.label} dev={dev} />
+          </div>)}
+        </section>;
+      })}
+    </div>
+  </section>;
+}
+
+function RatingComparison({ left, right, dev }: { left: CatalogueEntry; right: CatalogueEntry; dev: boolean }) {
+  const entries = [left, right] as const;
+  const sources = comparisonRatingSources(left, right);
+  return <section className="comparison-ratings" aria-labelledby="comparison-ratings-title">
+    <div className="comparison-section-heading"><h2 id="comparison-ratings-title">Oceny</h2><span>Każde źródło ma własną skalę i metodę. Skal nie łączymy ani nie uśredniamy.</span></div>
+    {sources.length === 0 && <p className="no-ratings">Brak opublikowanych ocen dla obu rakiet.</p>}
+    {sources.map((source) => {
+      const ratings = source.cells.flatMap((cell) => cell.ratings);
+      const group = groupMethodology(ratings);
+      const rows = comparisonRatingRows(source);
+      const order = sortDimensions(rows.map((row) => row.dimension));
+      return <section className="comparison-rating-source" key={source.code} aria-label={`Oceny: ${source.name}`}>
+        <RatingGroupHeader sourceName={source.name} ratings={ratings} />
+        {order.map((dimension) => rows.find((row) => row.dimension === dimension)!).map((row) => {
+          const label = ratingDimensionLabels[row.dimension] ?? row.dimension;
+          return <div className="comparison-rating-row" key={row.dimension} data-dimension={row.dimension}>
+            <p className="comparison-row-label">{label}</p>
+            {row.cells.map((cell, index) => <div key={cell.entryId} className="comparison-rating-cell" data-column={columns[index]} aria-label={`${label}: ${racketLabel(entries[index]!)}`}>
+              {cell.ratings.length ? cell.ratings.map((rating) => <div className="rating-entry" key={rating.evidence.observationId}>
+                <RatingValue rating={rating} />
+                {ratingPosition(rating) !== null && <StatBar tone={columns[index]!} min={rating.scaleMin!} max={rating.scaleMax!} value={rating.value!} label={`${label}: ${rating.value} w skali ${rating.scaleMin}–${rating.scaleMax}`} />}
+                <RatingSourceInfo rating={rating} group={group} dev={dev} label={`Źródło oceny: ${label}`} />
+              </div>) : <p className="comparison-unknown">brak oceny</p>}
+            </div>)}
+          </div>;
+        })}
+      </section>;
+    })}
+  </section>;
+}
+
+/** Every original observation of both rackets stays one click away, including raw values and measurement context. */
+function AllObservations({ rows, entries, dev }: { rows: Row[]; entries: readonly [CatalogueEntry, CatalogueEntry]; dev: boolean }) {
+  const withObservations = rows.filter((row) => row.cells.some((cell) => cell.observations.length > 0));
+  const total = withObservations.reduce((sum, row) => sum + row.cells.reduce((inner, cell) => inner + cell.observations.length, 0), 0);
+  if (total === 0) return null;
+  return <details className="comparison-all-observations">
+    <summary>Wszystkie obserwacje źródeł ({total})</summary>
+    {withObservations.map((row) => <div className="all-observations-row" key={row.key} data-spec={row.key}>
+      <h3 className="all-observations-label">{row.label}</h3>
+      <div className="all-observations-columns">
+        {row.cells.map((cell, index) => <div key={cell.entryId} data-column={columns[index]}>
+          <p className="all-observations-who"><ColumnMark column={columns[index]!} />{racketLabel(entries[index]!)}</p>
+          {cell.observations.length ? <div className="observation-list">
+            {cell.observations.map((spec) => <ObservationDetails key={spec.evidence.observationId} spec={spec} releaseId={entries[index]!.releaseId} dev={dev} />)}
+          </div> : <p className="comparison-unknown">Brak obserwacji</p>}
+        </div>)}
+      </div>
+    </div>)}
+  </details>;
+}
 
 export function RacketComparison({ left, right, dev = false }: { left: CatalogueEntry; right: CatalogueEntry; dev?: boolean }) {
-  const entries = [left, right];
-  const ratingSources = comparisonRatingSources(left, right);
+  const entries = [left, right] as const;
+  const rows = comparisonRows(left, right);
+  const credits = entries.flatMap((entry, index) => { const image = approvedImageFor(entry); return image ? [{ column: columns[index]!, image }] : []; });
   return <section className="racket-comparison" aria-label="Zestawienie dwóch rakiet">
-    <div className="comparison-pair comparison-identities">{entries.map((entry, index) => <div key={entry.id} className="comparison-identity">
-      <RacketVisual entry={{ image: approvedImageFor(entry) }} /><div className="comparison-identity-copy"><span className="section-kicker">RAKIETA {index + 1} · {entry.modelYear ?? 'ROK NIEZNANY'}</span>
-      <p className="racket-brand">{entry.brand}</p><h2><Link href={`/rakiety/${encodeURIComponent(entry.id)}`}>{entry.model.toLocaleLowerCase('pl').startsWith(`${entry.brand.toLocaleLowerCase('pl')} `) ? entry.model.slice(entry.brand.length + 1) : entry.model}</Link></h2>
-      <p>{entry.variant || 'Wariant nieustalony'}</p>
-      {entry.modelYear === null && <span className="conflict-label">Rocznik niepotwierdzony</span>}
-      <RemoveComparisonItem id={entry.id} label={racketLabel(entry)} />
-    </div></div>)}</div>
-    <div className="comparison-section-heading"><h2>Parametry ze źródłami</h2><span>Różnice i braki pozostają widoczne</span></div>
-    {comparisonRows(left, right).map((row) => <section className="comparison-row" key={row.key} aria-label={row.label}>
-      <h3>{row.label}</h3><div className="comparison-pair">{row.cells.map((cell, index) => <div className="comparison-cell" key={cell.entryId} aria-label={`${row.label}: ${racketLabel(entries[index]!)}`}>
-        <span className="comparison-column-label">Rakieta {index + 1}</span>
-        {cell.selected.length ? cell.selected.map((spec) => <div className="comparison-value" key={spec.evidence.observationId}>
-          <strong>{specDisplayValue(spec)}</strong><small>{claimLabel(spec)}</small><SourceCitation evidence={spec.evidence} />
-        </div>) : <p className="comparison-unknown">Brak danych</p>}
-        {cell.observations.some((spec) => spec.conflict) && <p><span className="conflict-label">Rozbieżne źródła</span></p>}
-        {cell.observations.length > 0 && <details className="comparison-observations"><summary>Obserwacje ({cell.observations.length})</summary>
-          <div className="observation-list">{cell.observations.map((spec) => <ObservationDetails key={spec.evidence.observationId} spec={spec} releaseId={left.releaseId} dev={dev} />)}</div>
-        </details>}
-      </div>)}</div>
-    </section>)}
-    <div className="comparison-section-heading"><h2>Oceny poszczególnych źródeł</h2><span>Pasek pokazuje pozycję w skali źródła. Skale i metody pozostają odrębne.</span></div>
-    {ratingSources.length === 0 && <p className="no-ratings">Brak opublikowanych ocen dla obu rakiet.</p>}
-    {ratingSources.map((source) => <section className="comparison-rating-source" key={source.code} aria-label={`Oceny: ${source.name}`}>
-      <h3>{source.name}</h3><div className="comparison-pair">{entries.map((entry, index) => <p className="comparison-column-label" key={entry.id}>Rakieta {index + 1} · {racketLabel(entry)}</p>)}</div>
-      {comparisonRatingRows(source).map((row) => <div className="comparison-pair comparison-rating-row" key={row.dimension} data-dimension={row.dimension}>{row.cells.map((cell, index) => <div key={cell.entryId} className="comparison-rating-cell">
-        <span className="comparison-column-label">Rakieta {index + 1}</span>
-        {cell.ratings.length ? cell.ratings.map((rating) => <RatingCard key={rating.evidence.observationId} rating={rating} compact />) : <p className="no-ratings">Brak ocen z tego źródła dla tej kategorii.</p>}
-      </div>)}</div>)}
-    </section>)}
+    <ComparisonHeader entries={entries} />
+    <SpecComparisonTable rows={rows} entries={entries} dev={dev} />
+    <RatingComparison left={left} right={right} dev={dev} />
+    <AllObservations rows={rows} entries={entries} dev={dev} />
+    {credits.length > 0 && <p className="comparison-image-credits">Zdjęcia: {credits.map(({ column, image }, index) => <span key={column}>{index > 0 && '; '}{column.toUpperCase()} — <ImageCredit image={image} /></span>)}</p>}
     {dev && <details className="comparison-release"><summary>Wersja porównywanych danych</summary><p>{left.releaseId}</p><p>Obie rakiety pochodzą z jednej publikacji katalogu. Stare odnośniki wymagają świadomego odświeżenia po kolejnej publikacji.</p></details>}
   </section>;
 }

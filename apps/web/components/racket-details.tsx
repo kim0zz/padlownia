@@ -1,26 +1,9 @@
 import type { CatalogueEntry, CatalogueRating, CatalogueSpec } from '@padlownia/database';
 import { claimLabel, formatDate, ratingLabels, rawText, specLabels } from '../lib/catalogue';
 import { RatingCitation, SourceCitation } from './evidence';
+import { ratingDimensionLabels, ratingPosition } from '../lib/ratings';
 
-// The source's dimensions stay distinct: labels translate names without
-// merging scales or conflating related dimensions from different sources.
-export const ratingDimensionLabels: Readonly<Record<string, string>> = Object.freeze(Object.assign(Object.create(null) as Record<string, string>, {
-  overall: 'Ocena ogólna',
-  power: 'Moc',
-  control: 'Kontrola',
-  handling: 'Prowadzenie rakiety',
-  forgiveness: 'Tolerancja błędów',
-  comfort: 'Komfort',
-  value: 'Stosunek jakości do ceny',
-  maneuverability: 'Manewrowość',
-  net_performance: 'Gra przy siatce',
-  defensive_output: 'Gra w obronie',
-  off_center_stability: 'Stabilność poza środkiem',
-  sweet_spot: 'Pole optymalnego trafienia',
-  spin_generation: 'Nadawanie rotacji',
-  power_ceiling: 'Maksymalny potencjał mocy',
-  power_accessibility: 'Łatwość uzyskania mocy',
-}));
+export { ratingDimensionLabels, ratingPosition } from '../lib/ratings';
 
 /** Full original observation with its publication version and source trail. */
 export function ObservationDetails({ spec, releaseId, dev = false }: { spec: CatalogueSpec; releaseId: string; dev?: boolean }) {
@@ -50,18 +33,9 @@ export function ObservationDetails({ spec, releaseId, dev = false }: { spec: Cat
   </article>;
 }
 
-export function ratingPosition(rating: CatalogueRating) {
-  const { value, scaleMin, scaleMax } = rating;
-  if (rating.validationStatus !== 'valid' || value === null || scaleMin === null || scaleMax === null
-    || ![value, scaleMin, scaleMax].every(Number.isFinite) || scaleMax <= scaleMin || value < scaleMin || value > scaleMax) return null;
-  return (value - scaleMin) / (scaleMax - scaleMin);
-}
-
-export function RatingCard({ rating, compact = false }: { rating: CatalogueRating; compact?: boolean }) {
+export function RatingCard({ rating }: { rating: CatalogueRating }) {
   const hasPosition = ratingPosition(rating) !== null;
-  const incomplete = /brakuj|niepełne|missing|neutral/i.test(rating.methodology);
-  const citation = <RatingCitation rating={rating} />;
-  return <article className={`rating-card${compact ? ' rating-compact' : ''}`}>
+  return <article className="rating-card">
     <span className="rating-kind">{ratingLabels[rating.kind] ?? 'Ocena źródła'}</span>
     <h3>{ratingDimensionLabels[rating.dimension] ?? rating.dimension}</h3>
     <p className="rating-value">
@@ -72,8 +46,7 @@ export function RatingCard({ rating, compact = false }: { rating: CatalogueRatin
     {hasPosition && <meter className="rating-meter" min={rating.scaleMin!} max={rating.scaleMax!} value={rating.value!} aria-label={`${ratingDimensionLabels[rating.dimension] ?? rating.dimension}: ${rating.value} w skali ${rating.scaleMin}–${rating.scaleMax}`} />}
     <p>Skala źródła: {rating.scaleMin ?? '?'}–{rating.scaleMax ?? '?'}. Oryginał: {rawText(rating.rawValue)}.</p>
     {rating.validationStatus !== 'valid' && <p>Interpretacja oceny niepotwierdzona.</p>}
-    {compact ? <><div className="rating-compact-source"><SourceCitation evidence={rating.evidence} />{incomplete && <span className="conflict-label">Niepełne dane modelu</span>}</div>
-      <details className="rating-evidence"><summary>Metodologia i szczegóły</summary>{citation}</details></> : citation}
+    <RatingCitation rating={rating} />
   </article>;
 }
 

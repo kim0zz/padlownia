@@ -64,8 +64,13 @@ export function formatWeight(min: number | null, max: number | null) {
   return `${min}–${max} g`;
 }
 
+/** A manufacturer claim whose attribution to the manufacturer has not been verified. */
+export function isUnverifiedClaim(spec: CatalogueSpec) {
+  return spec.claimType === 'manufacturer_declared' && !spec.evidence.attribution?.verified;
+}
+
 export function claimLabel(spec: CatalogueSpec) {
-  if (spec.claimType === 'manufacturer_declared' && !spec.evidence.attribution?.verified) return 'Przypisane producentowi — niezweryfikowane';
+  if (isUnverifiedClaim(spec)) return 'Przypisane producentowi — niezweryfikowane';
   return claimLabels[spec.claimType] ?? 'Obserwacja źródła';
 }
 
