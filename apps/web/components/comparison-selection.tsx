@@ -88,14 +88,17 @@ export function ComparisonTray() {
   const context = useContext(Context);
   const pathname = usePathname();
   if (!context || pathname === '/porownaj') return null;
+  const items = context.selection?.items ?? [];
   return <div className="selection-shell">
     <p className="selection-status" role="status" aria-live="polite">{context.message}</p>
-    {context.selection && <aside className="selection-tray" aria-label="Wybrane rakiety">
-      <div><strong>Do porównania · {context.selection.items.length}/2</strong><ul>{context.selection.items.map((item) => <li key={item.id}>
-        <span>{item.label}</span><button type="button" className="text-button" aria-label={`Usuń z wyboru: ${item.label}`} onClick={() => context.remove(item.id)}>Usuń</button>
-      </li>)}</ul></div>
-      <div className="selection-actions"><Link className="button" href={comparisonUrl(context.selection)}>{context.selection.items.length === 2 ? 'Porównaj rakiety' : 'Wybierz drugą rakietę'}</Link>
-        <button type="button" className="text-button" onClick={context.clear}>Wyczyść wybór</button></div>
-    </aside>}
+    {context.selection && <aside className="selection-tray" aria-label="Wybrane rakiety"><div className="selection-inner">
+      <strong>Do porównania · {items.length}/2</strong>
+      <ul>{items.map((item) => <li key={item.id}>
+        <span title={item.label}>{item.label}</span><button type="button" className="text-button" aria-label={`Usuń z wyboru: ${item.label}`} onClick={() => context.remove(item.id)}>Usuń</button>
+      </li>)}</ul>
+      {items.length < 2 && <span className="selection-placeholder">wybierz drugą</span>}
+      <div className="selection-actions"><Link className="button" href={comparisonUrl(context.selection)} aria-label={items.length === 2 ? 'Porównaj rakiety' : 'Porównaj: wybierz drugą rakietę'}>Porównaj</Link>
+        <button type="button" className="text-button" aria-label="Wyczyść wybór" onClick={context.clear}>Wyczyść</button></div>
+    </div></aside>}
   </div>;
 }
