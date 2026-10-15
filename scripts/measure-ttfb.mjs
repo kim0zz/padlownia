@@ -3,6 +3,9 @@
 // Usage: node scripts/measure-ttfb.mjs [baseUrl] [runs]   e.g. node scripts/measure-ttfb.mjs http://127.0.0.1:3200 10
 // /porownaj renders a comparison only with a release ID: set MEASURE_RELEASE=<active release id> unless the catalogue HTML exposes one.
 
+import { performance } from 'node:perf_hooks';
+import { URLSearchParams } from 'node:url';
+
 const base = (process.argv[2] ?? 'http://127.0.0.1:3000').replace(/\/$/, '');
 const runs = Number(process.argv[3] ?? 10);
 
