@@ -1,0 +1,1149 @@
+{
+  "date": "2026-10-15",
+  "chunkerVersion": "review-chunks-v1",
+  "embedding": {
+    "model": "Xenova/multilingual-e5-small",
+    "seconds": 1
+  },
+  "corpus": {
+    "sha256": "4c63fd9e20badacd571617d64cf9231e90b881cee0cbcc19bf43286b342c6a45",
+    "reviewDocuments": 217,
+    "detailFiles": 29,
+    "chunks": 3053,
+    "approxTokens": 470565,
+    "kinds": {
+      "identification": 214,
+      "construction": 217,
+      "shape": 217,
+      "feel": 217,
+      "sweet_spot": 217,
+      "power": 220,
+      "net": 217,
+      "stability": 206,
+      "takeaways": 218,
+      "comparison": 478,
+      "positioning": 218,
+      "defense": 114,
+      "spin": 103,
+      "pros_cons": 10,
+      "other": 13,
+      "handling": 8,
+      "verdict": 29,
+      "faq": 137
+    }
+  },
+  "golden": {
+    "file": "evals/retrieval/golden-v0.jsonl",
+    "cases": 33
+  },
+  "results": {
+    "bm25Plain": {
+      "overall": {
+        "cases": 33,
+        "hitAt1": 0.182,
+        "hitAt3": 0.333,
+        "hitAt5": 0.485,
+        "hitAt20": 0.939,
+        "mrr": 0.343
+      },
+      "byTag": {
+        "broad": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.25
+        },
+        "comfort": {
+          "cases": 2,
+          "hitAt1": 0.5,
+          "hitAt3": 0.5,
+          "hitAt5": 0.5,
+          "hitAt20": 1,
+          "mrr": 0.556
+        },
+        "comparison-section": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "configuration": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "en": {
+          "cases": 2,
+          "hitAt1": 0,
+          "hitAt3": 0.5,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.375
+        },
+        "family-trap": {
+          "cases": 4,
+          "hitAt1": 0,
+          "hitAt3": 0.5,
+          "hitAt5": 0.5,
+          "hitAt20": 1,
+          "mrr": 0.301
+        },
+        "follow-up": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 0,
+          "mrr": 0
+        },
+        "known-conflict": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 1,
+          "mrr": 0.125
+        },
+        "lineup": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "pair": {
+          "cases": 6,
+          "hitAt1": 0,
+          "hitAt3": 0.5,
+          "hitAt5": 0.5,
+          "hitAt20": 0.833,
+          "mrr": 0.281
+        },
+        "pl": {
+          "cases": 31,
+          "hitAt1": 0.194,
+          "hitAt3": 0.323,
+          "hitAt5": 0.452,
+          "hitAt20": 0.935,
+          "mrr": 0.341
+        },
+        "positioning": {
+          "cases": 2,
+          "hitAt1": 0.5,
+          "hitAt3": 0.5,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.625
+        },
+        "possibly-unanswerable": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 1,
+          "mrr": 0.083
+        },
+        "product-example": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 1,
+          "mrr": 0.059
+        },
+        "single": {
+          "cases": 27,
+          "hitAt1": 0.222,
+          "hitAt3": 0.296,
+          "hitAt5": 0.481,
+          "hitAt20": 0.963,
+          "mrr": 0.357
+        },
+        "slang": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 1,
+          "mrr": 0.167
+        },
+        "variant-trap": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.5
+        }
+      },
+      "misses": [
+        "smash-vertex05@8",
+        "net-viper-26@11",
+        "materials-at10-18k@9",
+        "stability-wilson-blade@8",
+        "shape-hirostar-redstone@8",
+        "stiffness-starvie-triton@-",
+        "power-access-kuikma@8",
+        "vibration-siux-diablo@9",
+        "core-dunlop-fx-pro@12",
+        "takeaway-volt-900@6",
+        "smash-at10-attack-12k@11",
+        "defense-wilson-bela-pro@12",
+        "cmp-viper-veron@8",
+        "cmp-extreme-motion-viper@17",
+        "followup-net@-",
+        "slang-bandeja-viper@6",
+        "durability-starvie-raptor@12"
+      ]
+    },
+    "bm25AspectGlossary": {
+      "overall": {
+        "cases": 33,
+        "hitAt1": 0.545,
+        "hitAt3": 0.727,
+        "hitAt5": 0.788,
+        "hitAt20": 0.879,
+        "mrr": 0.663
+      },
+      "byTag": {
+        "broad": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 0,
+          "mrr": 0
+        },
+        "comfort": {
+          "cases": 2,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "comparison-section": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "configuration": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "en": {
+          "cases": 2,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "family-trap": {
+          "cases": 4,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.5
+        },
+        "follow-up": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 1,
+          "mrr": 0.167
+        },
+        "known-conflict": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "lineup": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "pair": {
+          "cases": 6,
+          "hitAt1": 0,
+          "hitAt3": 0.5,
+          "hitAt5": 0.667,
+          "hitAt20": 1,
+          "mrr": 0.336
+        },
+        "pl": {
+          "cases": 31,
+          "hitAt1": 0.516,
+          "hitAt3": 0.71,
+          "hitAt5": 0.774,
+          "hitAt20": 0.871,
+          "mrr": 0.641
+        },
+        "positioning": {
+          "cases": 2,
+          "hitAt1": 0.5,
+          "hitAt3": 0.5,
+          "hitAt5": 0.5,
+          "hitAt20": 1,
+          "mrr": 0.583
+        },
+        "possibly-unanswerable": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 0,
+          "mrr": 0
+        },
+        "product-example": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.25
+        },
+        "single": {
+          "cases": 27,
+          "hitAt1": 0.667,
+          "hitAt3": 0.778,
+          "hitAt5": 0.815,
+          "hitAt20": 0.852,
+          "mrr": 0.736
+        },
+        "slang": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 0,
+          "mrr": 0
+        },
+        "variant-trap": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.5
+        }
+      },
+      "misses": [
+        "spin-metalbone@-",
+        "beginner-head-vibe@6",
+        "control-drop-shot-axion@-",
+        "cmp-viper-veron@10",
+        "followup-net@6",
+        "slang-bandeja-viper@-",
+        "durability-starvie-raptor@-"
+      ]
+    },
+    "denseRaw": {
+      "overall": {
+        "cases": 33,
+        "hitAt1": 0.182,
+        "hitAt3": 0.424,
+        "hitAt5": 0.606,
+        "hitAt20": 0.939,
+        "mrr": 0.369
+      },
+      "byTag": {
+        "broad": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.5
+        },
+        "comfort": {
+          "cases": 2,
+          "hitAt1": 0,
+          "hitAt3": 0.5,
+          "hitAt5": 0.5,
+          "hitAt20": 1,
+          "mrr": 0.306
+        },
+        "comparison-section": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "configuration": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "en": {
+          "cases": 2,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.5
+        },
+        "family-trap": {
+          "cases": 4,
+          "hitAt1": 0,
+          "hitAt3": 0.5,
+          "hitAt5": 0.75,
+          "hitAt20": 1,
+          "mrr": 0.252
+        },
+        "follow-up": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 0,
+          "mrr": 0
+        },
+        "known-conflict": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.25
+        },
+        "lineup": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "pair": {
+          "cases": 6,
+          "hitAt1": 0,
+          "hitAt3": 0.5,
+          "hitAt5": 0.5,
+          "hitAt20": 0.667,
+          "mrr": 0.222
+        },
+        "pl": {
+          "cases": 31,
+          "hitAt1": 0.194,
+          "hitAt3": 0.387,
+          "hitAt5": 0.581,
+          "hitAt20": 0.935,
+          "mrr": 0.36
+        },
+        "positioning": {
+          "cases": 2,
+          "hitAt1": 0.5,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.667
+        },
+        "possibly-unanswerable": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 1,
+          "mrr": 0.125
+        },
+        "product-example": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 0,
+          "mrr": 0
+        },
+        "single": {
+          "cases": 27,
+          "hitAt1": 0.222,
+          "hitAt3": 0.407,
+          "hitAt5": 0.63,
+          "hitAt20": 1,
+          "mrr": 0.401
+        },
+        "slang": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.25
+        },
+        "variant-trap": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.5
+        }
+      },
+      "misses": [
+        "smash-vertex05@10",
+        "net-viper-26@11",
+        "materials-at10-18k@7",
+        "stability-wilson-blade@8",
+        "stiffness-starvie-triton@12",
+        "handling-royal-whip@7",
+        "vibration-siux-diablo@9",
+        "core-dunlop-fx-pro@12",
+        "defense-wilson-bela-pro@11",
+        "cmp-viper-veron@6",
+        "cmp-extreme-motion-viper@-",
+        "followup-net@-",
+        "durability-starvie-raptor@8"
+      ]
+    },
+    "denseAspect": {
+      "overall": {
+        "cases": 33,
+        "hitAt1": 0.424,
+        "hitAt3": 0.667,
+        "hitAt5": 0.788,
+        "hitAt20": 0.97,
+        "mrr": 0.572
+      },
+      "byTag": {
+        "broad": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.5
+        },
+        "comfort": {
+          "cases": 2,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "comparison-section": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "configuration": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.2
+        },
+        "en": {
+          "cases": 2,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "family-trap": {
+          "cases": 4,
+          "hitAt1": 0.25,
+          "hitAt3": 0.5,
+          "hitAt5": 0.5,
+          "hitAt20": 1,
+          "mrr": 0.436
+        },
+        "follow-up": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 0,
+          "mrr": 0
+        },
+        "known-conflict": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 1,
+          "mrr": 0.111
+        },
+        "lineup": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "pair": {
+          "cases": 6,
+          "hitAt1": 0,
+          "hitAt3": 0.333,
+          "hitAt5": 0.333,
+          "hitAt20": 0.833,
+          "mrr": 0.188
+        },
+        "pl": {
+          "cases": 31,
+          "hitAt1": 0.387,
+          "hitAt3": 0.645,
+          "hitAt5": 0.774,
+          "hitAt20": 0.968,
+          "mrr": 0.544
+        },
+        "positioning": {
+          "cases": 2,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "possibly-unanswerable": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 1,
+          "mrr": 0.167
+        },
+        "product-example": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 1,
+          "mrr": 0.053
+        },
+        "single": {
+          "cases": 27,
+          "hitAt1": 0.519,
+          "hitAt3": 0.741,
+          "hitAt5": 0.889,
+          "hitAt20": 1,
+          "mrr": 0.657
+        },
+        "slang": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.333
+        },
+        "variant-trap": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.5
+        }
+      },
+      "misses": [
+        "net-viper-26@9",
+        "shape-hirostar-redstone@9",
+        "cmp-extreme-motion-viper@19",
+        "cmp-at10-12k-18k@6",
+        "cmp-power-oxdog@13",
+        "followup-net@-",
+        "durability-starvie-raptor@6"
+      ]
+    },
+    "hybridRaw": {
+      "overall": {
+        "cases": 33,
+        "hitAt1": 0.333,
+        "hitAt3": 0.667,
+        "hitAt5": 0.818,
+        "hitAt20": 1,
+        "mrr": 0.552
+      },
+      "byTag": {
+        "broad": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.5
+        },
+        "comfort": {
+          "cases": 2,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "comparison-section": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "configuration": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "en": {
+          "cases": 2,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "family-trap": {
+          "cases": 4,
+          "hitAt1": 0,
+          "hitAt3": 0.5,
+          "hitAt5": 0.75,
+          "hitAt20": 1,
+          "mrr": 0.329
+        },
+        "follow-up": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 1,
+          "mrr": 0.125
+        },
+        "known-conflict": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "lineup": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "pair": {
+          "cases": 6,
+          "hitAt1": 0,
+          "hitAt3": 0.333,
+          "hitAt5": 0.5,
+          "hitAt20": 1,
+          "mrr": 0.253
+        },
+        "pl": {
+          "cases": 31,
+          "hitAt1": 0.29,
+          "hitAt3": 0.645,
+          "hitAt5": 0.806,
+          "hitAt20": 1,
+          "mrr": 0.523
+        },
+        "positioning": {
+          "cases": 2,
+          "hitAt1": 0.5,
+          "hitAt3": 0.5,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.625
+        },
+        "possibly-unanswerable": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 1,
+          "mrr": 0.125
+        },
+        "product-example": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.2
+        },
+        "single": {
+          "cases": 27,
+          "hitAt1": 0.407,
+          "hitAt3": 0.741,
+          "hitAt5": 0.889,
+          "hitAt20": 1,
+          "mrr": 0.618
+        },
+        "slang": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.25
+        },
+        "variant-trap": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.5
+        }
+      },
+      "misses": [
+        "net-viper-26@9",
+        "defense-wilson-bela-pro@6",
+        "cmp-viper-veron@8",
+        "cmp-power-oxdog@15",
+        "followup-net@8",
+        "durability-starvie-raptor@8"
+      ]
+    },
+    "hybridAspect": {
+      "overall": {
+        "cases": 33,
+        "hitAt1": 0.545,
+        "hitAt3": 0.788,
+        "hitAt5": 0.879,
+        "hitAt20": 1,
+        "mrr": 0.688
+      },
+      "byTag": {
+        "broad": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.5
+        },
+        "comfort": {
+          "cases": 2,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "comparison-section": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "configuration": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "en": {
+          "cases": 2,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "family-trap": {
+          "cases": 4,
+          "hitAt1": 0.25,
+          "hitAt3": 0.75,
+          "hitAt5": 0.75,
+          "hitAt20": 1,
+          "mrr": 0.528
+        },
+        "follow-up": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 1,
+          "mrr": 0.125
+        },
+        "known-conflict": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.333
+        },
+        "lineup": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "pair": {
+          "cases": 6,
+          "hitAt1": 0,
+          "hitAt3": 0.333,
+          "hitAt5": 0.667,
+          "hitAt20": 1,
+          "mrr": 0.273
+        },
+        "pl": {
+          "cases": 31,
+          "hitAt1": 0.516,
+          "hitAt3": 0.774,
+          "hitAt5": 0.871,
+          "hitAt20": 1,
+          "mrr": 0.668
+        },
+        "positioning": {
+          "cases": 2,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "possibly-unanswerable": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 1,
+          "mrr": 0.167
+        },
+        "product-example": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.2
+        },
+        "single": {
+          "cases": 27,
+          "hitAt1": 0.667,
+          "hitAt3": 0.889,
+          "hitAt5": 0.926,
+          "hitAt20": 1,
+          "mrr": 0.78
+        },
+        "slang": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.333
+        },
+        "variant-trap": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.5
+        }
+      },
+      "misses": [
+        "net-viper-26@7",
+        "cmp-power-oxdog@9",
+        "followup-net@8",
+        "durability-starvie-raptor@6"
+      ]
+    },
+    "hybridAspectDense2x": {
+      "overall": {
+        "cases": 33,
+        "hitAt1": 0.515,
+        "hitAt3": 0.758,
+        "hitAt5": 0.879,
+        "hitAt20": 1,
+        "mrr": 0.668
+      },
+      "byTag": {
+        "broad": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.5
+        },
+        "comfort": {
+          "cases": 2,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "comparison-section": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "configuration": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "en": {
+          "cases": 2,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "family-trap": {
+          "cases": 4,
+          "hitAt1": 0.25,
+          "hitAt3": 0.75,
+          "hitAt5": 0.75,
+          "hitAt20": 1,
+          "mrr": 0.523
+        },
+        "follow-up": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 1,
+          "mrr": 0.1
+        },
+        "known-conflict": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.333
+        },
+        "lineup": {
+          "cases": 1,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "pair": {
+          "cases": 6,
+          "hitAt1": 0,
+          "hitAt3": 0.333,
+          "hitAt5": 0.667,
+          "hitAt20": 1,
+          "mrr": 0.265
+        },
+        "pl": {
+          "cases": 31,
+          "hitAt1": 0.484,
+          "hitAt3": 0.742,
+          "hitAt5": 0.871,
+          "hitAt20": 1,
+          "mrr": 0.647
+        },
+        "positioning": {
+          "cases": 2,
+          "hitAt1": 1,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 1
+        },
+        "possibly-unanswerable": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 0,
+          "hitAt20": 1,
+          "mrr": 0.167
+        },
+        "product-example": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 0,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.2
+        },
+        "single": {
+          "cases": 27,
+          "hitAt1": 0.63,
+          "hitAt3": 0.852,
+          "hitAt5": 0.926,
+          "hitAt20": 1,
+          "mrr": 0.758
+        },
+        "slang": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.333
+        },
+        "variant-trap": {
+          "cases": 1,
+          "hitAt1": 0,
+          "hitAt3": 1,
+          "hitAt5": 1,
+          "hitAt20": 1,
+          "mrr": 0.5
+        }
+      },
+      "misses": [
+        "net-viper-26@8",
+        "cmp-power-oxdog@11",
+        "followup-net@10",
+        "durability-starvie-raptor@6"
+      ]
+    }
+  }
+}

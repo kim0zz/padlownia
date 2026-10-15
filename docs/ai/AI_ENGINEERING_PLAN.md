@@ -88,7 +88,7 @@ Znane ograniczenia (do dalszej pracy):
 | + bez nazwy rakiety (sam temat) | 18% | 21% | 21% |
 | **+ oba (obecny wybór)** | **55%** | **70%** | **73%** |
 
-Pytania o jedną rakietę: 78% w top 5. Porównania dwóch rakiet: 50%. Pełny raport: `evals/results/retrieval-2026-10-15-bm25.json`.
+Pytania o jedną rakietę: 78% w top 5. Porównania dwóch rakiet: 50%. (Liczby sprzed poprawki zestawu testowego. Aktualne są w sekcji o hybrydzie niżej.)
 
 **Wnioski z pomiaru:**
 - Nazwa rakiety w pytaniu „przyciąga” sekcje, które ją powtarzają (wstęp, porównania), zamiast sekcji o tym, o co pytasz. Dlatego rozpoznanie rakiety i wyszukiwanie tematu muszą być osobnymi krokami.
@@ -97,9 +97,33 @@ Pytania o jedną rakietę: 78% w top 5. Porównania dwóch rakiet: 50%. Pełny r
 - Część pudeł może wynikać z moich zbyt wąskich oczekiwań (np. obrona Viper opisana w „praktycznych wnioskach”, a nie w sekcji obrony). Dlatego zestaw potrzebuje Twojego przeglądu.
 - Zauważone przy okazji: w porównaniach wybieramy fragmenty po równo dla obu rakiet, inaczej dłuższa recenzja zagłusza drugą.
 
+## Wyszukiwanie hybrydowe: lokalne embeddingi + RRF (15.10.2026, koszt 0 zł)
+
+Wzorowane na kursie [ai-engineer-notebooks, 03-rag/02 i 04](https://github.com/calmrocks/ai-engineer-notebooks). Model `Xenova/multilingual-e5-small` (129 MB) działa lokalnie, bez API. Pobrany raz do `.local/models`. Wektory 3053 fragmentów liczą się w ~70 s i są zapisywane w `.local/embeddings` (prywatnie, poza Gitem). Łączenie list metodą RRF (k = 60, po pozycjach, a nie po punktach). Dla każdej rakiety osobno: pula 50 z BM25 + 50 z wektorów.
+
+**Poprawka zestawu testowego:** 3 pytania o obronę oczekiwały sekcji „obrona”, której te recenzje (Viper, Veron, ML10) nie mają. Obrona jest tam opisana we wnioskach, pozycjonowaniu i stabilności. Poprawiłem oczekiwania i zmierzyłem **wszystkie** warianty na poprawionym zestawie.
+
+| Wariant | 1. miejsce | top 3 | top 5 | top 20 | 1 rakieta, top 5 | Porównania, top 5 |
+|---|---|---|---|---|---|---|
+| BM25, pytanie jak jest | 18% | 33% | 49% | 94% | 48% | 50% |
+| BM25 + słowniczek + bez nazwy | 55% | 73% | 79% | 88% | 82% | 67% |
+| Same wektory (bez nazwy) | 42% | 67% | 79% | 97% | 89% | 33% |
+| **Hybryda (BM25 + wektory, RRF)** | **55%** | **79%** | **88%** | **100%** | **93%** | **67%** |
+| Hybryda, wektory ×2 | 52% | 76% | 88% | 100% | 93% | 67% |
+
+Raport: `evals/results/retrieval-2026-10-15-hybrid-e5small.json`.
+
+**Wnioski:**
+- Hybryda jest najlepsza i każda jej część ma znaczenie. Słowa trafiają nazwy i rzadkie terminy, wektory rozumieją polskie pytanie bez słowniczka. Sam wektor przegrywa na porównaniach, BM25 przegrywa na polskim słownictwie.
+- **Wszystkie 4 pozostałe pudła są „utopione”, a nie zgubione:** właściwy fragment jest na miejscach 6–9, a w top 20 jest zawsze (100%). Według diagnozy z kursu to dokładnie przypadek dla **rerankera**. Teraz się opłaca, a przed hybrydą nie (wtedy większość pudeł to fragmenty nieznalezione).
+- Ważenie wektorów ×2 nic nie daje, zostajemy przy równych wagach (bez „pokrętła” bez pomiaru).
+- Ostrożnie z liczbami: 33 pytania to mały zestaw, a 1 pytanie to 3 punkty procentowe. Różnice 3–6 pkt to sygnał, nie dowód.
+
+**Następny krok (do decyzji):** lokalny reranker typu cross-encoder (również darmowy, np. wielojęzyczny model mMiniLM / bge-reranker), który przestawia top 20 → top 5. Mierzymy, czy pudła z miejsc 6–9 wchodzą do top 5. Przy okazji trzeba poprawić tokenizer, który rozbija „2.6” na „2” i „6”.
+
 ## Decyzje techniczne do podjęcia (z rekomendacją)
 
-**A. Wektory (embeddingi) i polski.** Trzy opcje do zmierzenia na tym samym zestawie: (1) obecne BM25 ze słowniczkiem, (2) wielojęzyczny model embeddingów, który rozumie polskie pytanie i angielski tekst, (3) tanie tłumaczenie pytania na angielski przez model, a potem BM25. Docelowo łączymy wyniki (P-010: SQL + full-text + wektor), np. metodą RRF. *Rekomendacja:* zmierzyć 2 i 3 i wybrać po liczbach. Embeddingi liczy worker wsadowo, raz na wydanie danych.
+**A. Wektory (embeddingi) i polski.** ✅ Zmierzone (sekcja wyżej): lokalny model wielojęzyczny + RRF wygrywa i nic nie kosztuje. Do sprawdzenia przy benchmarku (P-039): czy płatny model embeddingów albo tłumaczenie pytania da więcej niż lokalny reranker. W produkcji wektory fragmentów liczy worker raz na wydanie danych. Wektor pytania liczy serwer przy każdym pytaniu (~50 ms na CPU); trzeba sprawdzić, czy to się zmieści w limitach Vercela.
 
 **B. Gdzie trzymać fragmenty i wektory.** Supabase ma `pgvector` (P-012). Lokalna baza testowa (PGlite 0.5.9) go nie ma, więc migracji z wektorami **celowo jeszcze nie pisałem**: nie dałoby się jej przetestować lokalnie. Do ustalenia: aktualizacja PGlite z rozszerzeniem `vector` albo testy wektorów tylko na Dev. Tabela fragmentów musi mieć wersję chunkera, hash dokumentu i usuwanie kaskadowe po źródle (wymóg z `AGENTS.md`). *Rekomendacja:* nowa tabela `knowledge_chunks` (prywatna, tylko dla roli workera i funkcji serwera), migracja addytywna, za Twoją zgodą na Dev.
 
@@ -115,7 +139,7 @@ Pytania o jedną rakietę: 78% w top 5. Porównania dwóch rakiet: 50%. Pełny r
 
 1. Ty: przegląd 33 pytań i dopisanie prawdziwych (pytanie 1), decyzje 2–10.
 2. Rozpoznawanie rakiet na kanonicznym katalogu z bazy (po R3) + Twoje prawdziwe pytania jako test. Pierwsza wersja modułu już jest.
-3. Pomiar embeddingów i tłumaczenia pytania (po zgodzie na koszt < 5 zł).
+3. ✅ Lokalne embeddingi + RRF zmierzone. Następny jest lokalny reranker. Płatne warianty przy benchmarku (P-039).
 4. Migracja `knowledge_chunks` + `pgvector` + `ai_usage` (za zgodą na Dev).
 5. Pierwszy działający asystent dla dwóch intencji („statystyki X” i „porównaj X i Y”) w trybie developerskim, bez publikacji.
 6. Pozostałe intencje, pamięć rozmowy, dostęp kodem zaproszenia (D-003), Vercel.

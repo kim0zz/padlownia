@@ -52,6 +52,16 @@ export function expandPolish(tokens: string[]): string[] {
   return [...tokens, ...extra];
 }
 
+/** Remove the words naming the resolved rackets, keeping the rest of the question verbatim (for embedding). */
+export function stripNames(query: string, names: string): string {
+  const ignored = new Set(tokenize(names));
+  const kept = query.split(/\s+/).filter((word) => {
+    const tokens = tokenize(word);
+    return !tokens.length || !tokens.every((token) => ignored.has(token));
+  }).join(' ');
+  return kept.trim() || query;
+}
+
 export interface LexicalIndex { chunks: ReviewChunk[]; terms: Map<string, number>[]; lengths: number[]; df: Map<string, number>; averageLength: number }
 
 export function buildLexicalIndex(chunks: ReviewChunk[]): LexicalIndex {

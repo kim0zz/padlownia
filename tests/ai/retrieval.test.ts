@@ -142,6 +142,6 @@ describe('retrieval evals', () => {
     expect(scoreCase(single!, [fake('x', 'power'), fake('x', 'defense')]).firstHitRank).toBe(2);
     expect(scoreCase(pair!, [fake('x', 'defense'), fake('x', 'power')]).firstHitRank).toBeNull();
     expect(scoreCase(pair!, [fake('x', 'defense'), fake('y', 'net'), fake('y', 'defense')]).firstHitRank).toBe(3);
-    expect(summarize([{ id: 'a', firstHitRank: 1, tags: [] }, { id: 'b', firstHitRank: null, tags: [] }])).toEqual({ cases: 2, hitAt1: 0.5, hitAt3: 0.5, hitAt5: 0.5, mrr: 0.5 });
+    expect(summarize([{ id: 'a', firstHitRank: 1, tags: [] }, { id: 'b', firstHitRank: null, tags: [] }])).toEqual({ cases: 2, hitAt1: 0.5, hitAt3: 0.5, hitAt5: 0.5, hitAt20: 0.5, mrr: 0.5 });
   });
 });

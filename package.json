@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@electric-sql/pglite": "0.5.9",
+    "@huggingface/transformers": "4.3.0",
     "next": "16.4.0",
     "pg": "8.23.1",
     "react": "19.3.0",

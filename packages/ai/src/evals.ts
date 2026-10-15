@@ -33,7 +33,7 @@ const matches = (result: RetrievedChunk, item: RetrievalCase['expected'][number]
   item.slug === result.chunk.slug && item.kinds.includes(result.chunk.kind as SectionKind);
 
 export interface CaseResult { id: string; firstHitRank: number | null; tags: string[] }
-export interface RetrievalMetrics { cases: number; hitAt1: number; hitAt3: number; hitAt5: number; mrr: number }
+export interface RetrievalMetrics { cases: number; hitAt1: number; hitAt3: number; hitAt5: number; hitAt20: number; mrr: number }
 
 /**
  * Rank at which the case is fully answered: every expected racket has a matching chunk at or above it.
@@ -49,5 +49,5 @@ export function summarize(results: CaseResult[]): RetrievalMetrics {
   const share = (k: number) => results.filter((result) => result.firstHitRank !== null && result.firstHitRank <= k).length / Math.max(1, results.length);
   const mrr = results.reduce((sum, result) => sum + (result.firstHitRank ? 1 / result.firstHitRank : 0), 0) / Math.max(1, results.length);
   const round = (value: number) => Math.round(value * 1000) / 1000;
-  return { cases: results.length, hitAt1: round(share(1)), hitAt3: round(share(3)), hitAt5: round(share(5)), mrr: round(mrr) };
+  return { cases: results.length, hitAt1: round(share(1)), hitAt3: round(share(3)), hitAt5: round(share(5)), hitAt20: round(share(20)), mrr: round(mrr) };
 }
