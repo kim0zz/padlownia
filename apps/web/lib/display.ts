@@ -28,6 +28,8 @@ export function displayModel(entry: ModelFields): string {
   if (entry.modelYear !== null) {
     const suffix = ` ${entry.modelYear}`;
     if (model.endsWith(suffix)) model = model.slice(0, -suffix.length);
+    // "NOX 2027": the year alone is not a model name — keep the original.
+    if (model.trim() === String(entry.modelYear)) return entry.model;
   }
   return model.trim() || entry.model;
 }

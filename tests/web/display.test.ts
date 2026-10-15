@@ -113,3 +113,10 @@ describe('displayLabel', () => {
       .toBe('__Proto__ · X · Pro · rok nieznany');
   });
 });
+
+describe('displayModel year-only remainder', () => {
+  it('keeps the original model when only the year would remain', async () => {
+    const { displayModel } = await import('../../apps/web/lib/display');
+    expect(displayModel({ brand: 'NOX', model: 'NOX 2027', modelYear: 2027 })).toBe('NOX 2027');
+  });
+});
