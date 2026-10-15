@@ -1,10 +1,10 @@
 # AGENTS.md — Padłownia
 
 ## Mission
-Build a trustworthy, low-cost, source-grounded padel racket catalogue, comparison UI and AI assistant. Owner focuses on architecture, rules, retrieval and evals; Codex writes the detailed implementation. Separate design decisions from implementation.
+Build a trustworthy, low-cost, source-grounded padel racket catalogue, comparison UI and AI assistant. Owner focuses on architecture, rules, retrieval and evals; the AI agent (Claude as tech lead, delegating bounded tasks to cheaper models) writes the detailed implementation. Separate design decisions from implementation.
 
 ## Read first
-1. `docs/product/DECISIONS.md` — accepted, proposed and open items.
+1. `docs/product/DECISIONS.md` — accepted, proposed and open items. Current priorities: `docs/product/ROADMAP.md`.
 2. `docs/product/PRODUCT.md` and `docs/product/MVP.md`.
 3. `docs/architecture/OVERVIEW.md` and relevant `docs/adr/*`.
 4. `docs/ai/ROLES.md` for optional role-based delegation.
