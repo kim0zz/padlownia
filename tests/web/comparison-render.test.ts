@@ -84,11 +84,12 @@ describe('structured comparison renders only authoritative catalogue facts', () 
 
   it('marks only the rows whose selected values differ and keeps the toggle server-rendered', () => {
     const html = view(payload());
-    const row = (label: string) => new RegExp(`<section class="comparison-row" aria-label="${label}"([^>]*)>`).exec(html)![1]!;
+    const row = (label: string) => new RegExp(`<section class="comparison-row" aria-label="${label}"([^>]*)>`).exec(html)?.[1] ?? '';
     expect(row('Kształt')).toContain('data-differs="true"');
     expect(row('Masa')).toContain('data-differs="true"');
     expect(row('Powierzchnia')).not.toContain('data-differs');
-    expect(row('Balans')).not.toContain('data-differs');
+    // A parameter neither racket has a value for gets no row (P-046).
+    expect(html).not.toContain('aria-label="Balans"');
     expect(html).toContain('class="only-diff-toggle"');
     expect(html).toContain('Tylko różnice');
     expect(html).not.toContain('Parametry są takie same');
@@ -185,15 +186,14 @@ describe('structured comparison renders only authoritative catalogue facts', () 
     expect(html).toContain('Interpretacja oceny niepotwierdzona.');
   });
 
-  it('keeps unknown year and missing parameters visible and retains an invalid unitless original only as evidence', () => {
+  it('shows no placeholder for an unknown year, a dash for a value only one side lacks, and retains an invalid unitless original only as evidence', () => {
     const entries = fixtures();
     const unknown = entries[5]!;
     unknown.specs.push({ ...structuredClone(entries[0]!.specs[1]!), key: 'balance_cm', rawValue: '~26.5', numericValue: null, valueMin: null, valueMax: null, unit: null, selected: false, validationStatus: 'unknown', evidence: { ...entries[0]!.specs[1]!.evidence, observationId: 'unknown-balance' } });
     const input = { version: 1, datasetVersion: release, blocks: [{ type: 'racket_comparison', racketIds: [first.id, unknown.id] }] };
     const html = view(input, entries);
-    expect(headerMeta(html, 'b')).toContain('rok nieznany');
-    expect(html).toContain('Rocznik niepotwierdzony');
-    expect(html).toContain('Brak danych');
+    expect(html).not.toMatch(/nieznany|niepotwierdzony|Brak danych/i);
+    expect(html).toContain('<span class="sr-only">brak wartości</span>');
     expect(html).toContain('~26.5');
     expect(html).toContain('Interpretacja niepotwierdzona — zachowano wartość oryginalną.');
     expect(html).not.toContain('26.5 cm');

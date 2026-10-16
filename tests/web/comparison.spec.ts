@@ -220,7 +220,7 @@ test('same-route removal clears the search selection and explicit URLs replace s
   await expect(comparison(page)).toBeVisible();
   await page.getByRole('link', { name: 'Zmień porównywane rakiety' }).click();
   await expect(leftSelect).toHaveValue(labels.pro2026);
-  await expect(rightSelect).toHaveValue('TESTLAB Arc · Standard · Rok nieznany');
+  await expect(rightSelect).toHaveValue('TESTLAB Arc · Standard');
   const selected = await page.evaluate(() => JSON.parse(sessionStorage.getItem('padlownia:comparison:v1')!));
   expect(selected.items.map((item: { id: string }) => item.id)).toEqual([pro2026, unknownYear]);
 
@@ -262,9 +262,10 @@ test('comparison preserves source observations, specimen context, conflicts and 
   await expect(comparison(page).locator('.comparison-release').getByText(release, { exact: true })).toBeVisible();
 
   await page.goto(comparisonPath(control2026, unknownYear));
-  await expect(comparison(page).getByText('Rocznik niepotwierdzony', { exact: true })).toBeVisible();
-  await expect(comparison(page).locator('.comparison-row[aria-label="Kształt"] .comparison-cell').nth(1).getByText('Brak danych', { exact: true })).toBeVisible();
-  await expect(comparison(page).locator('.comparison-row[aria-label="Masa"] .comparison-cell').nth(1).getByText('Brak danych', { exact: true })).toBeVisible();
+  // P-046: no placeholder for the unknown year; a value only one racket lacks is a dash.
+  await expect(comparison(page).getByText(/nieznany|niepotwierdzony/)).toHaveCount(0);
+  await expect(comparison(page).locator('.comparison-row[aria-label="Kształt"] .comparison-cell').nth(1).getByText('—', { exact: true })).toBeVisible();
+  await expect(comparison(page).locator('.comparison-row[aria-label="Masa"] .comparison-cell').nth(1).getByText('—', { exact: true })).toBeVisible();
 });
 
 test('source popovers open from the keyboard, close with Escape and stay inside the viewport in both columns', async ({ page }) => {
@@ -369,7 +370,7 @@ test('fixture gallery exposes source scales and unknown states with accessible r
   await expect(fixtureNotice(page)).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Deklaracja, pomiar i brak jednostki', exact: true })).toBeVisible();
   const values = page.getByRole('region', { name: 'Wartość parametru', exact: true });
-  await expect(values.getByText('Brak danych', { exact: true })).toBeVisible();
+  await expect(values.getByText('—', { exact: true })).toBeVisible();
   await expect(values.getByText('Rozbieżne źródła', { exact: true })).toBeVisible();
   await expect(values.getByText('Niezweryfikowane', { exact: true })).toBeVisible();
   await expect(values.getByText('Brak potwierdzonej wartości', { exact: true })).toBeVisible();

@@ -165,7 +165,7 @@ describe('component gallery isolation', () => {
     const html = renderToStaticMarkup(createElement(ComponentGalleryPage));
     for (const state of ['Pełna wartość', 'Brak wartości', 'Konflikt źródeł', 'Bez weryfikacji producenta', 'Niezweryfikowane', 'Nieznana jednostka', 'Pomiar egzemplarza', '~26.5',
       'Rozbieżne źródła', 'skala 0–10', 'skala 0–100', 'Niepełne dane modelu', 'Nieustalona', 'brak oceny', 'Brak opublikowanych ocen dla tego wariantu',
-      'Rok nieznany', 'Co chcesz porównać', 'Dodaj drugą rakietę.', 'Wersja danych w tym odnośniku nie jest już aktualna']) expect(html, state).toContain(state);
+      'Co chcesz porównać', 'Dodaj drugą rakietę.', 'Wersja danych w tym odnośniku nie jest już aktualna']) expect(html, state).toContain(state);
     expect(html.match(/class="badge badge-(neutral|warning|info)"/g)?.length).toBeGreaterThanOrEqual(3);
     for (const tone of ['neutral', 'warning', 'info']) expect(html).toContain(`badge badge-${tone}`);
   });

@@ -26,7 +26,7 @@ export default async function CataloguePage({ searchParams }: { searchParams: Pr
   const page = Math.min(filters.page, pages);
   const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const brands = [...new Set(entries.map((entry) => entry.brand))].sort();
-  const years = [...new Set(entries.map((entry) => entry.modelYear))].sort((a, b) => (b ?? 0) - (a ?? 0));
+  const years = [...new Set(entries.flatMap((entry) => entry.modelYear === null ? [] : [entry.modelYear]))].sort((a, b) => b - a);
   const shapes = [...new Set(entries.flatMap((entry) => entry.shape ? [entry.shape] : []))].sort();
   const sources = [...new Set(entries.flatMap((entry) => [...entry.specs, ...entry.ratings].map((item) => item.evidence.sourceName)))].slice(0, 3);
   const options = entries.map((entry) => ({ id: entry.id, label: displayLabel(entry), brand: entry.brand, year: entry.modelYear }));
@@ -42,7 +42,7 @@ export default async function CataloguePage({ searchParams }: { searchParams: Pr
           <CatalogueSearch options={options} initialQuery={filters.q} />
           <div className="filter-row">
             <div className="filter-field"><label htmlFor="brand" className="sr-only">Marka</label><select id="brand" name="brand" defaultValue={filters.brand}><option value="">Każda marka</option>{brands.map((brand) => <option key={brand}>{brand}</option>)}</select></div>
-            <div className="filter-field"><label htmlFor="year" className="sr-only">Rocznik</label><select id="year" name="year" defaultValue={filters.year}><option value="">Każdy rok</option>{years.map((year) => <option key={year ?? 'unknown'} value={year ?? 'unknown'}>{year ?? 'Rok nieznany'}</option>)}</select></div>
+            <div className="filter-field"><label htmlFor="year" className="sr-only">Rocznik</label><select id="year" name="year" defaultValue={filters.year}><option value="">Każdy rok</option>{years.map((year) => <option key={year} value={year}>{year}</option>)}</select></div>
             <div className="filter-field"><label htmlFor="shape" className="sr-only">Kształt</label><select id="shape" name="shape" defaultValue={filters.shape}><option value="">Każdy kształt</option>{shapes.map((shape) => <option key={shape} value={shape}>{shapeLabels[shape] ?? shape}</option>)}</select></div>
             <div className="filter-field"><label htmlFor="weight" className="sr-only">Masa</label><select id="weight" name="weight" defaultValue={filters.weight}><option value="">Dowolna masa</option>{weightFilters.map((weight) => <option key={weight} value={weight}>{weightLabels[weight]}</option>)}</select></div>
             <label className="rated-toggle"><input type="checkbox" name="rated" value="1" defaultChecked={filters.rated === '1'} /> Tylko z ocenami</label>

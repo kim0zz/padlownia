@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { claimLabel, formatWeight, shapeLabels } from '../lib/catalogue';
 import { AddToComparison } from './comparison-selection';
 import { racketLabel } from '../lib/comparison';
-import { displayBrand, displayModel, displayVariant } from '../lib/display';
+import { displayBrand, displayLabel, displayModel, displayVariant } from '../lib/display';
 import { ImageCredit, RacketVisual } from './racket-visual';
 import { approvedImageFor, type IllustratedCatalogueEntry, type PublicRacketImage } from '../lib/catalogue-images';
 import { Badge } from './ui/badge';
@@ -61,12 +61,12 @@ export function RacketCard({ entry, comparable = true }: { entry: IllustratedCat
   return <article className="racket-card">
     <div className="card-top">
       <p className="racket-brand">{displayBrand(entry.brand)}</p>
-      {entry.modelYear === null ? <Badge tone="warning">Rok nieznany</Badge> : <Badge>{entry.modelYear}</Badge>}
+      {entry.modelYear !== null && <Badge>{entry.modelYear}</Badge>}
     </div>
     <div className="card-main">
       <div className="card-name">
-        <h3><Link href={`/rakiety/${encodeURIComponent(entry.id)}`} aria-label={`Zobacz profil ${entry.brand} ${entry.model} ${entry.variant ?? ''} ${entry.modelYear ?? 'rok nieznany'}`}>{displayModel(entry)}</Link></h3>
-        <p className={variant ? 'racket-variant' : 'racket-variant muted'}>{variant ?? 'wariant nieustalony'}</p>
+        <h3><Link href={`/rakiety/${encodeURIComponent(entry.id)}`} aria-label={`Zobacz profil ${displayLabel(entry)}`}>{displayModel(entry)}</Link></h3>
+        {variant && <p className="racket-variant">{variant}</p>}
       </div>
       {image && <RacketVisual compact entry={{ image }} />}
     </div>

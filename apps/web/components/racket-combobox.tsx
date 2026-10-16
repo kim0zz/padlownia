@@ -52,7 +52,7 @@ export function RacketCombobox({ name, label, options, initialId }: { name: stri
     {open && <div className="combobox-popup"><ul id={listId} role="listbox" aria-label={`Podpowiedzi: ${label}`}>
       {visible.map((option, index) => <li id={`${listId}-${index}`} key={option.id} role="option" aria-selected={index === activeIndex}
         className={index === activeIndex ? 'active-option' : ''} onMouseDown={(event) => event.preventDefault()} onClick={() => choose(option)}>
-        <span>{option.label}</span><small>{option.brand} · {option.year ?? 'Rok nieznany'}</small>
+        <span>{option.label}</span><small>{option.year === null ? option.brand : `${option.brand} · ${option.year}`}</small>
       </li>)}
     </ul>{!visible.length && <p role="status">Brak wyników. Spróbuj innej nazwy.</p>}
       {matches.length > 30 && <p>{matches.length} wyników — dopisz nazwę lub rok, aby zawęzić listę.</p>}

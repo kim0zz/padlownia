@@ -6,10 +6,8 @@ import { ConflictNotice, RacketSpecs } from '../../../components/racket-details'
 import { RatingGroups } from '../../../components/rating-groups';
 import { SpecTable } from '../../../components/spec-table';
 import { AddToComparison } from '../../../components/comparison-selection';
-import { Badge } from '../../../components/ui/badge';
 import { PageHeader } from '../../../components/ui/page-header';
-import { racketLabel } from '../../../lib/comparison';
-import { displayBrand, displayModel, displayVariant } from '../../../lib/display';
+import { racketLabel } from '../../../lib/comparison';import { displayBrand, displayModel, displayVariant, identityDetails } from '../../../lib/display';
 import { getCatalogue } from '../../../lib/catalogue-server';
 import { showDevDetails } from '../../../lib/dev-ui';
 
@@ -28,15 +26,15 @@ export default async function RacketPage({ params }: { params: Promise<{ id: str
   return <main id="main" className="main-shell profile-shell">
     <PageHeader back={{ href: '/', label: 'Katalog' }} title={displayModel(entry)}
       meta={<>
-        {/* Most source records carry no separate variant (it is part of the model name), so "unknown" goes to the meta line, not a subtitle. */}
+        {/* P-046: a missing variant or year is simply not shown — many rackets have no variant, the model name is their full name. */}
         {variant && <p className="profile-variant">{variant}</p>}
-        <p>{displayBrand(entry.brand)} · {entry.modelYear ?? <Badge tone="warning">Rocznik nieznany</Badge>}{!variant && <> · wariant nieustalony</>}</p>
+        <p>{[displayBrand(entry.brand), ...(entry.modelYear === null ? [] : [entry.modelYear])].join(' · ')}</p>
       </>}
       actions={<AddToComparison id={entry.id} releaseId={entry.releaseId} label={racketLabel(entry)} />} />
     <ModeNotice mode={result.mode} dev={dev} />
     {related.length > 0 && <nav className="related-versions" aria-label="Inne wersje">
       <span>Inne wersje:</span>
-      <ul>{related.map((racket) => <li key={racket.id}><Link className="chip-link" href={`/rakiety/${encodeURIComponent(racket.id)}`}>{displayVariant(racket.variant) ?? 'wariant nieustalony'} · {racket.modelYear ?? 'rok nieznany'}</Link></li>)}</ul>
+      <ul>{related.map((racket) => <li key={racket.id}><Link className="chip-link" href={`/rakiety/${encodeURIComponent(racket.id)}`}>{identityDetails(racket).join(' · ') || displayModel(racket)}</Link></li>)}</ul>
     </nav>}
     <div className="profile-columns">
       <section className="profile-specs" aria-labelledby="spec-title">

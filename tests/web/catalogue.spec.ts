@@ -33,7 +33,8 @@ test('empty search, unknown year and conflict remain explicit', async ({ page })
   await expect(page.getByRole('heading', { name: 'Tym razem bez wyników.' })).toBeVisible();
   await page.getByRole('link', { name: 'Pokaż cały katalog' }).click();
   await page.goto('/rakiety/fixture-arc-unknown');
-  await expect(page.getByText('Rocznik nieznany', { exact: false }).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Arc' })).toBeVisible();
+  await expect(page.getByText(/Rocznik nieznany|wariant nieustalony/)).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Parametry jeszcze nieustalone.' })).toBeVisible();
   await page.goto('/rakiety/fixture-orbit-pro-2026');
   await expect(page.getByText('Źródła podają rozbieżne parametry.', { exact: true })).toBeVisible();
@@ -232,10 +233,10 @@ test('cards show a thumbnail only for approved images, with no placeholder and n
   await expect(page.locator('.card-number')).toHaveCount(0);
 });
 
-test('an unknown year is a warning badge on the card; the footer carries the data attribution', async ({ page }) => {
+test('an unknown year shows no badge on the card (P-046); the footer carries the data attribution', async ({ page }) => {
   await page.goto('/?year=unknown');
   await expect(visibleCards(page)).toHaveCount(1);
-  await expect(visibleCards(page).first().locator('.badge-warning', { hasText: 'Rok nieznany' })).toBeVisible();
+  await expect(visibleCards(page).first().locator('.badge')).toHaveCount(0);
   await expect(visibleCards(page).first().getByText('Kształt i masa nieustalone')).toBeVisible();
   await expect(page.getByRole('contentinfo').getByRole('link', { name: 'CC BY 4.0' })).toBeVisible();
   await expect(page.locator('.source-licence')).toHaveCount(0);

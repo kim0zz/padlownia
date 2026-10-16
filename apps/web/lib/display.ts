@@ -61,5 +61,11 @@ export function displayBrand(brand: string): string {
 
 /** "NOX · ML10 Pro Cup COORP by Miguel Lamperti · Pro · 2027" — for aria-labels and the comparison tray. */
 export function displayLabel(entry: LabelFields): string {
-  return `${displayBrand(entry.brand)} · ${displayModel(entry)} · ${displayVariant(entry.variant) ?? 'wariant nieustalony'} · ${entry.modelYear ?? 'rok nieznany'}`;
+  return [displayBrand(entry.brand), displayModel(entry), ...identityDetails(entry)].join(' · ');
+}
+
+/** Variant and model year when known; nothing for a missing one (P-046): many rackets have no variant at all. */
+export function identityDetails(entry: Pick<CatalogueEntry, 'variant' | 'modelYear'>): string[] {
+  const variant = displayVariant(entry.variant);
+  return [...(variant ? [variant] : []), ...(entry.modelYear === null ? [] : [String(entry.modelYear)])];
 }

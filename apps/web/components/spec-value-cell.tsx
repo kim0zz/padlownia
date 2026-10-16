@@ -24,7 +24,7 @@ export function SpecValueCell({ specs, observations = specs, specLabel, dev = fa
       <SourceInfo label={`Źródło: ${specLabel}`} items={[{ evidence: spec.evidence, claim: claimLabel(spec) }]} dev={dev} />
       {/* Systemic for some sources (~1/3 of values), so a quiet marker rather than a warning; conflicts keep the warning tone. */}
       {isUnverifiedClaim(spec) && <Badge><span title={claimLabel(spec)}>Niezweryfikowane</span></Badge>}
-    </div>) : <p className="comparison-unknown">{observations.some((spec) => spec.conflict) ? 'Źródła podają różne wartości' : 'Brak danych'}</p>}
+    </div>) : <p className="comparison-unknown">{observations.some((spec) => spec.conflict) ? 'Źródła podają różne wartości' : <><span aria-hidden="true">—</span><span className="sr-only">brak wartości</span></>}</p>}
     {observations.some((spec) => spec.conflict) && <p className="comparison-badges"><Badge tone="warning">Rozbieżne źródła</Badge></p>}
   </>;
 }

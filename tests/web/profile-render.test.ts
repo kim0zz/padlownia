@@ -100,11 +100,12 @@ describe('profile layout (UX v3 §7)', () => {
     expect(html.indexOf('id="spec-title"')).toBeLessThan(html.indexOf('id="ratings-title"'));
     for (const retired of ['profile-hero', 'profile-description', 'profile-key-specs', 'reading-guide', 'missing-specs', 'section-kicker', 'class="eyebrow', 'FAKTY Z KONTEKSTEM', 'PERSPEKTYWA ŹRÓDŁA', 'Ten profil dotyczy dokładnie', 'rating-card']) expect(html).not.toContain(retired);
   });
-  it('renders the parameter rows with the comparison cell (value, source popover) and an explicit "Brak danych"', async () => {
+  it('renders the parameter rows with the comparison cell (value, source popover) and leaves out rows without data', async () => {
     const html = await render('fixture-orbit-control-2026');
     expect(html).toMatch(/<dt class="spec-row-label">Kształt<\/dt><dd class="spec-row-cell"><div class="comparison-value"><strong>Okrągła<\/strong>/);
     expect(html).toMatch(/<dt class="spec-row-label">Masa<\/dt><dd class="spec-row-cell"><div class="comparison-value"><strong>360–370 g<\/strong>/);
-    expect(html).toMatch(/<dt class="spec-row-label">Balans<\/dt><dd class="spec-row-cell"><p class="comparison-unknown">Brak danych<\/p>/);
+    expect(html).not.toContain('<dt class="spec-row-label">Balans</dt>');
+    expect(html).not.toContain('Brak danych');
     expect(html).toContain('aria-label="Źródło: Kształt: ');
   });
   it('groups ratings under their source with the shared caveat once and a bar in the source scale', async () => {
@@ -144,9 +145,9 @@ describe('profile layout (UX v3 §7)', () => {
     expect(await render('fixture-vector-attack-2026')).toContain('chip-link');
     expect(await render('fixture-arc-unknown')).not.toContain('Inne wersje');
   });
-  it('states an unknown year and an empty parameter list explicitly', async () => {
+  it('shows no placeholder for an unknown year and states an empty parameter list explicitly', async () => {
     const html = await render('fixture-arc-unknown');
-    expect(html).toContain('<span class="badge badge-warning">Rocznik nieznany</span>');
+    expect(html).not.toMatch(/nieznany|nieustalony/);
     expect(html).toContain('Parametry jeszcze nieustalone.');
     expect(html).not.toContain('profile-observations');
   });

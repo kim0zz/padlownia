@@ -7,6 +7,8 @@ import { Notice } from './ui/notice';
 
 /** Full observation: the normalised value first, the source's original wording second, then kind, context, citation and (developer mode) the source trail. */
 export function ObservationDetails({ spec, releaseId, dev = false }: { spec: CatalogueSpec; releaseId: string; dev?: boolean }) {
+  // Source schema metadata (sourceField, sourceSchemaPath, …) is technical provenance: developer mode only (P-032).
+  const context = Object.entries(spec.measurementContext).filter(([key]) => dev || !key.startsWith('source'));
   return <article className="observation">
     <div className="observation-title">
       <h3>{specLabels[spec.key] ?? spec.key}</h3>
@@ -18,8 +20,8 @@ export function ObservationDetails({ spec, releaseId, dev = false }: { spec: Cat
     <p className="observation-value">{specValueText(spec)}</p>
     <p className="observation-original">Oryginał: <span className="raw-value">{rawText(spec.rawValue)}</span></p>
     <p className="observation-kind">{claimLabel(spec)}</p>
-    {Object.keys(spec.measurementContext).length > 0 && <p className="context-note">
-      Kontekst: {Object.entries(spec.measurementContext).map(([key, value]) => `${key}: ${rawText(value)}`).join('; ')}
+    {context.length > 0 && <p className="context-note">
+      Kontekst: {context.map(([key, value]) => `${key}: ${rawText(value)}`).join('; ')}
     </p>}
     {spec.validationStatus !== 'valid' && <p className="context-note">Interpretacja niepotwierdzona — zachowano wartość oryginalną.</p>}
     <div className="observation-source"><SourceCitation evidence={spec.evidence} /><span>Pobrano {formatDate(spec.evidence.retrievedAt)}</span></div>

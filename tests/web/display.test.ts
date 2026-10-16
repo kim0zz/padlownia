@@ -106,8 +106,9 @@ describe('displayLabel', () => {
     expect(displayLabel({ brand: 'NOX', model: 'ML10 Pro Cup COORP by Miguel Lamperti', variant: 'pro', modelYear: 2027 }))
       .toBe('NOX · ML10 Pro Cup COORP by Miguel Lamperti · Pro · 2027');
   });
-  it('uses the placeholders for an unknown variant and year', () => {
-    expect(displayLabel(entry({ variant: '', modelYear: null }))).toBe('NOX · ML10 · wariant nieustalony · rok nieznany');
+  it('leaves out a missing variant and year instead of placeholders (P-046)', () => {
+    expect(displayLabel(entry({ variant: '', modelYear: null }))).toBe('NOX · ML10');
+    expect(displayLabel(entry({ variant: '', modelYear: 2026 }))).toBe('NOX · ML10 · 2026');
   });
   it('applies the model and brand formatting rules', () => {
     expect(displayLabel({ brand: 'adidas', model: 'adidas Arrow Hit 2026', variant: 'ctrl pro', modelYear: 2026 }))
@@ -115,7 +116,7 @@ describe('displayLabel', () => {
   });
   it('does not crash on __proto__ as a brand', () => {
     expect(displayLabel(entry({ brand: '__proto__', model: 'X', variant: 'Pro', modelYear: null })))
-      .toBe('__Proto__ · X · Pro · rok nieznany');
+      .toBe('__Proto__ · X · Pro');
   });
 });
 

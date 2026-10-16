@@ -12,7 +12,7 @@ describe('racket card (catalogue and racket_card block)', () => {
   it('keeps the exact profile link label and drops the ordinal number and the old footer', () => {
     const html = card(control2026);
     expect(html).toContain('class="racket-card"');
-    expect(html).toContain('aria-label="Zobacz profil TESTLAB Orbit Control 2026"');
+    expect(html).toContain('aria-label="Zobacz profil TESTLAB · Orbit · Control · 2026"');
     expect(html).toContain('href="/rakiety/fixture-orbit-control-2026"');
     expect(html).not.toContain('card-number');
     expect(html).not.toContain('card-bottom');
@@ -36,10 +36,11 @@ describe('racket card (catalogue and racket_card block)', () => {
     expect(html).toContain('>Orbit</a>');
     expect(html).toContain('>Control<');
   });
-  it('marks unknown year, unknown weight/shape and an unknown variant on the first layer', () => {
+  it('shows nothing for a missing year and variant (P-046) and still marks unknown weight/shape', () => {
     const html = card({ ...unknownYear, variant: '' });
-    expect(html).toContain('<span class="badge badge-warning">Rok nieznany</span>');
-    expect(html).toContain('wariant nieustalony');
+    expect(html).not.toMatch(/nieznany|nieustalony/);
+    expect(html).not.toContain('racket-variant');
+    expect(html).not.toContain('class="badge');
     expect(html).toContain('Kształt i masa nieustalone');
     expect(html).not.toContain('<details');
   });

@@ -1,6 +1,5 @@
 import type { CatalogueEntry, CatalogueSpec } from '@padlownia/database';
 import { canonicalBrand } from '@padlownia/domain/brands';
-
 export const weightFilters = ['lt355', '355-365', '365-375', 'gt375'] as const;
 export const sortModes = ['newest', 'name', 'weight', 'ratings'] as const;
 export type WeightFilter = '' | (typeof weightFilters)[number];
@@ -104,6 +103,7 @@ export const specLabels = labels({
   shape: 'Kształt', weight: 'Masa', weight_g: 'Masa', balance: 'Balans', balance_cm: 'Balans',
   core: 'Rdzeń', surface: 'Powierzchnia', surface_material: 'Powierzchnia', frame: 'Rama',
   thickness: 'Grubość', player_level: 'Poziom gracza', firmness: 'Twardość', texture: 'Faktura powierzchni',
+  court_side: 'Strona kortu', demand: 'Wymagania', gender: 'Przeznaczenie', junior: 'Dla juniorów', play_style: 'Styl gry', profile_tags: 'Cechy',
 });
 export const claimLabels = labels({
   manufacturer_declared: 'Deklaracja producenta', retailer_claim: 'Informacja sprzedawcy',

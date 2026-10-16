@@ -35,7 +35,7 @@ describe('comparison keeps source observations and exact identities', () => {
     expect(racketLabel(first)).toBe('TESTLAB Orbit · Control · 2026');
     expect(racketLabel(second)).toBe('TESTLAB Orbit · Control · 2025');
     expect(racketLabel(fixtureCatalogue[2]!)).toBe('TESTLAB Orbit · Pro · 2026');
-    expect(racketLabel({ ...first, variant: '', modelYear: null })).toBe('TESTLAB Orbit · Wariant nieustalony · Rok nieznany');
+    expect(racketLabel({ ...first, variant: '', modelYear: null })).toBe('TESTLAB Orbit');
   });
 
   it.each([['weight_g', 'weight'], ['balance_cm', 'balance'], ['surface_material', 'surface'], ['core', 'core'], ['__proto__', '__proto__']])('maps only the known alias %s', (input, expected) => {
@@ -63,14 +63,13 @@ describe('comparison keeps source observations and exact identities', () => {
     left.specs = [spec({ key: 'balance_cm', rawValue: '~26.5', unit: null, validationStatus: 'invalid', selected: true, conflict: true }), spec({ key: '__proto__', rawValue: 0, selected: false })];
     const right = structuredClone(fixtureCatalogue[5]!);
     const rows = comparisonRows(left, right);
-    expect(rows.map((row) => row.key)).toEqual(['shape', 'weight', 'balance', 'core', 'surface', '__proto__']);
-    expect(rows.find((row) => row.key === '__proto__')!.label).toBe('__proto__');
+    // Only rows with a value or a disclosed conflict on either side (P-046); unselected observations stay in the observation list.
+    expect(rows.map((row) => row.key)).toEqual(['balance']);
     const balance = rows.find((row) => row.key === 'balance')!;
     expect(balance.cells[0]!.observations[0]).toMatchObject({ rawValue: '~26.5', conflict: true, selected: true });
     expect(balance.cells[0]!.selected).toEqual([]);
     expect(balance.cells[1]!.observations).toEqual([]);
     expect(balance.cells[1]!.selected).toEqual([]);
-    expect(rows.find((row) => row.key === 'weight')!.cells.every((cell) => cell.selected.length === 0)).toBe(true);
   });
 
   it.each([
@@ -263,24 +262,25 @@ describe('comparison row order and differences (UX v3 §5.3)', () => {
   it('orders the key parameters first and everything else alphabetically by label', () => {
     const left = structuredClone(first);
     left.specs.push(spec({ key: 'player_level', rawValue: 'Advanced', normalizedText: 'advanced' }), spec({ key: 'frame', rawValue: 'carbon', normalizedText: 'carbon' }), spec({ key: 'zeta', rawValue: 'z' }), spec({ key: 'alpha', rawValue: 'a' }));
-    expect(comparisonRows(left, second).map((row) => row.key)).toEqual(['shape', 'weight', 'balance', 'core', 'surface', 'frame', 'player_level', 'alpha', 'zeta']);
+    // Rows without a value on either side are left out (P-046).
+    expect(comparisonRows(left, second).map((row) => row.key)).toEqual(['shape', 'weight', 'frame', 'player_level', 'alpha', 'zeta']);
   });
   it('marks a row as different when values differ or only one side has one, and not when both are empty or equal', () => {
     const rows = comparisonRows(first, fixtureCatalogue[2]!);
     const byKey = (key: string) => rows.find((row) => row.key === key)!;
     expect(rowDiffers(byKey('shape'))).toBe(true);
     expect(rowDiffers(byKey('weight'))).toBe(true);
-    expect(rowDiffers(byKey('core'))).toBe(false);
+    expect(rows.find((row) => row.key === 'core')).toBeUndefined();
     expect(rowDiffers(comparisonRows(first, first).find((row) => row.key === 'weight')!)).toBe(false);
     expect(rowDiffers(comparisonRows(first, fixtureCatalogue[5]!).find((row) => row.key === 'shape')!)).toBe(true);
   });
 });
 
 describe('profile rows of one racket (UX v3 §7.2)', () => {
-  it('uses the comparison order: key parameters first (even without data), then the rest alphabetically', () => {
+  it('uses the comparison order: key parameters first, then the rest alphabetically; rows without data are left out', () => {
     const entry = structuredClone(first);
     entry.specs.push(spec({ key: 'player_level', rawValue: 'Advanced', normalizedText: 'advanced' }), spec({ key: 'frame', rawValue: 'carbon', normalizedText: 'carbon' }), spec({ key: 'zeta', rawValue: 'z' }), spec({ key: 'alpha', rawValue: 'a' }));
-    expect(entrySpecRows(entry).map((row) => row.key)).toEqual(['shape', 'weight', 'balance', 'core', 'surface', 'frame', 'player_level', 'alpha', 'zeta']);
+    expect(entrySpecRows(entry).map((row) => row.key)).toEqual(['shape', 'weight', 'frame', 'player_level', 'alpha', 'zeta']);
     expect(entrySpecRows(entry).map((row) => row.key)).toEqual(comparisonRows(entry, entry).map((row) => row.key));
   });
   it('keeps the selected valid values apart from every original observation, and merges the weight_g alias into one row', () => {
@@ -291,15 +291,32 @@ describe('profile rows of one racket (UX v3 §7.2)', () => {
     expect(weight.observations.some((observation) => observation.claimType === 'measured_specimen' && !observation.selected)).toBe(true);
     expect(entrySpecRows(first).filter((row) => row.key === 'weight')).toHaveLength(1);
   });
-  it('lists unselected and invalid observations without selecting them, and shows empty key rows for a racket without data', () => {
+  it('never selects an unconfirmed observation and shows no rows for a racket without data', () => {
     const entry = structuredClone(first);
     entry.specs = [spec({ key: 'weight_g', validationStatus: 'unknown', selected: true })];
-    const weight = entrySpecRows(entry).find((row) => row.key === 'weight')!;
-    expect(weight.observations).toHaveLength(1);
-    expect(weight.selected).toEqual([]);
-    const empty = entrySpecRows(fixtureCatalogue[5]!);
-    expect(empty.map((row) => row.key)).toEqual(['shape', 'weight', 'balance', 'core', 'surface']);
-    expect(empty.every((row) => row.observations.length === 0 && row.selected.length === 0)).toBe(true);
+    // The unconfirmed value stays in "Wszystkie obserwacje źródeł"; the parameter table has nothing to show.
+    expect(entrySpecRows(entry)).toEqual([]);
+    expect(entrySpecRows(fixtureCatalogue[5]!)).toEqual([]);
+  });
+  it('shows a consistent editorial-only characteristic, translated, and folds junior into Przeznaczenie', () => {
+    const entry = structuredClone(first);
+    const editorial = { claimType: 'editorial_assessment' as const, selected: false };
+    entry.specs = [
+      spec({ key: 'play_style', rawValue: ['attacking', 'net play', 'spin'], normalizedText: 'attacking|net play|spin', ...editorial }),
+      spec({ key: 'court_side', rawValue: 'both', normalizedText: 'both', ...editorial }),
+      spec({ key: 'demand', rawValue: 'forgiving', normalizedText: 'forgiving', ...editorial }),
+      spec({ key: 'gender', rawValue: 'unisex', normalizedText: 'unisex', ...editorial }),
+      spec({ key: 'junior', rawValue: true, normalizedText: 'true', ...editorial }),
+      spec({ key: 'profile_tags', rawValue: ['control', 'arm-friendly'], normalizedText: 'control|arm-friendly', claimType: 'unknown' }),
+    ];
+    const rows = entrySpecRows(entry);
+    expect(rows.map((row) => [row.label, row.selected.map(specDisplayValue).join()])).toEqual([
+      ['Styl gry', 'Ofensywny, gra przy siatce, rotacja'], ['Wymagania', 'Wybacza błędy'], ['Strona kortu', 'Obie strony'],
+      ['Przeznaczenie', 'Juniorska'], ['Cechy', 'Kontrola, przyjazna dla ręki'],
+    ]);
+    // A physical parameter is never taken from an editorial assessment.
+    entry.specs = [spec({ key: 'weight_g', ...editorial })];
+    expect(entrySpecRows(entry)).toEqual([]);
   });
   it('keeps both conflicting observations of one parameter in its row', () => {
     const shape = entrySpecRows(fixtureCatalogue[2]!).find((row) => row.key === 'shape')!;

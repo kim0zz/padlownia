@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { CatalogueEntry } from '@padlownia/database';
 import { comparisonRatingRows, comparisonRatingSources, comparisonRows, racketLabel, rowDiffers } from '../lib/comparison';
-import { displayBrand, displayModel, displayVariant } from '../lib/display';
+import { displayBrand, displayModel, identityDetails } from '../lib/display';
 import { groupMethodology, ratingDimensionLabels, sortDimensions } from '../lib/ratings';
 import { approvedImageFor } from '../lib/catalogue-images';
 import { ObservationDetails } from './racket-details';
@@ -10,7 +10,6 @@ import { RemoveComparisonItem } from './comparison-selection';
 import { ChangePairLink } from './change-pair-link';
 import { SpecValueCell } from './spec-value-cell';
 import { RatingEntry, RatingGroupHeader } from './rating-parts';
-import { Badge } from './ui/badge';
 
 type Row = ReturnType<typeof comparisonRows>[number];
 const columns = ['a', 'b'] as const;
@@ -30,8 +29,7 @@ function ComparisonHeader({ entries }: { entries: readonly [CatalogueEntry, Cata
         {image && <RacketVisual compact entry={{ image }} />}
         <div className="comparison-header-copy">
           <p className="comparison-header-name"><ColumnMark column={column} /><span className="comparison-header-brand">{displayBrand(entry.brand)}</span> <Link href={`/rakiety/${encodeURIComponent(entry.id)}`}>{displayModel(entry)}</Link></p>
-          <p className="comparison-identity-meta">{`${displayVariant(entry.variant) ?? 'wariant nieustalony'} · ${entry.modelYear ?? 'rok nieznany'}`}
-            {entry.modelYear === null && <> <Badge tone="warning">Rocznik niepotwierdzony</Badge></>}</p>
+          {identityDetails(entry).length > 0 && <p className="comparison-identity-meta">{identityDetails(entry).join(' · ')}</p>}
         </div>
         <RemoveComparisonItem id={entry.id} label={racketLabel(entry)} />
       </div>;
@@ -117,7 +115,7 @@ export function RacketComparison({ left, right, dev = false }: { left: Catalogue
     <ComparisonHeader entries={entries} />
     <SpecComparisonTable rows={rows} entries={entries} dev={dev} />
     <RatingComparison left={left} right={right} dev={dev} />
-    <AllObservations rows={rows} entries={entries} dev={dev} />
+    <AllObservations rows={comparisonRows(left, right, true)} entries={entries} dev={dev} />
     {credits.length > 0 && <p className="comparison-image-credits">Zdjęcia: {credits.map(({ column, image }, index) => <span key={column}>{index > 0 && '; '}{column.toUpperCase()} — <ImageCredit image={image} /></span>)}</p>}
     {dev && <details className="comparison-release"><summary>Wersja porównywanych danych</summary><p>{left.releaseId}</p><p>Obie rakiety pochodzą z jednej publikacji katalogu. Stare odnośniki wymagają świadomego odświeżenia po kolejnej publikacji.</p></details>}
   </section>;
