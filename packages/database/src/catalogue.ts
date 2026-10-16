@@ -1,4 +1,5 @@
 import type { ClaimType, Json, RatingKind, ValidationStatus } from "@padlownia/domain";
+import { canonicalBrand } from "@padlownia/domain/brands";
 import type { SqlExecutor } from "./executor.js";
 
 export interface CatalogueEvidence {
@@ -53,11 +54,17 @@ export interface CatalogueEntry {
   ratings: CatalogueRating[];
 }
 
+/** One brand name per brand, whatever spelling the source used ("STARVIE" and "StarVie" → "StarVie"). */
+export function withCanonicalBrand(entry: CatalogueEntry): CatalogueEntry {
+  const brand = canonicalBrand(entry.brand);
+  return brand === entry.brand ? entry : { ...entry, brand };
+}
+
 /** The database function exposes fixed, released fields, never raw snapshots. */
 export async function readPublishedCatalogue(db: SqlExecutor): Promise<CatalogueEntry[]> {
   try {
     const result = await db.query<{ entry: CatalogueEntry }>("select entry from padlownia.published_catalogue()");
-    return result.rows.map((row) => row.entry);
+    return result.rows.map((row) => withCanonicalBrand(row.entry));
   } catch {
     // Driver errors can include connection URLs, SQL parameters or credentials.
     throw new Error("DATABASE_READ_FAILED");

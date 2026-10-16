@@ -11,6 +11,11 @@ describe('displayModel', () => {
   it('strips the brand prefix and the trailing model year', () => {
     expect(displayModel({ brand: 'Adidas', model: 'adidas Arrow Hit 2026', modelYear: 2026 })).toBe('Arrow Hit');
   });
+  it('strips any known spelling of the canonical brand, longest first', () => {
+    expect(displayModel({ brand: 'Cork', model: 'Cork Padel Classic II', modelYear: null })).toBe('Classic II');
+    expect(displayModel({ brand: 'Cork', model: 'Cork Extreme Deus', modelYear: 2025 })).toBe('Extreme Deus');
+    expect(displayModel({ brand: 'StarVie', model: 'STARVIE Triton Power Plus 2026', modelYear: 2026 })).toBe('Triton Power Plus');
+  });
   it('matches the brand prefix case-insensitively', () => {
     expect(displayModel({ brand: 'NOX', model: 'Nox ML10', modelYear: null })).toBe('ML10');
   });

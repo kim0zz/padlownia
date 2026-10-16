@@ -2,7 +2,7 @@ import 'server-only';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { assertDevelopmentDatabase, sharedPgExecutor } from '@padlownia/database/executor';
-import { readPublishedCatalogue, type CatalogueEntry } from '@padlownia/database/catalogue';
+import { readPublishedCatalogue, withCanonicalBrand, type CatalogueEntry } from '@padlownia/database/catalogue';
 import { fixtureCatalogue } from './fixtures';
 import { CatalogueSetupError, resolveCatalogueConfig, type CatalogueConfig } from './config';
 import { loadCatalogueImages } from './catalogue-images-server';
@@ -76,7 +76,7 @@ export function parseCatalogueSnapshot(text: string): CatalogueEntry[] {
     ids.add(entry.id); releases.add(entry.releaseId);
   }
   if (releases.size > 1) throw new Error('SNAPSHOT_INVALID');
-  return data as CatalogueEntry[];
+  return (data as CatalogueEntry[]).map(withCanonicalBrand);
 }
 
 let snapshotCache: { path: string; entries: CatalogueEntry[] } | null = null;

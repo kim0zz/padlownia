@@ -20,6 +20,11 @@ describe('classic catalogue search and provenance presentation', () => {
     expect(parseFilters({ q: ['a'.repeat(1000), 'ignored'], page: '-42' })).toMatchObject({ q: 'a'.repeat(120), page: 1 });
     expect(parseFilters({ page: '1000000' }).page).toBe(10000);
   });
+  it('maps an old brand spelling in a link to the canonical brand', () => {
+    expect(parseFilters({ brand: 'STARVIE' }).brand).toBe('StarVie');
+    expect(parseFilters({ brand: 'Cork Padel' }).brand).toBe('Cork');
+    expect(parseFilters({}).brand).toBe('');
+  });
   it('does not invent missing values or discard numeric zero', () => {
     expect(formatWeight(null, null)).toBe('Brak danych');
     expect(formatWeight(360, 370)).toBe('360–370 g');

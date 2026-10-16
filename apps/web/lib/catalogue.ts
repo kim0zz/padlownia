@@ -1,4 +1,5 @@
 import type { CatalogueEntry, CatalogueSpec } from '@padlownia/database';
+import { canonicalBrand } from '@padlownia/domain/brands';
 
 export const weightFilters = ['lt355', '355-365', '365-375', 'gt375'] as const;
 export const sortModes = ['newest', 'name', 'weight', 'ratings'] as const;
@@ -24,7 +25,8 @@ const oneOf = <T extends string>(allowed: readonly T[], value: string): T | unde
 export function parseFilters(params: SearchParams): CatalogueFilters {
   return {
     q: first(params.q).trim().slice(0, 120),
-    brand: first(params.brand).slice(0, 100),
+    // Old links may carry another spelling of the brand ("STARVIE"); the catalogue uses canonical names.
+    brand: canonicalBrand(first(params.brand).slice(0, 100)),
     year: first(params.year).slice(0, 10),
     shape: first(params.shape).slice(0, 40),
     weight: oneOf(weightFilters, first(params.weight)) ?? '',

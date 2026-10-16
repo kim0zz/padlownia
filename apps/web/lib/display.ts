@@ -1,4 +1,5 @@
 import type { CatalogueEntry } from '@padlownia/database';
+import { brandSpellings } from '@padlownia/domain/brands';
 
 type ModelFields = Pick<CatalogueEntry, 'brand' | 'model' | 'modelYear'>;
 type LabelFields = Pick<CatalogueEntry, 'brand' | 'model' | 'variant' | 'modelYear'>;
@@ -18,13 +19,15 @@ function mapCore(token: string, transform: (core: string) => string): string {
   return `${lead}${transform(core)}${trail}`;
 }
 
-/** "adidas Arrow Hit 2026" (brand "Adidas", year 2026) → "Arrow Hit". Falls back to the raw model if nothing is left. */
+/**
+ * "adidas Arrow Hit 2026" (brand "Adidas", year 2026) → "Arrow Hit"; "Cork Padel Classic II" (brand "Cork") → "Classic II".
+ * Falls back to the raw model if nothing is left.
+ */
 export function displayModel(entry: ModelFields): string {
   let model = entry.model;
-  const brand = entry.brand;
-  if (brand !== '' && lower(model.slice(0, brand.length + 1)) === lower(`${brand} `)) {
-    model = model.slice(brand.length + 1);
-  }
+  const spellings = brandSpellings(entry.brand).filter((brand) => brand !== '').sort((a, b) => b.length - a.length);
+  const prefix = spellings.find((brand) => lower(model.slice(0, brand.length + 1)) === lower(`${brand} `));
+  if (prefix) model = model.slice(prefix.length + 1);
   if (entry.modelYear !== null) {
     const suffix = ` ${entry.modelYear}`;
     if (model.endsWith(suffix)) model = model.slice(0, -suffix.length);

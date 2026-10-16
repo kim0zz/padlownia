@@ -4,7 +4,7 @@ import type { getCatalogue as GetCatalogue } from '../../apps/web/lib/catalogue-
 vi.mock('server-only', () => ({}));
 const stubs = vi.hoisted(() => ({ read: vi.fn(), shared: vi.fn(), identity: vi.fn() }));
 vi.mock('@padlownia/database/executor', () => ({ sharedPgExecutor: stubs.shared, assertDevelopmentDatabase: stubs.identity }));
-vi.mock('@padlownia/database/catalogue', () => ({ readPublishedCatalogue: stubs.read }));
+vi.mock('@padlownia/database/catalogue', async (importOriginal) => ({ ...(await importOriginal<object>()), readPublishedCatalogue: stubs.read }));
 // The catalogue cache is module state: every test gets a fresh module.
 let getCatalogue: typeof GetCatalogue;
 beforeEach(async () => { vi.resetModules(); ({ getCatalogue } = await import('../../apps/web/lib/catalogue-server')); });
@@ -114,6 +114,7 @@ describe('local snapshot mode', () => {
   it('rejects malformed, duplicated or mixed-release exports', async () => {
     const { parseCatalogueSnapshot } = await import('../../apps/web/lib/catalogue-server');
     expect(parseCatalogueSnapshot(JSON.stringify([entry('a')]))).toHaveLength(1);
+    expect(parseCatalogueSnapshot(JSON.stringify([{ ...entry('a'), brand: 'Cork Padel' }, { ...entry('b'), brand: 'STARVIE' }])).map((x) => x.brand)).toEqual(['Cork', 'StarVie']);
     for (const bad of ['{}', '[1]', JSON.stringify([entry('a'), entry('a')]), JSON.stringify([entry('a'), entry('b', 'release-b')]), JSON.stringify([{ ...entry('a'), specs: null }])]) {
       expect(() => parseCatalogueSnapshot(bad)).toThrow();
     }
