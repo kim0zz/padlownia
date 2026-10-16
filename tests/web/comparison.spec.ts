@@ -315,6 +315,8 @@ test('"Tylko różnice" hides identical rows and the identity header stays under
   await page.getByRole('checkbox', { name: 'Tylko różnice' }).uncheck();
   await expect(rows).toHaveCount(before);
 
+  // A short viewport keeps the page scrollable now that rows without data are left out (P-046).
+  await page.setViewportSize({ width: 1440, height: 480 });
   await page.evaluate(() => window.scrollTo(0, 1500));
   expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(300);
   const header = (await comparison(page).locator('.comparison-header').boundingBox())!;
