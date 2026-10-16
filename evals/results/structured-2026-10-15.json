@@ -1,0 +1,376 @@
+{
+  "date": "2026-10-15",
+  "mapping": "aspects-v1",
+  "cases": 33,
+  "catalogueEntries": 444,
+  "aspectDetection": {
+    "precision": 0.97,
+    "recall": 0.97,
+    "exactMatch": 0.939
+  },
+  "dataCoverage": {
+    "fullyAnswerableFromData": 28,
+    "partiallyFromData": 1,
+    "proseOnly": 4
+  },
+  "perCase": [
+    {
+      "id": "smash-vertex05",
+      "expected": [
+        "power"
+      ],
+      "detected": [
+        "power"
+      ],
+      "covered": "✓",
+      "evidence": 3
+    },
+    {
+      "id": "elbow-varlion-cube",
+      "expected": [
+        "comfort"
+      ],
+      "detected": [
+        "comfort"
+      ],
+      "covered": "✓",
+      "evidence": 2
+    },
+    {
+      "id": "sweetspot-head-extreme-pro",
+      "expected": [
+        "sweet_spot"
+      ],
+      "detected": [
+        "sweet_spot"
+      ],
+      "covered": "✓",
+      "evidence": 2
+    },
+    {
+      "id": "net-viper-26",
+      "expected": [
+        "net"
+      ],
+      "detected": [
+        "net"
+      ],
+      "covered": "✓",
+      "evidence": 1
+    },
+    {
+      "id": "defense-nox-ml10",
+      "expected": [
+        "defense"
+      ],
+      "detected": [
+        "defense"
+      ],
+      "covered": "✓",
+      "evidence": 1
+    },
+    {
+      "id": "materials-at10-18k",
+      "expected": [
+        "materials",
+        "core"
+      ],
+      "detected": [
+        "materials",
+        "core"
+      ],
+      "covered": "✓✓",
+      "evidence": 5
+    },
+    {
+      "id": "spin-metalbone",
+      "expected": [
+        "spin"
+      ],
+      "detected": [
+        "spin"
+      ],
+      "covered": "✓",
+      "evidence": 3
+    },
+    {
+      "id": "stability-wilson-blade",
+      "expected": [
+        "stability"
+      ],
+      "detected": [
+        "stability"
+      ],
+      "covered": "✓",
+      "evidence": 1
+    },
+    {
+      "id": "who-for-oxdog-tourx",
+      "expected": [
+        "level",
+        "court_side"
+      ],
+      "detected": [
+        "level",
+        "court_side"
+      ],
+      "covered": "✓✗",
+      "evidence": 3
+    },
+    {
+      "id": "shape-hirostar-redstone",
+      "expected": [
+        "shape"
+      ],
+      "detected": [
+        "shape"
+      ],
+      "covered": "✓",
+      "evidence": 1
+    },
+    {
+      "id": "lineup-hack04",
+      "expected": [],
+      "detected": [
+        "comfort"
+      ],
+      "covered": "proza",
+      "evidence": 32
+    },
+    {
+      "id": "stiffness-starvie-triton",
+      "expected": [
+        "stiffness"
+      ],
+      "detected": [
+        "stiffness"
+      ],
+      "covered": "✓",
+      "evidence": 1
+    },
+    {
+      "id": "beginner-head-vibe",
+      "expected": [
+        "level"
+      ],
+      "detected": [
+        "level"
+      ],
+      "covered": "✓",
+      "evidence": 3
+    },
+    {
+      "id": "power-access-kuikma",
+      "expected": [
+        "power"
+      ],
+      "detected": [
+        "power"
+      ],
+      "covered": "✓",
+      "evidence": 2
+    },
+    {
+      "id": "handling-royal-whip",
+      "expected": [
+        "handling"
+      ],
+      "detected": [
+        "handling"
+      ],
+      "covered": "✓",
+      "evidence": 5
+    },
+    {
+      "id": "vibration-siux-diablo",
+      "expected": [
+        "comfort"
+      ],
+      "detected": [
+        "comfort"
+      ],
+      "covered": "✓",
+      "evidence": 2
+    },
+    {
+      "id": "control-drop-shot-axion",
+      "expected": [
+        "control"
+      ],
+      "detected": [
+        "control"
+      ],
+      "covered": "✓",
+      "evidence": 1
+    },
+    {
+      "id": "core-dunlop-fx-pro",
+      "expected": [
+        "core"
+      ],
+      "detected": [
+        "core"
+      ],
+      "covered": "✓",
+      "evidence": 1
+    },
+    {
+      "id": "other-brands-pearl",
+      "expected": [],
+      "detected": [],
+      "covered": "proza",
+      "evidence": 31
+    },
+    {
+      "id": "takeaway-volt-900",
+      "expected": [],
+      "detected": [],
+      "covered": "proza",
+      "evidence": 18
+    },
+    {
+      "id": "smash-at10-attack-12k",
+      "expected": [
+        "power"
+      ],
+      "detected": [
+        "power"
+      ],
+      "covered": "✓",
+      "evidence": 2
+    },
+    {
+      "id": "defense-wilson-bela-pro",
+      "expected": [
+        "defense"
+      ],
+      "detected": [
+        "defense"
+      ],
+      "covered": "✓",
+      "evidence": 1
+    },
+    {
+      "id": "weight-xcalion",
+      "expected": [
+        "weight"
+      ],
+      "detected": [
+        "weight"
+      ],
+      "covered": "✓",
+      "evidence": 1
+    },
+    {
+      "id": "en-power-metalbone-hrd",
+      "expected": [
+        "power"
+      ],
+      "detected": [
+        "power"
+      ],
+      "covered": "✓",
+      "evidence": 3
+    },
+    {
+      "id": "en-sweetspot-coello-pro",
+      "expected": [
+        "sweet_spot"
+      ],
+      "detected": [
+        "sweet_spot"
+      ],
+      "covered": "✓",
+      "evidence": 2
+    },
+    {
+      "id": "cmp-viper-veron",
+      "expected": [
+        "defense"
+      ],
+      "detected": [
+        "defense"
+      ],
+      "covered": "✓",
+      "evidence": 2
+    },
+    {
+      "id": "cmp-extreme-motion-viper",
+      "expected": [
+        "defense"
+      ],
+      "detected": [
+        "defense"
+      ],
+      "covered": "✓",
+      "evidence": 2
+    },
+    {
+      "id": "cmp-at10-12k-18k",
+      "expected": [
+        "stiffness"
+      ],
+      "detected": [
+        "stiffness"
+      ],
+      "covered": "✓",
+      "evidence": 4
+    },
+    {
+      "id": "cmp-power-oxdog",
+      "expected": [
+        "power"
+      ],
+      "detected": [
+        "power"
+      ],
+      "covered": "✓",
+      "evidence": 5
+    },
+    {
+      "id": "cmp-comfort-varlion-sw",
+      "expected": [
+        "comfort"
+      ],
+      "detected": [
+        "comfort"
+      ],
+      "covered": "✓",
+      "evidence": 4
+    },
+    {
+      "id": "followup-net",
+      "expected": [
+        "net"
+      ],
+      "detected": [
+        "net"
+      ],
+      "covered": "✓",
+      "evidence": 2
+    },
+    {
+      "id": "slang-bandeja-viper",
+      "expected": [
+        "spin",
+        "power"
+      ],
+      "detected": [
+        "spin"
+      ],
+      "covered": "✓✓",
+      "evidence": 6
+    },
+    {
+      "id": "durability-starvie-raptor",
+      "expected": [
+        "durability"
+      ],
+      "detected": [
+        "durability"
+      ],
+      "covered": "✗",
+      "evidence": 0
+    }
+  ]
+}

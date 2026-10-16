@@ -13,7 +13,8 @@
     "types": ["node"],
     "paths": {
       "@padlownia/domain": ["./packages/domain/src/index.ts"],
-      "@padlownia/database": ["./packages/database/src/index.ts"]
+      "@padlownia/database": ["./packages/database/src/index.ts"],
+      "@padlownia/ai": ["./packages/ai/src/index.ts"]
     }
   },
   "include": ["apps/worker/**/*.ts", "packages/**/*.ts", "tests/**/*.ts", "vitest.config.ts", "playwright.config.ts"],
