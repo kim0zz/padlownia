@@ -8,6 +8,7 @@ Jedno źródło odpowiedzi na pytanie „co działa teraz”. Starsze raporty zo
 - **Szybkość:** 7–16 ms na stronę dzięki katalogowi w pamięci (R1). Nowe wydanie pojawia się na stronie najpóźniej po ~60 s.
 - **Wygląd (P-046):** bez „wariant nieustalony” i „rok nieznany”. Pola padel.how są po polsku, puste wiersze ukryte.
 - **Jedna nazwa na markę (R3):** 34 marki.
+- **Oceny PadelTrue jako „Profil konstrukcji”:** to wzór z kształtu, balansu i wagi, a nie ocena jakości. Pokazujemy je słownie (niski … wysoki poziom), bez paska. „Stosunek jakości do ceny” jest ukryty.
 - **Parser 1.3.0** i ponowny przegląd tego samego pliku (`--reprocess-tag`); tak opublikowano połączenie 24 bliźniaków.
 - **Etap 2:** generator kandydatów dopasowań (`npm run candidates`) i lokalny widok przeglądu `/przeglad-dopasowan` (tylko tryb deweloperski).
 - **Asystent, wersja 1 (podgląd):** `/asystent` w trybie deweloperskim. Dwie intencje i doprecyzowanie, odpowiedzi tylko z danych katalogu z przypisami, bez modelu językowego.
