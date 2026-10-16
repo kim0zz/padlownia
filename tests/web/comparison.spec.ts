@@ -378,7 +378,7 @@ test('fixture gallery exposes source scales and unknown states with accessible r
   await expect(values.getByText('Brak potwierdzonej wartości', { exact: true })).toBeVisible();
   const ratings = page.getByRole('region', { name: 'Oceny źródłowe', exact: true });
   await expect(ratings.getByText('skala 0–10', { exact: true })).toBeVisible();
-  await expect(ratings.getByText('raczej wysoki poziom', { exact: true })).toBeVisible();
+  await expect(ratings.locator('.rating-tendency', { hasText: 'raczej wysoki poziom' }).first()).toBeVisible();
   await expect(ratings.getByText('Niepełne dane modelu', { exact: true })).toBeVisible();
   await expect(ratings.getByText('Nieustalona', { exact: true })).toBeVisible();
   // The scale and original value moved from the rating card into the source popover: open it with the keyboard.
