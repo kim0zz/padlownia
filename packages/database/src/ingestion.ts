@@ -18,6 +18,12 @@ export interface StageImportInput {
   records: NormalizedRecord[];
   recordErrors: RecordError[];
   issues?: Issue[];
+  /**
+   * Explicit same-snapshot re-review (e.g. "twin-review-2026-10-16"). A run pinned in a published release can never
+   * be reviewed again; the tag gives the same snapshot and versions a new, reviewable run. Without it, a repeat import
+   * replays the existing run, as before.
+   */
+  reprocessTag?: string;
 }
 export interface ImportMetrics { valid: number; invalid: number; reviewRequired: number; total: number }
 export interface GateReport {
@@ -112,7 +118,8 @@ export async function stageImport(db: SqlExecutor, input: StageImportInput): Pro
   const inputIndices = [...input.records,...input.recordErrors].map((r) => r.inputIndex);
   if (new Set(inputIndices).size !== inputIndices.length) throw new Error("DUPLICATE_INPUT_INDEX");
   const source = await sourceId(db,input.source);
-  const key = hash([input.source,input.sha256,input.parserVersion,input.normalizerVersion,MATCH_RULE_VERSION,"stage-v1"].join(":"));
+  if (input.reprocessTag !== undefined && !/^[a-z0-9][a-z0-9-]{2,63}$/.test(input.reprocessTag)) throw new Error("INVALID_REPROCESS_TAG");
+  const key = hash([input.source,input.sha256,input.parserVersion,input.normalizerVersion,MATCH_RULE_VERSION,"stage-v1",...(input.reprocessTag ? [`reprocess:${input.reprocessTag}`] : [])].join(":"));
   const start = await db.transaction(async (tx) => {
     await tx.query(`insert into padlownia.source_snapshots(source_id,retrieved_at,sha256,storage_bucket,storage_path,storage_verified)
       values($1,$2,$3,$4,$5,$6) on conflict(source_id,sha256) do nothing`, [source,input.retrievedAt,input.sha256,input.storage.bucket,input.storage.path,input.storage.verified]);
@@ -140,7 +147,8 @@ export async function stageImport(db: SqlExecutor, input: StageImportInput): Pro
     const metrics = { total: Number(counts.total), valid: Number(counts.valid), invalid: Number(counts.invalid), reviewRequired: Math.max(Number(counts.review),Number(pending.count)) };
     const complete = metrics.total === input.actualCount && (input.declaredCount === null || input.declaredCount === input.actualCount);
     const status = !complete || metrics.invalid ? "partial" : metrics.reviewRequired ? "review_required" : "staged";
-    await db.query("update padlownia.ingestion_runs set status=$2,metrics=$3::jsonb,completed_at=now() where id=$1", [start.runId,status,json(metrics)]);
+    // The tag is kept with the run for audit; it is not part of the returned metrics.
+    await db.query("update padlownia.ingestion_runs set status=$2,metrics=$3::jsonb,completed_at=now() where id=$1", [start.runId,status,json(input.reprocessTag ? { ...metrics, reprocessTag: input.reprocessTag } : metrics)]);
     await db.query("insert into padlownia.run_events(run_id,stage,code) values($1,'staging',$2)", [start.runId,start.replayed ? "IMPORT_REPLAYED" : "IMPORT_STAGED"]);
     const releaseId = await createRelease(db,[start.runId]);
     const gate = await evaluateRelease(db,releaseId);

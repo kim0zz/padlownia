@@ -61,6 +61,20 @@ describe("PostgreSQL ingestion, permissions and publication (PGlite, isolated sy
     expect(entry).toMatchObject({ weightMinG: 360,weightMaxG: 370,shape: "round" });
   });
 
+  it("an explicit re-review tag gives a published snapshot a new reviewable run and leaves the published catalogue untouched", async () => {
+    const staged = await stageImport(db,input());
+    await approveRelease(db,staged.releaseId,{ actor: "test-reviewer",note: "Explicit isolated fixture acceptance" });
+    await publishRelease(db,staged.releaseId,{ actor: "test",expectedPreviousReleaseId: null });
+    const before = await readPublishedCatalogue(db);
+    const rereview = await stageImport(db,{ ...input(),reprocessTag: "twin-review-test" });
+    expect(rereview.replayed).toBe(false);
+    expect(rereview.runId).not.toBe(staged.runId);
+    expect((await db.query<{ metrics: { reprocessTag?: string } }>("select metrics from padlownia.ingestion_runs where id=$1",[rereview.runId])).rows[0]!.metrics.reprocessTag).toBe("twin-review-test");
+    expect((await stageImport(db,{ ...input(),reprocessTag: "twin-review-test" })).runId).toBe(rereview.runId);
+    expect(await readPublishedCatalogue(db)).toEqual(before);
+    await expect(stageImport(db,{ ...input(),reprocessTag: "Bad Tag!" })).rejects.toThrow("INVALID_REPROCESS_TAG");
+  });
+
   it("ING-001/003/022: stores provenance, keeps staging invisible and replays without duplicating data", async () => {
     const staged = await stageImport(db,input());
     expect(staged.metrics).toEqual({ valid: 1,invalid: 0,reviewRequired: 0,total: 1 });

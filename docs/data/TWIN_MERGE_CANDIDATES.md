@@ -31,4 +31,14 @@ Pewność: **M** (mocna) = numer produktu, kod lub data premiery potwierdzają r
 | 23 | Wilson Bela LS V3 | 2025 | M | Premiera 13.06.2025; masa 355 g zgodna; kształt różnie klasyfikowany |
 | 24 | Wilson Endure LS V1 | 2026 | Ś | Sklep padelnuestro; masa 355 g i kształt zgodne |
 
-**Do zatwierdzenia przez właściciela:** wszystkie, albo z wyłączeniem wskazanych numerów. Wykonanie wymaga zapisu w Supabase Dev (decyzje przeglądu i nowe wydanie danych; poprzednie wydanie zostaje do cofnięcia).
+## Wykonanie (16.10.2026)
+
+Właściciel zatwierdził wszystkie 24 pary. Opublikowany przebieg importu nie może być ponownie przeglądany (`REVIEW_RUN_PINNED`), więc ten sam plik PadelTrue (identyczny SHA-256 `a6fe01ec…`) przetworzono ponownie jako nowy przebieg z jawnym znacznikiem `twin-review-2026-10-16` (`reprocessTag` w `stageImport`, flaga `--reprocess-tag` workera). 188 wcześniejszych decyzji powtórzono bez zmian, a 24 rekordy przypisano do rakiety z rocznikiem. Najpierw była próba na lokalnej kopii bazy, z identycznym wynikiem.
+
+| | Przed (`9fd4b742…`) | Po (`48dfe3eb…`) |
+|---|---|---|
+| Rakiety w katalogu | 444 | **420** (−24 bliźniaki, 0 dodanych, 24 zmienione) |
+| Rakiety z danymi z obu źródeł | 54 | **76** |
+| Bramka wydania | — | przepuszczona, bez blokad |
+
+Poprzednie wydanie `9fd4b742…` zostaje do cofnięcia (`worker rollback`). Rozbieżności między źródłami po połączeniu (np. faktura powierzchni, masa Adidasa) są widoczne jako „Rozbieżne źródła”, a nie uśredniane.

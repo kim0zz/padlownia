@@ -10,7 +10,7 @@ import { checkDevelopmentStorage } from './storage-check.js';
 
 const help = `Padłownia worker — no LLM and no remote source fetching
   profile --source padeltrue|padelhow --file <path>
-  import --source <source> --file <path> [--dry-run | --stage --target local|dev]
+  import --source <source> --file <path> [--dry-run | --stage --target local|dev] [--reprocess-tag <tag>]
   release --runs <run-id,run-id> [--target local|dev]
   gate --release <id> [--target local|dev]
   approve --release <id> --actor <name> --note <review> --explicit-yes [--target local|dev]
@@ -28,7 +28,7 @@ async function main(): Promise<void> {
     source: { type: 'string' }, file: { type: 'string' }, target: { type: 'string', default: 'local' },
     'dry-run': { type: 'boolean' }, stage: { type: 'boolean' }, release: { type: 'string' },
     actor: { type: 'string' }, note: { type: 'string' }, expected: { type: 'string' },
-    'explicit-yes': { type: 'boolean' }, runs: { type: 'string' }, help: { type: 'boolean' },
+    'explicit-yes': { type: 'boolean' }, runs: { type: 'string' }, help: { type: 'boolean' }, 'reprocess-tag': { type: 'string' },
   } });
   const command = positionals[0];
   if (values.help || !command) { process.stdout.write(`${help}\n`); return; }
@@ -74,7 +74,7 @@ async function main(): Promise<void> {
     }
     if (command === 'import' && profiled && bytes) {
       const storage = await store.put(profiled.parsed.source, bytes);
-      const staged = await stageImport(db, { ...profiled.parsed, records: profiled.records, sha256: profiled.summary.sha256, normalizerVersion: NORMALIZER_VERSION, retrievedAt: new Date().toISOString(), storage });
+      const staged = await stageImport(db, { ...profiled.parsed, records: profiled.records, sha256: profiled.summary.sha256, normalizerVersion: NORMALIZER_VERSION, retrievedAt: new Date().toISOString(), storage, ...(values['reprocess-tag'] ? { reprocessTag: values['reprocess-tag'] } : {}) });
       report({ mode: 'staged', target, ...staged, paidLlmCalls: 0 });
     } else if (command === 'release') {
       report({ releaseId: await createRelease(db, required(values.runs, 'RUNS').split(',')) });
