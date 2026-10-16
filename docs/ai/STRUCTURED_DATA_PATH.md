@@ -61,7 +61,17 @@ Uwaga: oceny padel.how są ściśnięte (większość rakiet ma 6,5–8,5), wię
 
 ## Nowe pola w danych (P-045, parser i normalizator 1.3.0)
 
-Właściciel zdecydował 15.10.2026: pola zachowane wcześniej tylko w archiwum (`raw_payload`) stają się zwykłymi obserwacjami. **Kod jest gotowy i przetestowany lokalnie. Na Dev jeszcze nie ma**, bo to wymaga nowego wydania danych i zgody właściciela.
+Właściciel zdecydował 15.10.2026: pola zachowane wcześniej tylko w archiwum (`raw_payload`) stają się zwykłymi obserwacjami. **Opublikowane na Dev 16.10.2026** (za zgodą właściciela w rozmowie) jako wydanie `9fd4b742…`, które zastąpiło `94f807c4…` (poprzednie zostaje do rollbacku).
+
+**Przebieg wydania:**
+1. Import parserem 1.3.0 tych samych snapshotów: 217 + 281 rekordów, 0 błędnych.
+2. 259 decyzji przeglądowych z audytu 14.10 odtworzonych po źródle i ID rekordu: 0 rakiet dopasowanych inaczej niż w audycie.
+3. Bramka: 0 blokad, **0 rakiet dodanych, 0 usuniętych**.
+4. Po publikacji 444/444 rakiet zgrupowanych identycznie jak wcześniej, a 8213 dotychczasowych faktów bez żadnej zmiany.
+5. Nowe pola: strona kortu 180, styl gry 217, wymagalność 180, przeznaczenie i junior po 217, indeks sztywności 217, tagi PadelTrue 281.
+6. Pokrycie pytań testowych danymi: 29 z 33 (`evals/results/structured-2026-10-16.json`).
+
+Uwaga operacyjna: procesy łączące się z Dev potrafiły zawisnąć po zakończeniu pracy (praca w bazie była już zapisana). Stan zawsze sprawdzaliśmy zapytaniem tylko do odczytu, zanim ruszyliśmy dalej.
 
 | Pole | Źródło | Jak zapisane | Wynik na prawdziwym pliku |
 |---|---|---|---|
@@ -78,4 +88,4 @@ Właściciel zdecydował 15.10.2026: pola zachowane wcześniej tylko w archiwum 
 - Klasyfikacje redakcyjne nigdy nie trafiają do kanonicznych wartości fizycznych (waga, kształt). Bramka publikacji to wymusza.
 - Mapa aspektów rozszerzona o „styl gry” i „przeznaczenie”. „Strona kortu” i „twardość” korzystają z nowych pól, a „komfort” z tagu „arm-friendly”.
 
-**Wydanie na Dev (do zgody właściciela):** ponowne przetworzenie tych samych snapshotów wersją 1.3.0 tworzy nowe przebiegi. Zgodnie z ADR-004 wcześniejsze decyzje przeglądowe (wyjątki i ręczne dopasowania) trzeba ponownie zastosować do nowych wyników, zanim stare przebiegi zostaną wycofane. Potem bramka, zatwierdzenie i publikacja, a poprzednie wydanie zostaje do wycofania zmian (rollback). To operacja na bazie Dev, warta osobnej, uważnej sesji.
+Wynik całości po wydaniu: patrz „Przebieg wydania” wyżej.
