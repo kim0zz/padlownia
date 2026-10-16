@@ -23,7 +23,7 @@ const parse = (record = row, definitions = envelope.fields) => parseSnapshot("pa
 describe("profiled padel.how flat schema — synthetic contract examples", () => {
   it("preserves source schema, dates, license and source-specific metadata without asserting rights", () => {
     const result = parse();
-    expect(result).toMatchObject({ parserVersion: "1.2.0", declaredCount: 1, actualCount: 1, recordErrors: [] });
+    expect(result).toMatchObject({ parserVersion: "1.3.0", declaredCount: 1, actualCount: 1, recordErrors: [] });
     expect(result.metadata).toMatchObject({ schema_version: "2026-08-23", generated: "2026-08-18", license: envelope.license, fields: envelope.fields });
     expect(result.records[0]!.metadata).toMatchObject({ retailers: row.retailers, feel: row.feel, play_style: ["control"], gender: "unisex", junior: false, handle_length_cm: "12" });
     expect(result.records[0]!.rawPayload).toEqual(row);
@@ -54,9 +54,38 @@ describe("profiled padel.how flat schema — synthetic contract examples", () =>
     expect(normalized.observations.find((x) => x.key === "texture")!.issues[0]!.code).toBe("wrong_semantic_field");
     expect(normalized.status).toBe("needs_review");
   });
+  it("turns editorial classifications into observations, never manufacturer facts", () => {
+    const normalized = normalizeRecord(parse().records[0]!);
+    const find = (key: string) => normalized.observations.find((x) => x.key === key);
+    expect(normalized.status).toBe("valid");
+    expect(find("court_side")).toMatchObject({ kind: "editorial_assessment", normalizedText: "both", rawSourcePath: "/rackets/0/court_side", status: "valid" });
+    expect(find("play_style")).toMatchObject({ kind: "editorial_assessment", normalizedText: "control", rawValue: ["control"] });
+    expect(find("demand")).toMatchObject({ normalizedText: "moderate" });
+    expect(find("gender")).toMatchObject({ normalizedText: "unisex" });
+    expect(find("junior")).toMatchObject({ normalizedText: "no", rawValue: false });
+  });
+  it("keeps several play styles as one sorted observation and sends unknown vocabulary to review", () => {
+    const normalized = normalizeRecord(parse({ ...row, play_style: ["spin", "Attacking", "spin"], court_side: "middle" }).records[0]!);
+    expect(normalized.observations.filter((x) => x.key === "play_style").map((x) => x.normalizedText)).toEqual(["attacking|spin"]);
+    expect(normalized.observations.find((x) => x.key === "court_side")).toMatchObject({ status: "unknown", issues: [{ code: "unknown_court_side" }] });
+    expect(normalized.status).toBe("needs_review");
+  });
+  it("omits classifications the source left empty instead of creating review work", () => {
+    const normalized = normalizeRecord(parse({ ...row, court_side: "", demand: null as unknown as string, play_style: [] }).records[0]!);
+    expect(normalized.observations.map((x) => x.key)).not.toEqual(expect.arrayContaining(["court_side"]));
+    expect(normalized.observations.some((x) => ["demand", "play_style"].includes(x.key))).toBe(false);
+    expect(normalized.status).toBe("valid");
+  });
+  it("imports the relative stiffness index as an editorial 0–100 rating with its caveat, not the duplicate power score", () => {
+    const record = parse().records[0]!;
+    expect(record.ratings.find((x) => x.key === "stiffness_index")).toMatchObject({ numericScore: 50, scaleMin: 0, scaleMax: 100, kind: "editorial", rawSourcePath: "/rackets/0/feel/stiffness", status: "valid" });
+    expect(record.ratings.find((x) => x.key === "stiffness_index")!.methodology).toContain("najsztywniejsza rama w katalogu padel.how");
+    expect(record.ratings.some((x) => x.key === "power_on_demand")).toBe(false);
+    expect(parse({ ...row, feel: { ...row.feel, stiffness: 140 } }).records[0]!.ratings.find((x) => x.key === "stiffness_index")!.status).toBe("invalid");
+  });
   it("retains 10 editorial category scores and the rounded source total with methodology", () => {
     const record = parse({ ...row, scores: { ...row.scores, comfort: 7 } }).records[0]!;
-    expect(record.ratings).toHaveLength(11);
+    expect(record.ratings).toHaveLength(12);
     expect(record.issues).toEqual([]);
     expect(record.ratings.find((x) => x.key === "overall")).toMatchObject({ numericScore: 75, rawValue: 75, rawSourcePath: "/rackets/0/score", scaleMin: 0, scaleMax: 100, kind: "editorial", methodology: envelope.methodology });
     expect(record.ratings.find((x) => x.key === "comfort")).toMatchObject({ numericScore: 7, scaleMax: 10, rawSourcePath: "/rackets/0/scores/comfort" });

@@ -23,6 +23,21 @@ const claims = new Set<ClaimType>(["manufacturer_declared", "retailer_claim", "m
 const padelHowCategories = ["maneuverability", "net_performance", "control", "defensive_output", "off_center_stability", "sweet_spot", "spin_generation", "power_ceiling", "power_accessibility", "comfort"];
 const flatSpecKeys: Record<string, string> = { shape: "shape", thickness_mm: "thickness", weight_g: "weight", balance_cm: "balance", face_material: "surface", core: "core", surface: "texture", player_level: "player_level" };
 const padelTrueCategories = ["power", "control", "handling", "forgiveness", "comfort", "value"];
+/** Editorial classifications padel.how publishes per racket (schema 2026-08-23). */
+const padelHowClassifications = ["court_side", "play_style", "demand", "gender", "junior"];
+const STIFFNESS_NOTE = "Indeks sztywności padel.how: pozycja na mapie odczucia redakcji, 0–100, gdzie 100 to najsztywniejsza rama w katalogu padel.how. Wartość względna i redakcyjna, nie pomiar przyrządem.";
+
+/** Absent or empty source values are not observations: omitting them avoids turning "not published" into review work. */
+const published = (value: Json | undefined) => value !== undefined && value !== null && value !== "" && !(Array.isArray(value) && !value.length);
+
+/** padel.how judgements (court side, style, demand, targeting) are editorial assessments, never manufacturer facts. */
+function classificationObservation(key: string, raw: Json, path: string, metadata: ObjectValue, source: SourceCode): ObservationInput {
+  const definition = text(object(metadata.fields)?.[key]);
+  const context: Record<string, Json> = { sourceField: key };
+  if (source === "padelhow") context.sourceSchemaVersion = metadata.schema_version ?? null;
+  if (definition) { context.sourceFieldDefinition = definition; context.sourceSchemaPath = `/fields/${pointer(key)}`; }
+  return { key, rawValue: raw, rawSourcePath: path, kind: "editorial_assessment", context, attribution: null };
+}
 
 /** Keep the cited verbatim statement and the supplier's structured interpretation separately. */
 function trueObservations(key: string, raw: Json, path: string): ObservationInput[] {
@@ -97,12 +112,12 @@ function observation(key: string, raw: Json, path: string): ObservationInput {
   };
 }
 
-function rating(key: string, raw: Json, path: string, source: SourceCode, overall: boolean, metadata: ObjectValue): SourceRating {
+function rating(key: string, raw: Json, path: string, source: SourceCode, overall: boolean, metadata: ObjectValue, options: { scaleMax?: number; methodologyNote?: string } = {}): SourceRating {
   const nested = object(raw);
   const value = nested && Object.hasOwn(nested, "value") ? nested.value! : raw;
   const sourceScale = object(nested?.scale) ?? object(metadata.rating_scale);
   const scaleMin = source === "padelhow" ? 0 : typeof sourceScale?.min === "number" ? sourceScale.min : null;
-  const scaleMax = source === "padelhow" ? overall ? 100 : 10 : typeof sourceScale?.max === "number" ? sourceScale.max : null;
+  const scaleMax = options.scaleMax ?? (source === "padelhow" ? overall ? 100 : 10 : typeof sourceScale?.max === "number" ? sourceScale.max : null);
   const score = typeof value === "number" && Number.isFinite(value) ? value : null;
   const issues: Issue[] = [];
   if (score === null) issues.push(issue(value === null ? "missing_rating" : "invalid_rating", path, value === null ? "warning" : "error"));
@@ -111,7 +126,8 @@ function rating(key: string, raw: Json, path: string, source: SourceCode, overal
   return {
     key, rawValue: value, rawSourcePath: nested && Object.hasOwn(nested, "value") ? `${path}/value` : path,
     numericScore: issues.some((x) => x.severity === "error") ? null : score, scaleMin, scaleMax,
-    methodology: text(nested?.methodology) ?? text(metadata.methodology) ?? (source === "padeltrue" ? "padeltrue:technical-characteristics:version-unknown" : "padelhow:editorial:version-unknown"),
+    methodology: (text(nested?.methodology) ?? text(metadata.methodology) ?? (source === "padeltrue" ? "padeltrue:technical-characteristics:version-unknown" : "padelhow:editorial:version-unknown"))
+      + (options.methodologyNote ? `\n${options.methodologyNote}` : ""),
     kind: source === "padeltrue" ? "rule_derived" : "editorial",
     status: issues.some((x) => x.severity === "error") ? "invalid" : issues.length ? "unknown" : "valid", issues,
   };
@@ -163,6 +179,17 @@ function parseRecord(raw: Json, inputIndex: number, source: SourceCode, rootPath
     if (categoryValues.every((value) => typeof value === "number" && Number.isFinite(value)) && typeof row.score === "number" && Math.round(categoryValues.reduce<number>((sum, value) => sum + (value as number), 0)) !== row.score) issues.push(issue("overall_rating_sum_mismatch", `${path}/score`, "warning"));
   }
   if (row.overall_score !== undefined) ratings.push(rating("overall", row.overall_score, `${path}/overall_score`, source, true, metadata));
+  if (flatPadelHow) {
+    for (const key of padelHowClassifications) if (published(row[key])) observations.push(classificationObservation(key, row[key]!, `${path}/${key}`, metadata, source));
+    // feel.power_on_demand equals scores.power_accessibility in the inspected snapshot, so only the stiffness index is new evidence.
+    const feel = object(row.feel);
+    if (feel && published(feel.stiffness)) ratings.push(rating("stiffness_index", feel.stiffness!, `${path}/feel/stiffness`, source, false, metadata, { scaleMax: 100, methodologyNote: STIFFNESS_NOTE }));
+  }
+  // PadelTrue's profile tags ("arm-friendly", "forgiving") are produced by its rating model from the published inputs.
+  if (publishedPadelTrue && published(row.profile)) {
+    observations.push({ key: "profile_tags", rawValue: row.profile!, rawSourcePath: `${path}/profile`, kind: "unknown",
+      context: { sourceField: "profile", derivedBy: "padeltrue:model-1.0", methodology: metadata.methodology ?? null }, attribution: null });
+  }
   const sourceUrl = safeSourceUrl(row.url ?? row.product_url);
   if ((row.url ?? row.product_url) != null && !sourceUrl) issues.push(issue("invalid_source_url", `${path}/url`));
   const preservedMetadata: Record<string, Json> = {};

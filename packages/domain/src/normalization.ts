@@ -5,6 +5,13 @@ const emptyValues = new Set(["", "unknown", "n/a", "na", "-", "?", "not availabl
 const normalizedString = (value: string) => value.trim().toLowerCase().replace(/(\d),(\d)/g, "$1.$2");
 const shapes: Record<string, string> = { round: "round", "okrągła": "round", diamond: "diamond", "diament": "diamond", teardrop: "teardrop", "tear drop": "teardrop", "łza": "teardrop", hybrid: "hybrid" };
 const levels = new Set(["beginner", "intermediate", "advanced", "professional", "all levels"]);
+/** Closed vocabularies of the editorial classifications; anything else goes to review instead of being guessed. */
+const vocabularies: Record<string, Set<string>> = {
+  court_side: new Set(["both", "left", "right"]),
+  demand: new Set(["demanding", "moderate", "forgiving"]),
+  gender: new Set(["unisex", "women", "men", "junior"]),
+  play_style: new Set(["control", "attacking", "defensive", "net play", "spin", "all-round"]),
+};
 
 function blank(input: ObservationInput): NormalizedObservation {
   return { ...input, context: { ...input.context }, status: "unknown", normalizedText: null, numericValue: null, valueMin: null, valueMax: null, unit: null, issues: [] };
@@ -24,6 +31,18 @@ export function normalizeObservation(input: ObservationInput): NormalizedObserva
   const raw = input.context.sourceFormat === "padeltrue:model-1.0" && Object.hasOwn(input.context, "normalizationCandidate")
     ? input.context.normalizationCandidate! : input.rawValue;
   if (raw === null || (typeof raw === "string" && emptyValues.has(normalizedString(raw)))) return problem(result, "missing_value");
+  if (input.key === "junior") {
+    if (typeof raw !== "boolean") return problem(result, "boolean_value_required", true);
+    result.normalizedText = raw ? "yes" : "no"; result.status = "valid"; return result;
+  }
+  if (input.key === "play_style" || input.key === "profile_tags") {
+    // A list is one observation: several values for one key would otherwise look like a source conflict.
+    const items = Array.isArray(raw) ? raw : typeof raw === "string" ? [raw] : null;
+    if (!items || !items.length || items.some((item) => typeof item !== "string" || !item.trim() || item.length > 40)) return problem(result, "invalid_tag_list", true);
+    const values = [...new Set(items.map((item) => normalizedString(item as string)))].sort();
+    if (input.key === "play_style" && values.some((item) => !vocabularies.play_style!.has(item))) return problem(result, "unknown_play_style");
+    result.normalizedText = values.join("|"); result.status = "valid"; return result;
+  }
   if (typeof raw !== "string" && typeof raw !== "number") return problem(result, "unsupported_value_type", true);
   const value = normalizedString(String(raw));
   if (input.key === "weight" || input.key === "balance" || input.key === "thickness") {
@@ -116,6 +135,9 @@ export function normalizeObservation(input: ObservationInput): NormalizedObserva
   } else if (input.key === "player_level") {
     if (!levels.has(value)) return problem(result, "invalid_level_category", true);
     result.normalizedText = value.replaceAll(" ", "_");
+  } else if (Object.hasOwn(vocabularies, input.key)) {
+    if (!vocabularies[input.key]!.has(value)) return problem(result, `unknown_${input.key}`);
+    result.normalizedText = value;
   } else if (input.key === "surface" || input.key === "texture") {
     if (/\d\s*(?:cm|mm|m)\s*(?:²|2|\^2)/.test(value)) return problem(result, "wrong_semantic_field", true);
     result.normalizedText = value;

@@ -39,6 +39,13 @@ describe("profiled PadelTrue model 1.0 — synthetic contract examples", () => {
     expect(observations.find((x) => x.key === "core")).toMatchObject({ normalizedText: null, status: "unknown" });
     expect(observations.find((x) => x.key === "firmness")).toMatchObject({ normalizedText: "medium", status: "valid" });
   });
+  it("keeps model-derived profile tags as one observation attributed to the PadelTrue model", () => {
+    const record = normalizeRecord(parse({ ...row, profile: ["arm-friendly", "Control", "arm-friendly"] }).records[0]!);
+    expect(record.status).toBe("valid");
+    expect(record.observations.filter((x) => x.key === "profile_tags")).toMatchObject([{ normalizedText: "arm-friendly|control", kind: "unknown",
+      rawSourcePath: "/rackets/0/profile", context: { derivedBy: "padeltrue:model-1.0" } }]);
+    expect(normalizeRecord(parse({ ...row, profile: [] }).records[0]!).observations.some((x) => x.key === "profile_tags")).toBe(false);
+  });
   it("keeps source rating scale/version and dated multi-currency prices without conversion", () => {
     const result = parse();
     expect(result.metadata).toMatchObject({ modelVersion: "1.0", built: "2026-01-01", license: "CC0 synthetic", rating_scale: { min: 0, max: 100 } });

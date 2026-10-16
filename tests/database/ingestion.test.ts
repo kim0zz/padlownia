@@ -42,6 +42,25 @@ describe("PostgreSQL ingestion, permissions and publication (PGlite, isolated sy
     return staged;
   }
 
+  it("publishes editorial classifications and a relative stiffness index without projecting them as canonical facts", async () => {
+    const editorial = record(0, {
+      observations: [
+        ...record().observations,
+        { key: "court_side",rawValue: "left",rawSourcePath: "/rackets/0/court_side",kind: "editorial_assessment",context: {},attribution: null },
+        { key: "play_style",rawValue: ["spin","attacking"],rawSourcePath: "/rackets/0/play_style",kind: "editorial_assessment",context: {},attribution: null },
+      ],
+      ratings: [...record().ratings, { key: "stiffness_index",rawValue: 72,rawSourcePath: "/rackets/0/feel/stiffness",numericScore: 72,scaleMin: 0,scaleMax: 100,methodology: "synthetic:editorial:v1",kind: "editorial",status: "valid",issues: [] }],
+    });
+    const staged = await publish(input([editorial]));
+    expect(staged.gate.allowed).toBe(true);
+    const [entry] = await readPublishedCatalogue(db);
+    expect(entry!.specs.find((s) => s.key === "court_side")).toMatchObject({ normalizedText: "left",claimType: "editorial_assessment",selected: false,validationStatus: "valid" });
+    expect(entry!.specs.find((s) => s.key === "play_style")).toMatchObject({ normalizedText: "attacking|spin",rawValue: ["spin","attacking"] });
+    expect(entry!.ratings.find((r) => r.dimension === "stiffness_index")).toMatchObject({ value: 72,scaleMin: 0,scaleMax: 100,kind: "editorial" });
+    // Physical canonical values stay unchanged by the new editorial evidence.
+    expect(entry).toMatchObject({ weightMinG: 360,weightMaxG: 370,shape: "round" });
+  });
+
   it("ING-001/003/022: stores provenance, keeps staging invisible and replays without duplicating data", async () => {
     const staged = await stageImport(db,input());
     expect(staged.metrics).toEqual({ valid: 1,invalid: 0,reviewRequired: 0,total: 1 });

@@ -5,7 +5,6 @@ import { methodologyCitation, ratingLabels } from './catalogue';
 // merging scales or conflating related dimensions from different sources.
 export const ratingDimensionLabels: Readonly<Record<string, string>> = Object.freeze(Object.assign(Object.create(null) as Record<string, string>, {
   overall: 'Ocena ogólna',
-  stiffness_index: 'Indeks sztywności',
   power: 'Moc',
   control: 'Kontrola',
   handling: 'Prowadzenie rakiety',
@@ -19,6 +18,7 @@ export const ratingDimensionLabels: Readonly<Record<string, string>> = Object.fr
   sweet_spot: 'Pole optymalnego trafienia',
   spin_generation: 'Nadawanie rotacji',
   power_ceiling: 'Maksymalny potencjał mocy',
+  stiffness_index: 'Indeks sztywności (względny)',
   power_accessibility: 'Łatwość uzyskania mocy',
 }));
 
