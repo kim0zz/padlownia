@@ -22,6 +22,30 @@ export const ratingDimensionLabels: Readonly<Record<string, string>> = Object.fr
   power_accessibility: 'Łatwość uzyskania mocy',
 }));
 
+/**
+ * A rating computed by formula from published specs (PadelTrue: shape, balance, weight, firmness, face material).
+ * It describes which way the build leans, not how good the racket is, so it is shown as a build profile in words.
+ */
+export const isBuildProfile = (rating: Pick<CatalogueRating, 'kind'>) => rating.kind === 'rule_derived';
+
+/** Not shown: PadelTrue "value" divides ratings by a snapshot price, which reads as a verdict on a top racket. */
+const HIDDEN_DIMENSIONS: ReadonlySet<string> = new Set(['value']);
+export const visibleRatings = <T extends Pick<CatalogueRating, 'dimension' | 'kind'>>(ratings: readonly T[]) =>
+  ratings.filter((rating) => !(isBuildProfile(rating) && HIDDEN_DIMENSIONS.has(rating.dimension)));
+
+/** "wysoki poziom" etc. by position in the source's scale; gender-neutral so it fits every dimension name. */
+export function buildTendency(rating: CatalogueRating): string | null {
+  const position = ratingPosition(rating);
+  if (position === null) return null;
+  if (position < 0.3) return 'niski poziom';
+  if (position < 0.45) return 'raczej niski poziom';
+  if (position <= 0.55) return 'średni poziom';
+  if (position <= 0.7) return 'raczej wysoki poziom';
+  return 'wysoki poziom';
+}
+
+export const BUILD_PROFILE_NOTE = 'Wyliczony wzorem z kształtu, balansu i wagi (przy komforcie i tolerancji błędów także z twardości i materiału). Pokazuje, w którą stronę idzie konstrukcja, a nie jakość rakiety. To nie jest test gry.';
+
 /** Position within the rating's own scale (0–1), or null when the value cannot be placed on it. */
 export function ratingPosition(rating: CatalogueRating) {
   const { value, scaleMin, scaleMax } = rating;

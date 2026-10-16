@@ -117,7 +117,10 @@ describe('shared source ratings', () => {
     // Each source is its own group with its own scale; nothing is merged.
     expect(html.match(/class="rating-group"/g)).toHaveLength(2);
     expect(html).toContain('skala 0–10');
-    expect(html).toContain('skala 0–100');
+    // A formula-based source is a build profile: tendency in words, the number only in the popover.
+    expect(html).toContain('Profil konstrukcji wg Syntetyczny model');
+    expect(html).toContain('<p class="rating-tendency">raczej wysoki poziom</p>');
+    expect(html).not.toContain('value="65"');
     expect(html).toContain('Ocena redakcyjna');
     expect(html).toContain('<p class="rating-row-label">Kontrola</p>');
     expect(html).toContain('Skala źródła: 0–10');
@@ -164,7 +167,7 @@ describe('component gallery isolation', () => {
   it('keeps every state of the former gallery on the page', () => {
     const html = renderToStaticMarkup(createElement(ComponentGalleryPage));
     for (const state of ['Pełna wartość', 'Brak wartości', 'Konflikt źródeł', 'Bez weryfikacji producenta', 'Niezweryfikowane', 'Nieznana jednostka', 'Pomiar egzemplarza', '~26.5',
-      'Rozbieżne źródła', 'skala 0–10', 'skala 0–100', 'Niepełne dane modelu', 'Nieustalona', 'brak oceny', 'Brak opublikowanych ocen dla tego wariantu',
+      'Rozbieżne źródła', 'skala 0–10', 'Profil konstrukcji wg', 'Niepełne dane modelu', 'Nieustalona', 'brak oceny', 'Brak opublikowanych ocen dla tego wariantu',
       'Co chcesz porównać', 'Dodaj drugą rakietę.', 'Wersja danych w tym odnośniku nie jest już aktualna']) expect(html, state).toContain(state);
     expect(html.match(/class="badge badge-(neutral|warning|info)"/g)?.length).toBeGreaterThanOrEqual(3);
     for (const tone of ['neutral', 'warning', 'info']) expect(html).toContain(`badge badge-${tone}`);

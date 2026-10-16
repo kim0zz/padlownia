@@ -1,6 +1,6 @@
 import type { CatalogueEntry, CatalogueSpec } from '@padlownia/database';
 import { formatWeight, rawText, shapeLabels, specLabels } from './catalogue';
-import { sortDimensions } from './ratings';
+import { sortDimensions, visibleRatings } from './ratings';
 import { identityDetails } from './display';
 
 export function racketLabel(entry: CatalogueEntry) {
@@ -118,9 +118,9 @@ export function specDisplayValue(spec: CatalogueSpec) {
 // Ratings remain separate observations in their original scales and methodologies.
 // Grouping by source is presentation only, never a numeric join or aggregate.
 export function comparisonRatingSources(left: CatalogueEntry, right: CatalogueEntry) {
-  const sources = new Map([...left.ratings, ...right.ratings].map((rating) => [rating.evidence.sourceCode, rating.evidence.sourceName]));
+  const sources = new Map([...visibleRatings(left.ratings), ...visibleRatings(right.ratings)].map((rating) => [rating.evidence.sourceCode, rating.evidence.sourceName]));
   return [...sources].map(([code, name]) => ({ code, name, cells: [left, right].map((entry) => ({
-    entryId: entry.id, ratings: entry.ratings.filter((rating) => rating.evidence.sourceCode === code),
+    entryId: entry.id, ratings: visibleRatings(entry.ratings).filter((rating) => rating.evidence.sourceCode === code),
   })) }));
 }
 
@@ -133,9 +133,10 @@ export function comparisonRatingRows(source: ReturnType<typeof comparisonRatingS
 
 /** Ratings of one racket grouped by source, then by dimension in display order. Presentation only: scales are never joined. */
 export function entryRatingGroups(entry: CatalogueEntry) {
-  const sources = new Map(entry.ratings.map((rating) => [rating.evidence.sourceCode, rating.evidence.sourceName]));
+  const shown = visibleRatings(entry.ratings);
+  const sources = new Map(shown.map((rating) => [rating.evidence.sourceCode, rating.evidence.sourceName]));
   return [...sources].map(([code, name]) => {
-    const ratings = entry.ratings.filter((rating) => rating.evidence.sourceCode === code);
+    const ratings = shown.filter((rating) => rating.evidence.sourceCode === code);
     const rows = sortDimensions([...new Set(ratings.map((rating) => rating.dimension))])
       .map((dimension) => ({ dimension, ratings: ratings.filter((rating) => rating.dimension === dimension) }));
     return { code, name, ratings, rows };

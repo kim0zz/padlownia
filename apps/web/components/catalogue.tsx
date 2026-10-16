@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { claimLabel, formatWeight, shapeLabels } from '../lib/catalogue';
 import { AddToComparison } from './comparison-selection';
 import { racketLabel } from '../lib/comparison';
+import { isBuildProfile } from '../lib/ratings';
 import { displayBrand, displayModel, displayVariant, identityDetails } from '../lib/display';
 import { ImageCredit, RacketVisual } from './racket-visual';
 import { approvedImageFor, type IllustratedCatalogueEntry, type PublicRacketImage } from '../lib/catalogue-images';
@@ -56,7 +57,10 @@ function CardFacts({ entry, image }: { entry: IllustratedCatalogueEntry; image?:
 export function RacketCard({ entry, comparable = true }: { entry: IllustratedCatalogueEntry; comparable?: boolean }) {
   const hasConflict = entry.specs.some((spec) => spec.conflict);
   const image = approvedImageFor(entry);
-  const ratingSources = [...new Set(entry.ratings.map((rating) => rating.evidence.sourceName))];
+  // Review ratings and formula-based build profiles are named apart, so a profile never reads as a verdict.
+  const ratingSources = [...new Set(entry.ratings.filter((rating) => !isBuildProfile(rating)).map((rating) => rating.evidence.sourceName))];
+  const profileSources = [...new Set(entry.ratings.filter(isBuildProfile).map((rating) => rating.evidence.sourceName))];
+  const ratingsText = [...(ratingSources.length ? [`Oceny: ${ratingSources.join(', ')}`] : []), ...(profileSources.length ? [`Profil konstrukcji: ${profileSources.join(', ')}`] : [])].join(' · ');
   const variant = displayVariant(entry.variant);
   return <article className="racket-card">
     <div className="card-top">
@@ -71,7 +75,7 @@ export function RacketCard({ entry, comparable = true }: { entry: IllustratedCat
       {image && <RacketVisual compact entry={{ image }} />}
     </div>
     <CardFacts entry={entry} image={image} />
-    <p className="card-ratings">{ratingSources.length ? `Oceny: ${ratingSources.join(', ')}` : 'Brak ocen'}</p>
+    <p className="card-ratings">{ratingsText || 'Brak ocen'}</p>
     {hasConflict && <Badge tone="warning">Rozbieżne źródła</Badge>}
     {comparable && <AddToComparison id={entry.id} releaseId={entry.releaseId} label={racketLabel(entry)} compact />}
   </article>;

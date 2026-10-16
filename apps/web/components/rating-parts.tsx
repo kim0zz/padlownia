@@ -1,6 +1,6 @@
 import type { CatalogueRating } from '@padlownia/database';
 import { methodologyCitation, rawText, ratingLabels, safeSourceUrl } from '../lib/catalogue';
-import { groupKindLabel, groupMethodology, groupScaleLabel, isIncompleteModel, ratingDimensionLabels, ratingPosition } from '../lib/ratings';
+import { BUILD_PROFILE_NOTE, buildTendency, groupKindLabel, groupMethodology, groupScaleLabel, isBuildProfile, isIncompleteModel, ratingDimensionLabels, ratingPosition } from '../lib/ratings';
 import { Badge } from './ui/badge';
 import { SourceInfo } from './ui/source-info';
 import { StatBar } from './ui/stat-bar';
@@ -12,10 +12,12 @@ import { StatBar } from './ui/stat-bar';
 export function RatingGroupHeader({ sourceName, ratings }: { sourceName: string; ratings: CatalogueRating[] }) {
   const { url, sharedNote, hasDistinctNotes } = groupMethodology(ratings);
   const href = safeSourceUrl(url);
+  const profile = ratings.length > 0 && ratings.every(isBuildProfile);
   return <header className="rating-group-header">
-    <h3 className="rating-group-title">{sourceName}</h3>
+    <h3 className="rating-group-title">{profile ? `Profil konstrukcji wg ${sourceName}` : sourceName}</h3>
+    {profile && <p className="rating-group-note">{BUILD_PROFILE_NOTE}</p>}
     <p className="rating-group-meta">
-      <span>{groupScaleLabel(ratings)}</span><span aria-hidden="true"> · </span><span>{groupKindLabel(ratings)}</span>
+      {!profile && <><span>{groupScaleLabel(ratings)}</span><span aria-hidden="true"> · </span></>}<span>{groupKindLabel(ratings)}</span>
       {href && <><span aria-hidden="true"> · </span><a className="source-link" href={href} rel="noreferrer">Metodologia<span className="sr-only"> ocen — {sourceName}</span> <span aria-hidden="true">↗</span></a></>}
       {ratings.some(isIncompleteModel) && <Badge tone="warning">Niepełne dane modelu</Badge>}
     </p>
@@ -51,6 +53,12 @@ export function RatingSourceInfo({ rating, group, dev = false, label }: { rating
 
 /** One rating as the comparison and the profile show it: number in the source's scale, a bar within that scale, and the source popover. */
 export function RatingEntry({ rating, group, tone, label, dev = false }: { rating: CatalogueRating; group: ReturnType<typeof groupMethodology>; tone: 'a' | 'b'; label: string; dev?: boolean }) {
+  const tendency = isBuildProfile(rating) ? buildTendency(rating) : null;
+  // A build profile reads as a tendency in words; the number stays one click away in the source popover (P-032).
+  if (tendency) return <div className="rating-entry rating-entry-profile">
+    <p className="rating-tendency">{tendency}{isIncompleteModel(rating) && <><span aria-hidden="true">*</span><span className="sr-only"> niepełne dane modelu</span></>}</p>
+    <RatingSourceInfo rating={rating} group={group} dev={dev} label={`Źródło oceny: ${label}`} />
+  </div>;
   return <div className="rating-entry">
     <RatingValue rating={rating} />
     {ratingPosition(rating) !== null && <StatBar tone={tone} min={rating.scaleMin!} max={rating.scaleMax!} value={rating.value!} label={`${label}: ${rating.value} w skali ${rating.scaleMin}–${rating.scaleMax}`} />}
