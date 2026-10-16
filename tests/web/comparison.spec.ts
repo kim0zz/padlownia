@@ -302,15 +302,15 @@ test('source popovers open from the keyboard, close with Escape and stay inside 
 
 test('"Tylko różnice" hides identical rows and the identity header stays under the site header', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto(comparisonPath(control2026, pro2026));
+  await page.goto(comparisonPath(control2026, control2025));
   const rows = comparison(page).locator('.comparison-row:visible');
   // Wait for the streamed content to replace the loading fallback before counting rows.
   await expect(rows.first()).toBeVisible();
   const before = await rows.count();
   await page.getByRole('checkbox', { name: 'Tylko różnice' }).check();
-  // Orbit Control and Orbit Pro differ in shape and mass; balance, core and surface are empty on both sides.
-  await expect(rows).toHaveCount(2);
-  expect(before).toBeGreaterThan(2);
+  // Orbit Control 2026 and 2025 share the shape and differ in mass; parameters empty on both sides have no row (P-046).
+  await expect(rows).toHaveCount(1);
+  expect(before).toBe(2);
   for (const row of await rows.all()) await expect(row).toHaveAttribute('data-differs', 'true');
   await page.getByRole('checkbox', { name: 'Tylko różnice' }).uncheck();
   await expect(rows).toHaveCount(before);
@@ -343,7 +343,7 @@ test('comparison is accessible on keyboard, desktop and mobile with synthetic sc
   const identityBar = (await comparison(page).locator('.comparison-header').boundingBox())!;
   expect(identityBar.y + identityBar.height).toBeLessThan(330);
   expect(identityBar.height).toBeLessThanOrEqual(80);
-  const lastCoreRow = (await comparison(page).locator('.comparison-row[aria-label="Powierzchnia"]').boundingBox())!;
+  const lastCoreRow = (await comparison(page).locator('.comparison-row').last().boundingBox())!;
   expect(lastCoreRow.y + lastCoreRow.height).toBeLessThan(700);
   const firstRatingGroup = (await comparison(page).locator('.rating-group-header').first().boundingBox())!;
   expect(firstRatingGroup.y + firstRatingGroup.height).toBeLessThan(900);

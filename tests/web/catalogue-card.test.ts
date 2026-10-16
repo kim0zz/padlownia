@@ -12,7 +12,7 @@ describe('racket card (catalogue and racket_card block)', () => {
   it('keeps the exact profile link label and drops the ordinal number and the old footer', () => {
     const html = card(control2026);
     expect(html).toContain('class="racket-card"');
-    expect(html).toContain('aria-label="Zobacz profil TESTLAB · Orbit · Control · 2026"');
+    expect(html).toContain('aria-label="Zobacz profil TESTLAB Orbit Control 2026"');
     expect(html).toContain('href="/rakiety/fixture-orbit-control-2026"');
     expect(html).not.toContain('card-number');
     expect(html).not.toContain('card-bottom');

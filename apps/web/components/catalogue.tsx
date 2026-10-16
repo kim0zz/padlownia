@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { claimLabel, formatWeight, shapeLabels } from '../lib/catalogue';
 import { AddToComparison } from './comparison-selection';
 import { racketLabel } from '../lib/comparison';
-import { displayBrand, displayLabel, displayModel, displayVariant } from '../lib/display';
+import { displayBrand, displayModel, displayVariant, identityDetails } from '../lib/display';
 import { ImageCredit, RacketVisual } from './racket-visual';
 import { approvedImageFor, type IllustratedCatalogueEntry, type PublicRacketImage } from '../lib/catalogue-images';
 import { Badge } from './ui/badge';
@@ -65,7 +65,7 @@ export function RacketCard({ entry, comparable = true }: { entry: IllustratedCat
     </div>
     <div className="card-main">
       <div className="card-name">
-        <h3><Link href={`/rakiety/${encodeURIComponent(entry.id)}`} aria-label={`Zobacz profil ${displayLabel(entry)}`}>{displayModel(entry)}</Link></h3>
+        <h3><Link href={`/rakiety/${encodeURIComponent(entry.id)}`} aria-label={['Zobacz profil', displayBrand(entry.brand), displayModel(entry), ...identityDetails(entry)].join(' ')}>{displayModel(entry)}</Link></h3>
         {variant && <p className="racket-variant">{variant}</p>}
       </div>
       {image && <RacketVisual compact entry={{ image }} />}
