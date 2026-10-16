@@ -1,4 +1,4 @@
-import type { SectionKind } from './chunking.js';
+import type { SectionKind } from './chunking';
 
 /**
  * Structured evidence: answer from the catalogue's numbers and specs first, prose second.

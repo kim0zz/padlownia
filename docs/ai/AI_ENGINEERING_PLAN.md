@@ -119,7 +119,9 @@ Raport: `evals/results/retrieval-2026-10-15-hybrid-e5small.json`.
 - Ważenie wektorów ×2 nic nie daje, zostajemy przy równych wagach (bez „pokrętła” bez pomiaru).
 - Ostrożnie z liczbami: 33 pytania to mały zestaw, a 1 pytanie to 3 punkty procentowe. Różnice 3–6 pkt to sygnał, nie dowód.
 
-**Następny krok (do decyzji):** lokalny reranker typu cross-encoder (również darmowy, np. wielojęzyczny model mMiniLM / bge-reranker), który przestawia top 20 → top 5. Mierzymy, czy pudła z miejsc 6–9 wchodzą do top 5. Przy okazji trzeba poprawić tokenizer, który rozbija „2.6” na „2” i „6”.
+**Następny krok (do decyzji):** lokalny reranker typu cross-encoder (np. wielojęzyczny mMiniLM / bge-reranker), który przestawia top 20 → top 5. Bez opłat za wywołanie, ale kosztowny obliczeniowo: każda para pytanie–fragment to osobne przejście modelu, czyli dodatkowy czas odpowiedzi (szacunkowo 0,1–0,5 s na CPU) i model do wdrożenia na serwerze. Wchodzi tylko wtedy, gdy pomiar pokaże, że pudła z miejsc 6–9 wchodzą do top 5.
+
+**Tokenizer „2.6” (zmierzone 16.10, odrzucone):** zachowanie liczb dziesiętnych jako jednego słowa nie poprawiło wyniku (hybryda top 5: 87,9% → 84,8%, czyli −1 pytanie, w granicach szumu). Wyszukiwanie działa w obrębie rozpoznanej rakiety, więc numer modelu w treści nie rozróżnia fragmentów. Zmiana wycofana.
 
 ## Decyzje techniczne do podjęcia (z rekomendacją)
 
@@ -141,7 +143,7 @@ Raport: `evals/results/retrieval-2026-10-15-hybrid-e5small.json`.
 2. Rozpoznawanie rakiet na kanonicznym katalogu z bazy (po R3) + Twoje prawdziwe pytania jako test. Pierwsza wersja modułu już jest.
 3. ✅ Lokalne embeddingi + RRF zmierzone. Następny jest lokalny reranker. Płatne warianty przy benchmarku (P-039).
 4. Migracja `knowledge_chunks` + `pgvector` + `ai_usage` (za zgodą na Dev).
-5. Pierwszy działający asystent dla dwóch intencji („statystyki X” i „porównaj X i Y”) w trybie developerskim, bez publikacji.
+5. ✅ (16.10, wersja 1) Pierwszy asystent dla dwóch intencji („statystyki X”, „porównaj X i Y”) plus doprecyzowanie przy niejasnej nazwie. `packages/ai/src/assistant.ts`, podgląd `/asystent` (tylko `APP_ENV=development` i `ASSISTANT_PREVIEW=1`). Stały pipeline: rozpoznanie rakiet → aspekty (szukane poza nazwą rakiety) → dane katalogu z ID obserwacji → **autor deterministyczny** (bez modelu, bez kosztu, tylko przepisuje dane z przypisami) → ten sam walidator, którego użyje model. Czego brakuje: fragmenty recenzji w odpowiedzi (wymagają tabeli `knowledge_chunks`, krok 4), autor-model (konto OpenRouter i benchmark, P-039), polskie nazwy części wartości (np. „diamond”, „head_heavy”) w tekście dowodów.
 6. Pozostałe intencje, pamięć rozmowy, dostęp kodem zaproszenia (D-003), Vercel.
 
-Równolegle warto dokończyć Etap 1 (szybki odczyt). Asystent też będzie czytał katalog, a dziś każde wczytanie strony kosztuje ~1,6 s (`docs/architecture/STAGE_1_BASELINE.md`).
+Etap 1 (szybki odczyt) jest zrobiony: strona odpowiada w 7–16 ms z pamięci (`docs/architecture/STAGE_1_BASELINE.md`).

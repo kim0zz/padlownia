@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@padlownia/database', '@padlownia/domain'],
+  transpilePackages: ['@padlownia/database', '@padlownia/domain', '@padlownia/ai'],
   poweredByHeader: false,
   devIndicators: false,
   async headers() {

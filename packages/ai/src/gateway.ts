@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { costPln, estimateTokens, type BudgetConfig, type ModelPrice, type UsageLedger, type UsageRecord } from './budget.js';
+import { costPln, estimateTokens, type BudgetConfig, type ModelPrice, type UsageLedger, type UsageRecord } from './budget';
 
 /**
  * Model Gateway (P-014): the only place the app talks to a paid model. Providers are replaceable;

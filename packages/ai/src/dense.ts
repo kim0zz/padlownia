@@ -1,5 +1,5 @@
-import type { ReviewChunk, SectionKind } from './chunking.js';
-import { retrieveLexical, type LexicalIndex, type RetrievedChunk, type RetrieveOptions } from './lexical.js';
+import type { ReviewChunk, SectionKind } from './chunking';
+import { retrieveLexical, type LexicalIndex, type RetrievedChunk, type RetrieveOptions } from './lexical';
 
 /**
  * Vector (dense) retrieval and hybrid fusion. Embeddings are produced elsewhere (local model in the

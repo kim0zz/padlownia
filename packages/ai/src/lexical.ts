@@ -1,4 +1,4 @@
-import type { ReviewChunk, SectionKind } from './chunking.js';
+import type { ReviewChunk, SectionKind } from './chunking';
 
 /**
  * Offline lexical baseline (BM25) over review chunks. Free, deterministic and explainable:

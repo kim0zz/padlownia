@@ -19,7 +19,7 @@ const weightRanges: Readonly<Record<(typeof weightFilters)[number], readonly [nu
   lt355: [0, 354.99], '355-365': [355, 365], '365-375': [365, 375], gt375: [375.01, Number.POSITIVE_INFINITY],
 };
 
-const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value) ?? '';
+export const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value) ?? '';
 const oneOf = <T extends string>(allowed: readonly T[], value: string): T | undefined => allowed.find((item) => item === value);
 export function parseFilters(params: SearchParams): CatalogueFilters {
   return {

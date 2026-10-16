@@ -1,0 +1,12 @@
+/* Dev-only assistant preview (/asystent). */
+.assistant-form { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; margin-top: var(--space-4); }
+.assistant-form label { font-size: var(--text-sm); color: var(--muted); }
+.assistant-form input { flex: 1 1 280px; min-width: 0; height: var(--control-height); border: 1px solid var(--input-line); border-radius: var(--radius-small); background: var(--surface); color: var(--ink); font-size: var(--text-md); padding: 0 var(--space-3); }
+.assistant-examples { display: flex; flex-direction: column; gap: var(--space-2); font-size: var(--text-sm); margin-top: var(--space-4); }
+.assistant-answer { margin-top: var(--space-5); display: grid; gap: var(--space-3); }
+.assistant-rackets { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.assistant-segments { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-3); }
+.assistant-segments > li { border: 1px solid var(--line); border-radius: var(--radius-small); background: var(--surface); padding: var(--space-3); overflow-wrap: anywhere; }
+.assistant-line { margin: var(--space-1) 0 0; }
+.assistant-citations { margin-top: var(--space-2); font-size: var(--text-sm); color: var(--muted); }
+.assistant-clarify { border: 1px solid var(--line); border-radius: var(--radius-small); padding: var(--space-3); }

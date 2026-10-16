@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { SECTION_KINDS, type SectionKind } from './chunking.js';
-import type { RetrievedChunk } from './lexical.js';
+import { SECTION_KINDS, type SectionKind } from './chunking';
+import type { RetrievedChunk } from './lexical';
 
 /**
  * Retrieval golden set. Expectations name a racket and the section kinds that answer the question,
