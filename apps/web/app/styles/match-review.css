@@ -1,0 +1,10 @@
+/* Dev-only match review (/przeglad-dopasowan, ROADMAP R6). */
+.match-list { list-style: none; padding: 0; margin: var(--space-4) 0 0; display: grid; gap: var(--space-4); }
+.match-item { border: 1px solid var(--line); border-radius: var(--radius-small); background: var(--surface); padding: var(--space-4); }
+.match-item[data-answer="same"] { border-color: var(--forest); }
+.match-meta { font-size: var(--text-sm); color: var(--muted); display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.match-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--space-4); margin: var(--space-3) 0; }
+.match-side h3 { margin: 0; overflow-wrap: anywhere; }
+.match-identity, .match-source-name { font-size: var(--text-sm); color: var(--muted); margin: var(--space-1) 0; overflow-wrap: anywhere; }
+.match-answers { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.match-years { margin-top: var(--space-6); font-size: var(--text-sm); }

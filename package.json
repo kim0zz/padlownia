@@ -21,6 +21,7 @@
     "test:e2e": "playwright test",
     "worker": "tsx apps/worker/src/cli.ts",
     "knowledge": "tsx apps/worker/src/knowledge-cli.ts",
+    "candidates": "tsx apps/worker/src/candidates-cli.ts",
     "check": "npm run typecheck && npm run lint && npm test && npm run build"
   },
   "dependencies": {
